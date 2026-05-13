@@ -4,6 +4,7 @@ import { EnergyFlow } from "@/components/aura/EnergyFlow";
 import { DieselOffset } from "@/components/aura/DieselOffset";
 import { DieselBurden } from "@/components/aura/DieselBurden";
 import { FleetCommand } from "@/components/aura/FleetCommand";
+import { DevSeeder } from "@/components/aura/DevSeeder";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -56,6 +57,7 @@ function Index() {
           <p className="font-mono">PoP · Lagos · Frankfurt · Johannesburg · Encrypted Mesh</p>
         </footer>
       </main>
+      <DevSeeder />
     </div>
   );
 }
