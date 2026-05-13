@@ -3,12 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Subscribes to realtime INSERTs on power_logs / security_alerts / facilities
- * and invalidates the relevant React Query caches so the dashboards animate
- * without a page refresh.
- *
- * Tables that don't exist or aren't on the realtime publication will silently
- * no-op — the rest of the channels keep working.
+ * Subscribes to realtime changes on power_logs / security_alerts / facilities
+ * and invalidates the AURA dashboard caches.
  */
 export function useRealtimeTelemetry() {
   const qc = useQueryClient();
@@ -19,7 +15,11 @@ export function useRealtimeTelemetry() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "power_logs" },
-        () => qc.invalidateQueries({ queryKey: ["diesel-burden"] }),
+        () => {
+          qc.invalidateQueries({ queryKey: ["diesel-burden"] });
+          qc.invalidateQueries({ queryKey: ["daily-offset"] });
+          qc.invalidateQueries({ queryKey: ["latest-power-logs"] });
+        },
       )
       .on(
         "postgres_changes",
@@ -29,7 +29,10 @@ export function useRealtimeTelemetry() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "facilities" },
-        () => qc.invalidateQueries({ queryKey: ["facilities"] }),
+        () => {
+          qc.invalidateQueries({ queryKey: ["facilities"] });
+          qc.invalidateQueries({ queryKey: ["latest-power-logs"] });
+        },
       )
       .subscribe();
 

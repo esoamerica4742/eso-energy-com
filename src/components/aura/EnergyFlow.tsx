@@ -1,4 +1,6 @@
 import { Sun, Cpu, Building2, BatteryCharging } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchLatestPowerLogs } from "@/lib/aura";
 
 const Particle = ({ d, delay, color }: { d: string; delay: string; color: string }) => (
   <circle r="3" fill={color} style={{
@@ -10,6 +12,28 @@ const Particle = ({ d, delay, color }: { d: string; delay: string; color: string
 );
 
 export function EnergyFlow() {
+  const q = useQuery({
+    queryKey: ["latest-power-logs"],
+    queryFn: fetchLatestPowerLogs,
+    staleTime: 30_000,
+  });
+
+  const sites = q.data ?? [];
+  const totals = sites.reduce(
+    (acc, { log }) => {
+      if (!log) return acc;
+      acc.solar += Number(log.solar_generation_kw ?? 0);
+      acc.load += Number(log.load_consumption_kw ?? 0);
+      acc.batt += Number(log.battery_percentage ?? 0);
+      acc.battCount += 1;
+      return acc;
+    },
+    { solar: 0, load: 0, batt: 0, battCount: 0 },
+  );
+  const avgBatt = totals.battCount > 0 ? Math.round(totals.batt / totals.battCount) : 0;
+  const heroSite = sites.find((s) => s.log) ?? sites[0];
+  const heroName = heroSite?.facility.facility_name ?? "AURA Mesh";
+
   // Path coords (in viewBox 1000x260)
   const pathA = "M 165 130 C 280 130, 360 130, 480 130";
   const pathB = "M 520 130 C 640 130, 720 130, 835 130";
@@ -19,7 +43,7 @@ export function EnergyFlow() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <p className="text-[11px] tracking-[0.22em] text-silver uppercase">Energy Orchestration Layer</p>
-          <h2 className="text-xl md:text-2xl font-semibold mt-1 tracking-tight shimmer-text">Live Power Network — Lekki Premium Terminal</h2>
+          <h2 className="text-xl md:text-2xl font-semibold mt-1 tracking-tight shimmer-text">Live Power Network — {heroName}</h2>
         </div>
         <div className="hidden md:flex items-center gap-2 text-[11px] text-silver">
           <span className="h-1.5 w-1.5 rounded-full bg-[oklch(0.74_0.17_165)] ticker-dot" />
@@ -56,9 +80,9 @@ export function EnergyFlow() {
 
         {/* Nodes overlay */}
         <div className="absolute inset-0 grid grid-cols-3 items-center px-2 md:px-6">
-          <Node label="Solar Capture Fields" sub="412.7 kW · 6 strings" icon={<Sun className="h-7 w-7" />} accent="solar" />
+          <Node label="Solar Capture Fields" sub={`${totals.solar.toFixed(1)} kW · ${sites.length} site${sites.length === 1 ? "" : "s"}`} icon={<Sun className="h-7 w-7" />} accent="solar" />
           <Node label="AURA Inverter Intelligence" sub="MPPT · 98.2% η" icon={<Cpu className="h-7 w-7" />} accent="silver" central />
-          <Node label="Facility Grid Load" sub="287.4 kW draw" icon={<Building2 className="h-7 w-7" />} accent="storage" />
+          <Node label="Facility Grid Load" sub={`${totals.load.toFixed(1)} kW draw`} icon={<Building2 className="h-7 w-7" />} accent="storage" />
         </div>
       </div>
 
@@ -67,12 +91,12 @@ export function EnergyFlow() {
         <div className="hairline rounded-2xl bg-[oklch(0.16_0.02_265_/_0.7)] px-5 py-3 flex items-center gap-4 shadow-[0_0_40px_-10px_oklch(0.74_0.13_215_/_0.5)]">
           <BatteryCharging className="h-5 w-5 text-[oklch(0.78_0.13_215)]" />
           <div className="flex items-center gap-2">
-            {[0,1].map(i => (
+            {[0, 1].map((i) => (
               <div key={i} className="relative h-7 w-24 rounded-md hairline overflow-hidden bg-[oklch(0.13_0.02_265)]">
                 <div
                   className="absolute inset-y-0 left-0"
                   style={{
-                    width: "89%",
+                    width: `${avgBatt}%`,
                     background: "linear-gradient(90deg, oklch(0.58 0.14 230), oklch(0.78 0.13 215))",
                     boxShadow: "var(--glow-storage)",
                   }}
@@ -82,7 +106,7 @@ export function EnergyFlow() {
           </div>
           <div className="text-right">
             <p className="text-[10px] tracking-[0.2em] text-silver uppercase">Lithium Reserve</p>
-            <p className="num text-base font-semibold text-[oklch(0.85_0.12_215)]">89% SoC · 412 kWh</p>
+            <p className="num text-base font-semibold text-[oklch(0.85_0.12_215)]">{avgBatt}% SoC · fleet avg</p>
           </div>
         </div>
       </div>

@@ -1,4 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { TopHeader } from "@/components/aura/TopHeader";
 import { EnergyFlow } from "@/components/aura/EnergyFlow";
 import { DieselOffset } from "@/components/aura/DieselOffset";
@@ -6,6 +8,7 @@ import { DieselBurden } from "@/components/aura/DieselBurden";
 import { FleetCommand } from "@/components/aura/FleetCommand";
 import { DevSeeder } from "@/components/aura/DevSeeder";
 import { useRealtimeTelemetry } from "@/hooks/useRealtimeTelemetry";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -18,7 +21,22 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const { session, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !session) navigate({ to: "/login" });
+  }, [loading, session, navigate]);
+
   useRealtimeTelemetry();
+
+  if (loading || !session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-silver">
+        <Loader2 className="h-5 w-5 animate-spin" />
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen">
       <TopHeader />
