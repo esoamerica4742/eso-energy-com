@@ -148,6 +148,16 @@
   color: transparent;
   animation: shimmer 6s linear infinite;
 }
+.shimmer-block {
+  background: linear-gradient(
+    90deg,
+    oklch(0.22 0.02 260 / 0.45) 0%,
+    oklch(0.34 0.03 255 / 0.65) 50%,
+    oklch(0.22 0.02 260 / 0.45) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
 .ticker-dot { animation: ticker 1.4s ease-in-out infinite; }
 
 /* Scrollbar */
