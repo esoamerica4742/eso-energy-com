@@ -1,186 +1,180 @@
 import { useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { FlaskConical, Loader2, Radio, ShieldAlert, Square, X } from "lucide-react";
-import type { DieselDay } from "./DieselBurden";
+import { supabase, ENTERPRISE_CLIENT_ID } from "@/integrations/supabase/client";
 
 /**
  * Hidden developer control bar.
  *
- * Visible when:
- *   • `import.meta.env.DEV` is true, OR
- *   • URL contains `?dev=1`, OR
- *   • `localStorage.aura_dev === "1"`
+ * Both buttons issue REAL Supabase INSERTs against the enterprise client's
+ * facilities (auto-provisioning a default "Ikeja Corporate HQ" if none exist).
  *
- * Two actions:
- *   1. "Seed Demo Metrics" — primes React Query caches with a clean snapshot.
- *   2. "Generate Live Demo Stream" — runs a 5-minute inverter simulation,
- *      streaming power_logs, generator_logs, and security_alerts rows into
- *      the in-memory caches at 1s cadence. Random fuel-drop events trigger
- *      a crimson floating banner.
+ *   • "Seed" — backfills 7 days of power_logs (one per facility per day).
+ *   • "Generate Live Stream" — runs a 5-minute live insert loop (~1 row / 2s),
+ *     occasionally injecting security_alerts. Realtime subscriptions push the
+ *     new rows back into the dashboard with no refresh.
  */
 
-type PowerTick = { ts: number; kw: number; solarKw: number; gridKw: number; battSoc: number };
-type GenLog = { ts: number; site: string; runtimeMin: number; litres: number; load: number };
-type Alert = {
-  id: string;
-  severity: "critical" | "warning" | "info";
-  site: string;
-  code: string;
-  message: string;
-  at: number;
-};
+const STREAM_DURATION_MS = 5 * 60 * 1000;
+const TICK_MS = 2000;
 
-const STREAM_DURATION_MS = 5 * 60 * 1000; // 5 minutes
-const TICK_MS = 1000;
-const POWER_WINDOW = 60;
+const SITES = [
+  { facility_name: "Ikeja Corporate HQ", location_state: "Lagos", status: "online" },
+  { facility_name: "Lekki Premium Terminal", location_state: "Lagos", status: "online" },
+  { facility_name: "Abuja Operations Annex", location_state: "FCT", status: "online" },
+];
+
+const ALERT_TYPES = [
+  { type: "FUEL_DROP_ANOMALY", severity: "critical", msg: (l: number) => `Unauthorised ${l}L fuel drop while asset offline.` },
+  { type: "WIRING_AUDIT_PENDING", severity: "warning", msg: () => "Installer hardware checksum awaiting re-verification." },
+  { type: "PERIMETER_HANDSHAKE", severity: "info", msg: () => "Perimeter sensor handshake verified." },
+];
+
+async function ensureFacilities(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("facilities")
+    .select("id")
+    .eq("client_id", ENTERPRISE_CLIENT_ID);
+  if (error) throw error;
+  if (data && data.length > 0) return data.map((d: { id: string }) => d.id);
+
+  const { data: inserted, error: insErr } = await supabase
+    .from("facilities")
+    .insert(SITES.map((s) => ({ ...s, client_id: ENTERPRISE_CLIENT_ID })))
+    .select("id");
+  if (insErr) throw insErr;
+  return (inserted ?? []).map((d: { id: string }) => d.id);
+}
+
+function powerSample(facilityId: string, when: Date) {
+  const phase = (when.getHours() + when.getMinutes() / 60 - 6) / 12; // 0 at 6am, peak midday
+  const dayBoost = Math.max(0, Math.sin(phase * Math.PI));
+  const solar = +(380 * dayBoost + Math.random() * 40).toFixed(2);
+  const load = +(290 + Math.random() * 80).toFixed(2);
+  const battery = Math.round(70 + Math.random() * 25);
+  const battTemp = +(28 + Math.random() * 6).toFixed(1);
+  const grid = solar > load ? "online" : Math.random() < 0.15 ? "diesel" : "online";
+  // Naira saved = liters not burned * ₦1180 (rough heuristic from solar contribution).
+  const litersAvoided = Math.max(0, Math.min(solar, load)) * 0.25;
+  const naira = Math.round(litersAvoided * 1180);
+  return {
+    facility_id: facilityId,
+    solar_generation_kw: solar,
+    load_consumption_kw: load,
+    battery_percentage: battery,
+    battery_temperature_c: battTemp,
+    grid_status: grid,
+    diesel_saved_naira: naira,
+    logged_at: when.toISOString(),
+  };
+}
 
 export function DevSeeder() {
-  const qc = useQueryClient();
   const [visible, setVisible] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [seedFlash, setSeedFlash] = useState(false);
 
   const [streaming, setStreaming] = useState(false);
-  const [elapsed, setElapsed] = useState(0); // ms
-  const [latestAlert, setLatestAlert] = useState<Alert | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const [latestAlert, setLatestAlert] = useState<{ id: string; site: string; code: string; message: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const tickRef = useRef<number | null>(null);
   const startRef = useRef<number>(0);
-  const powerBufRef = useRef<PowerTick[]>([]);
-  const genBufRef = useRef<GenLog[]>([]);
-  const alertBufRef = useRef<Alert[]>([]);
+  const facilityIdsRef = useRef<string[]>([]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
-    const enabled =
-      import.meta.env.DEV ||
-      url.searchParams.get("dev") === "1" ||
-      localStorage.getItem("aura_dev") === "1";
+    const enabled = import.meta.env.DEV || url.searchParams.get("dev") === "1" || localStorage.getItem("aura_dev") === "1";
     setVisible(enabled);
   }, []);
 
-  useEffect(() => () => stopStream(), []); // cleanup on unmount
+  useEffect(() => () => stopStream(), []);
 
   if (!visible) return null;
 
   // ---------------------------------------------------------------------------
-  // Seed (snapshot)
+  // Seed — backfill 7 days of power_logs.
   // ---------------------------------------------------------------------------
   const handleSeed = async () => {
     setSeeding(true);
-    await new Promise((r) => setTimeout(r, 350));
-
-    const week: DieselDay[] = [
-      { d: "MON", v: 224 },
-      { d: "TUE", v: 251 },
-      { d: "WED", v: 268 },
-      { d: "THU", v: 247 },
-      { d: "FRI", v: 286 },
-      { d: "SAT", v: 273 },
-      { d: "SUN", v: 291 },
-    ];
-    qc.setQueryData(["diesel-burden", "week"], week);
-
-    const now = Date.now();
-    qc.setQueryData(
-      ["power-logs", "live"],
-      Array.from({ length: POWER_WINDOW }, (_, i) => ({
-        ts: now - (POWER_WINDOW - i) * 1000,
-        kw: 380 + Math.sin(i / 4) * 22 + Math.random() * 6,
-        solarKw: 410 + Math.sin(i / 5) * 18,
-        gridKw: 0,
-        battSoc: 89,
-      })),
-    );
-
-    qc.setQueryData(["generator-logs", "today"], []);
-    qc.setQueryData(["security-alerts", "active"], []);
-
-    await qc.invalidateQueries({ queryKey: ["diesel-burden"] });
-    setSeeding(false);
-    setSeedFlash(true);
-    window.setTimeout(() => setSeedFlash(false), 1400);
+    setError(null);
+    try {
+      const ids = await ensureFacilities();
+      const rows = [];
+      const now = new Date();
+      for (let d = 6; d >= 0; d--) {
+        for (const id of ids) {
+          for (let h = 6; h <= 18; h += 4) {
+            const when = new Date(now);
+            when.setDate(now.getDate() - d);
+            when.setHours(h, Math.floor(Math.random() * 60), 0, 0);
+            rows.push(powerSample(id, when));
+          }
+        }
+      }
+      const { error: insErr } = await supabase.from("power_logs").insert(rows);
+      if (insErr) throw insErr;
+      setSeedFlash(true);
+      window.setTimeout(() => setSeedFlash(false), 1400);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Seed failed");
+    } finally {
+      setSeeding(false);
+    }
   };
 
   // ---------------------------------------------------------------------------
-  // Live stream
+  // Live stream — INSERT a row every TICK_MS into a random facility.
   // ---------------------------------------------------------------------------
-  const sites = ["Lekki Hub", "Ikeja HQ", "Abuja Annex", "Victoria Island"];
-  const pickSite = () => sites[Math.floor(Math.random() * sites.length)];
-
-  const startStream = () => {
+  const startStream = async () => {
     if (streaming) return;
+    setError(null);
+    try {
+      facilityIdsRef.current = await ensureFacilities();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Could not provision facilities");
+      return;
+    }
     setStreaming(true);
     setElapsed(0);
-    powerBufRef.current = [];
-    genBufRef.current = [];
-    alertBufRef.current = [];
     startRef.current = Date.now();
 
-    tickRef.current = window.setInterval(() => {
-      const t = Date.now();
-      const dt = t - startRef.current;
+    tickRef.current = window.setInterval(async () => {
+      const now = Date.now();
+      const dt = now - startRef.current;
       setElapsed(dt);
 
-      // 1. Power log tick — rolling window of POWER_WINDOW samples.
-      const phase = dt / 1000 / 6;
-      const sample: PowerTick = {
-        ts: t,
-        kw: 380 + Math.sin(phase) * 28 + (Math.random() - 0.5) * 10,
-        solarKw: 410 + Math.sin(phase + 1) * 22 + (Math.random() - 0.5) * 6,
-        gridKw: Math.max(0, 12 + Math.sin(phase / 2) * 8),
-        battSoc: 88 + Math.sin(phase / 3) * 4,
-      };
-      powerBufRef.current = [...powerBufRef.current.slice(-(POWER_WINDOW - 1)), sample];
-      qc.setQueryData(["power-logs", "live"], powerBufRef.current);
-
-      // 2. Generator log — every ~20s, simulate a runtime entry.
-      if (Math.random() < 1 / 20) {
-        const gen: GenLog = {
-          ts: t,
-          site: pickSite(),
-          runtimeMin: Math.round(8 + Math.random() * 14),
-          litres: +(2.4 + Math.random() * 5.6).toFixed(2),
-          load: Math.round(40 + Math.random() * 50),
-        };
-        genBufRef.current = [gen, ...genBufRef.current].slice(0, 24);
-        qc.setQueryData(["generator-logs", "today"], genBufRef.current);
+      const ids = facilityIdsRef.current;
+      const fid = ids[Math.floor(Math.random() * ids.length)];
+      try {
+        await supabase.from("power_logs").insert(powerSample(fid, new Date()));
+      } catch {
+        // Realtime subscription will fall behind quietly; surface in error chip.
       }
 
-      // 3. Security alerts — rare crimson fuel-drop events (~3% / tick).
-      if (Math.random() < 0.03) {
-        const isFuelDrop = Math.random() < 0.55;
-        const alert: Alert = isFuelDrop
-          ? {
-              id: `alrt-${t}`,
-              severity: "critical",
-              site: pickSite(),
-              code: "FUEL_DROP_ANOMALY",
-              message: `Unauthorised ${Math.round(8 + Math.random() * 22)}L fuel drop detected while asset offline.`,
-              at: t,
-            }
-          : {
-              id: `alrt-${t}`,
-              severity: "warning",
-              site: pickSite(),
-              code: "WIRING_AUDIT_PENDING",
-              message: "Installer hardware checksum awaiting re-verification.",
-              at: t,
-            };
-        alertBufRef.current = [alert, ...alertBufRef.current].slice(0, 12);
-        qc.setQueryData(["security-alerts", "active"], alertBufRef.current);
-
-        if (alert.severity === "critical") {
-          setLatestAlert(alert);
-          window.setTimeout(
-            () => setLatestAlert((a) => (a?.id === alert.id ? null : a)),
-            8000,
-          );
+      // Random alert ~5% per tick.
+      if (Math.random() < 0.05) {
+        const def = ALERT_TYPES[Math.floor(Math.random() * ALERT_TYPES.length)];
+        const liters = Math.round(8 + Math.random() * 22);
+        const message = def.msg(liters);
+        const alertRow = {
+          facility_id: fid,
+          alert_type: def.type,
+          message,
+          severity: def.severity,
+          is_resolved: false,
+        };
+        try {
+          await supabase.from("security_alerts").insert(alertRow);
+          if (def.severity === "critical") {
+            const banner = { id: `${now}`, site: "AURA Mesh", code: def.type, message };
+            setLatestAlert(banner);
+            window.setTimeout(() => setLatestAlert((a) => (a?.id === banner.id ? null : a)), 8000);
+          }
+        } catch {
+          // ignore
         }
       }
-
-      // Bridge for any component that wants to react without subscribing to caches.
-      window.dispatchEvent(new CustomEvent("aura:tick", { detail: sample }));
 
       if (dt >= STREAM_DURATION_MS) stopStream();
     }, TICK_MS);
@@ -200,16 +194,13 @@ export function DevSeeder() {
 
   return (
     <>
-      {/* Crimson floating banner for fuel-drop events */}
       {latestAlert && (
         <div
           role="alert"
           className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] hairline rounded-xl px-4 py-3 flex items-center gap-3 backdrop-blur-md animate-in fade-in slide-in-from-top-2"
           style={{
-            background:
-              "linear-gradient(135deg, oklch(0.20 0.08 25 / 0.85), oklch(0.14 0.02 265 / 0.92))",
-            boxShadow:
-              "0 0 0 1px oklch(0.66 0.24 25 / 0.55), 0 20px 60px -10px oklch(0.66 0.24 25 / 0.45)",
+            background: "linear-gradient(135deg, oklch(0.20 0.08 25 / 0.85), oklch(0.14 0.02 265 / 0.92))",
+            boxShadow: "0 0 0 1px oklch(0.66 0.24 25 / 0.55), 0 20px 60px -10px oklch(0.66 0.24 25 / 0.45)",
             maxWidth: "min(560px, calc(100vw - 2rem))",
           }}
         >
@@ -219,9 +210,7 @@ export function DevSeeder() {
             <p className="text-[10px] tracking-[0.22em] uppercase font-semibold text-[oklch(0.88_0.16_25)]">
               {latestAlert.code} · {latestAlert.site}
             </p>
-            <p className="text-xs text-[oklch(0.92_0.05_25)] mt-0.5 truncate">
-              {latestAlert.message}
-            </p>
+            <p className="text-xs text-[oklch(0.92_0.05_25)] mt-0.5 truncate">{latestAlert.message}</p>
           </div>
           <button
             type="button"
@@ -234,68 +223,70 @@ export function DevSeeder() {
         </div>
       )}
 
-      {/* Dev control bar */}
+      {error && (
+        <div
+          className="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 hairline rounded-md px-3 py-2 text-[11px] text-[oklch(0.85_0.18_25)] backdrop-blur-md"
+          style={{ background: "oklch(0.20 0.08 25 / 0.85)", maxWidth: "min(520px, calc(100vw - 2rem))" }}
+        >
+          {error}
+        </div>
+      )}
+
       <div
         role="toolbar"
         aria-label="Developer control bar"
         className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 hairline rounded-full backdrop-blur-xl flex items-center gap-1 p-1 pl-3 opacity-60 hover:opacity-100 transition-opacity"
         style={{
           background: "oklch(0.10 0.02 265 / 0.78)",
-          boxShadow:
-            "0 0 0 1px oklch(0.30 0.03 265 / 0.6), 0 20px 50px -20px oklch(0 0 0 / 0.7)",
+          boxShadow: "0 0 0 1px oklch(0.30 0.03 265 / 0.6), 0 20px 50px -20px oklch(0 0 0 / 0.7)",
           maxWidth: "calc(100vw - 1.5rem)",
         }}
       >
-        <span className="text-[9px] tracking-[0.28em] uppercase text-silver/70 hidden sm:inline">
-          Dev
-        </span>
+        <span className="text-[9px] tracking-[0.28em] uppercase text-silver/70 hidden sm:inline">Dev</span>
         <span className="hidden sm:inline h-3 w-px bg-[oklch(0.30_0.03_265)] mx-1" />
 
         <button
           type="button"
           onClick={handleSeed}
           disabled={seeding || streaming}
-          aria-label="Seed Demo Metrics"
+          aria-label="Seed historical power logs"
           className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] tracking-[0.2em] uppercase text-silver/80 hover:text-[oklch(0.92_0.14_165)] hover:bg-[oklch(0.74_0.17_165_/_0.08)] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           style={
             seedFlash
               ? {
-                  boxShadow:
-                    "0 0 0 1px oklch(0.74 0.17 165 / 0.7), 0 0 30px oklch(0.74 0.17 165 / 0.5)",
+                  boxShadow: "0 0 0 1px oklch(0.74 0.17 165 / 0.7), 0 0 30px oklch(0.74 0.17 165 / 0.5)",
                   color: "oklch(0.92 0.14 165)",
                 }
               : undefined
           }
         >
           {seeding ? <Loader2 className="h-3 w-3 animate-spin" /> : <FlaskConical className="h-3 w-3" />}
-          <span className="hidden md:inline">{seeding ? "Seeding…" : seedFlash ? "Seeded" : "Seed"}</span>
+          <span className="hidden md:inline">{seeding ? "Seeding…" : seedFlash ? "Seeded" : "Seed 7d"}</span>
         </button>
 
         {streaming ? (
           <button
             type="button"
             onClick={stopStream}
-            aria-label="Stop demo stream"
+            aria-label="Stop live insert stream"
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] tracking-[0.2em] uppercase text-[oklch(0.88_0.16_25)] hover:bg-[oklch(0.66_0.24_25_/_0.12)] transition-all"
-            style={{
-              boxShadow: "0 0 0 1px oklch(0.66 0.24 25 / 0.45)",
-            }}
+            style={{ boxShadow: "0 0 0 1px oklch(0.66 0.24 25 / 0.45)" }}
           >
             <Square className="h-3 w-3 fill-current" />
-            <span>Stop · {mm}:{ss}</span>
+            <span>
+              Stop · {mm}:{ss}
+            </span>
           </button>
         ) : (
           <button
             type="button"
             onClick={startStream}
-            aria-label="Generate Live Demo Stream"
+            aria-label="Generate live insert stream"
             className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[10px] tracking-[0.2em] uppercase font-semibold transition-all"
             style={{
-              background:
-                "linear-gradient(135deg, oklch(0.78 0.17 165 / 0.22), oklch(0.74 0.13 215 / 0.22))",
+              background: "linear-gradient(135deg, oklch(0.78 0.17 165 / 0.22), oklch(0.74 0.13 215 / 0.22))",
               color: "oklch(0.92 0.14 165)",
-              boxShadow:
-                "0 0 0 1px oklch(0.74 0.17 165 / 0.45), 0 0 24px -4px oklch(0.74 0.17 165 / 0.4)",
+              boxShadow: "0 0 0 1px oklch(0.74 0.17 165 / 0.45), 0 0 24px -4px oklch(0.74 0.17 165 / 0.4)",
             }}
           >
             <Radio className="h-3 w-3" />
@@ -303,7 +294,6 @@ export function DevSeeder() {
           </button>
         )}
 
-        {/* Stream progress bar */}
         {streaming && (
           <div
             className="ml-1 h-1 w-16 sm:w-24 rounded-full overflow-hidden bg-[oklch(0.22_0.02_265)]"
@@ -313,8 +303,7 @@ export function DevSeeder() {
               className="h-full transition-[width] duration-1000 ease-linear"
               style={{
                 width: `${progress * 100}%`,
-                background:
-                  "linear-gradient(90deg, oklch(0.74 0.17 165), oklch(0.74 0.13 215))",
+                background: "linear-gradient(90deg, oklch(0.74 0.17 165), oklch(0.74 0.13 215))",
                 boxShadow: "0 0 12px oklch(0.74 0.17 165 / 0.6)",
               }}
             />
