@@ -17,7 +17,7 @@ const AVG = Math.round(TOTAL / week.length);
 
 export function DieselBurden() {
   return (
-    <div className="glass-card p-6 md:p-7 flex flex-col gap-6">
+    <div className="glass-card p-4 md:p-7 flex flex-col gap-4 md:gap-6">
       {/* Header */}
       <header className="flex items-start justify-between">
         <div>
