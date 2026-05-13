@@ -28,34 +28,6 @@ export function DieselOffset() {
         </div>
       </div>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-[oklch(0.30_0.03_265)] to-transparent" />
-
-      {/* Metric 2 */}
-      <div>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[10px] tracking-[0.22em] text-silver uppercase">Diesel Burden Regression</p>
-            <p className="num mt-1 text-2xl font-semibold tracking-tight">
-              1,840 <span className="text-silver text-base font-normal">Liters prevented · this week</span>
-            </p>
-          </div>
-          <Fuel className="h-5 w-5 text-[oklch(0.74_0.17_165)]" />
-        </div>
-        <div className="mt-4 flex items-end gap-1.5 h-16">
-          {bars.map((v, i) => (
-            <div key={i} className="flex-1 rounded-sm"
-              style={{
-                height: `${v}%`,
-                background: i === bars.length - 1
-                  ? "linear-gradient(180deg, oklch(0.82 0.17 165), oklch(0.5 0.14 175))"
-                  : "linear-gradient(180deg, oklch(0.5 0.08 200 / 0.7), oklch(0.3 0.04 220 / 0.5))",
-                boxShadow: i === bars.length - 1 ? "0 0 12px oklch(0.74 0.17 165 / 0.6)" : undefined,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* Theft Auditor */}
       <div className="rounded-xl hairline p-4"
         style={{ background: "linear-gradient(160deg, oklch(0.20 0.04 25 / 0.25), oklch(0.14 0.02 265 / 0.6))" }}>
