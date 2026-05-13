@@ -80,9 +80,9 @@ export function EnergyFlow() {
 
         {/* Nodes overlay */}
         <div className="absolute inset-0 grid grid-cols-3 items-center px-2 md:px-6">
-          <Node label="Solar Capture Fields" sub="412.7 kW · 6 strings" icon={<Sun className="h-7 w-7" />} accent="solar" />
+          <Node label="Solar Capture Fields" sub={`${totals.solar.toFixed(1)} kW · ${sites.length} site${sites.length === 1 ? "" : "s"}`} icon={<Sun className="h-7 w-7" />} accent="solar" />
           <Node label="AURA Inverter Intelligence" sub="MPPT · 98.2% η" icon={<Cpu className="h-7 w-7" />} accent="silver" central />
-          <Node label="Facility Grid Load" sub="287.4 kW draw" icon={<Building2 className="h-7 w-7" />} accent="storage" />
+          <Node label="Facility Grid Load" sub={`${totals.load.toFixed(1)} kW draw`} icon={<Building2 className="h-7 w-7" />} accent="storage" />
         </div>
       </div>
 
