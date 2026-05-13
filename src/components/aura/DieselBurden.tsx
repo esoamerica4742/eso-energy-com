@@ -49,11 +49,6 @@ export function DieselBurden({ data, isLoading }: DieselBurdenProps = {}) {
   const totalFmt = TOTAL.toLocaleString("en-US");
   const monetary = Math.round(TOTAL * 1180).toLocaleString("en-US");
 
-  const TOTAL = week.reduce((a, b) => a + b.v, 0);
-  const MAX = Math.max(...week.map((w) => w.v));
-  const AVG = Math.round(TOTAL / week.length);
-  const totalFmt = TOTAL.toLocaleString("en-US");
-  const monetary = Math.round(TOTAL * 1180).toLocaleString("en-US");
 
   return (
     <div className="glass-card p-4 md:p-7 flex flex-col gap-4 md:gap-6">
