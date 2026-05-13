@@ -57,6 +57,15 @@ export function TopHeader() {
             </div>
             <ChevronDown className="h-3.5 w-3.5 text-silver" />
           </button>
+          <button
+            type="button"
+            onClick={() => supabase.auth.signOut()}
+            aria-label="Sign out"
+            className="hairline rounded-full p-2 text-silver hover:text-[oklch(0.85_0.18_25)] hover:bg-[oklch(0.66_0.24_25_/_0.1)] transition-colors"
+            style={{ background: "oklch(0.18 0.022 265)" }}
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
     </header>
