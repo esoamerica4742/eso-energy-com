@@ -91,12 +91,12 @@ export function EnergyFlow() {
         <div className="hairline rounded-2xl bg-[oklch(0.16_0.02_265_/_0.7)] px-5 py-3 flex items-center gap-4 shadow-[0_0_40px_-10px_oklch(0.74_0.13_215_/_0.5)]">
           <BatteryCharging className="h-5 w-5 text-[oklch(0.78_0.13_215)]" />
           <div className="flex items-center gap-2">
-            {[0,1].map(i => (
+            {[0, 1].map((i) => (
               <div key={i} className="relative h-7 w-24 rounded-md hairline overflow-hidden bg-[oklch(0.13_0.02_265)]">
                 <div
                   className="absolute inset-y-0 left-0"
                   style={{
-                    width: "89%",
+                    width: `${avgBatt}%`,
                     background: "linear-gradient(90deg, oklch(0.58 0.14 230), oklch(0.78 0.13 215))",
                     boxShadow: "var(--glow-storage)",
                   }}
@@ -106,7 +106,7 @@ export function EnergyFlow() {
           </div>
           <div className="text-right">
             <p className="text-[10px] tracking-[0.2em] text-silver uppercase">Lithium Reserve</p>
-            <p className="num text-base font-semibold text-[oklch(0.85_0.12_215)]">89% SoC · 412 kWh</p>
+            <p className="num text-base font-semibold text-[oklch(0.85_0.12_215)]">{avgBatt}% SoC · fleet avg</p>
           </div>
         </div>
       </div>
