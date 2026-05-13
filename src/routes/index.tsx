@@ -5,6 +5,7 @@ import { DieselOffset } from "@/components/aura/DieselOffset";
 import { DieselBurden } from "@/components/aura/DieselBurden";
 import { FleetCommand } from "@/components/aura/FleetCommand";
 import { DevSeeder } from "@/components/aura/DevSeeder";
+import { useRealtimeTelemetry } from "@/hooks/useRealtimeTelemetry";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  useRealtimeTelemetry();
   return (
     <div className="min-h-screen">
       <TopHeader />
