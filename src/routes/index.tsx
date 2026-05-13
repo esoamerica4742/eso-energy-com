@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { TopHeader } from "@/components/aura/TopHeader";
 import { EnergyFlow } from "@/components/aura/EnergyFlow";
 import { DieselOffset } from "@/components/aura/DieselOffset";
+import { DieselBurden } from "@/components/aura/DieselBurden";
 import { FleetCommand } from "@/components/aura/FleetCommand";
 
 export const Route = createFileRoute("/")({
@@ -43,6 +44,9 @@ function Index() {
           </div>
           <div className="lg:col-span-7">
             <FleetCommand />
+          </div>
+          <div className="lg:col-span-12">
+            <DieselBurden />
           </div>
         </div>
 
