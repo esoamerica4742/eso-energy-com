@@ -247,7 +247,13 @@ function DieselBurdenSkeleton() {
 }
 
 /* ───────── Empty state ───────── */
-function DieselBurdenEmpty() {
+function DieselBurdenEmpty({
+  onRetry,
+  isRetrying = false,
+}: {
+  onRetry?: () => void;
+  isRetrying?: boolean;
+}) {
   return (
     <div
       className="glass-card p-4 md:p-7 flex flex-col gap-4 md:gap-6"
@@ -294,10 +300,22 @@ function DieselBurdenEmpty() {
         </div>
         <button
           type="button"
-          className="mt-1 hairline rounded-full px-3.5 py-1.5 text-[10px] tracking-[0.22em] uppercase text-[oklch(0.82_0.16_165)] hover:text-[oklch(0.92_0.14_165)] transition-colors inline-flex items-center gap-1.5"
+          onClick={onRetry}
+          disabled={isRetrying}
+          className="mt-1 hairline rounded-full px-3.5 py-1.5 text-[10px] tracking-[0.22em] uppercase text-[oklch(0.82_0.16_165)] hover:text-[oklch(0.92_0.14_165)] hover:bg-[oklch(0.74_0.17_165_/_0.08)] disabled:opacity-60 disabled:cursor-wait transition-colors inline-flex items-center gap-1.5"
+          aria-busy={isRetrying}
         >
-          <span className="h-1.5 w-1.5 rounded-full bg-[oklch(0.74_0.17_165)] ticker-dot" />
-          Retry Telemetry Sync
+          {isRetrying ? (
+            <>
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Syncing Telemetry…
+            </>
+          ) : (
+            <>
+              <span className="h-1.5 w-1.5 rounded-full bg-[oklch(0.74_0.17_165)] ticker-dot" />
+              Retry Telemetry Sync
+            </>
+          )}
         </button>
       </div>
     </div>
