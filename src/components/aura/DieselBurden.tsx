@@ -1,7 +1,9 @@
-import { Fuel, TrendingDown, ArrowUpRight } from "lucide-react";
+import { Fuel, TrendingDown, ArrowUpRight, FuelIcon, CloudOff } from "lucide-react";
+
+export type DieselDay = { d: string; v: number };
 
 // Liters of diesel prevented per day (Mon → Sun). Sun = today.
-const week = [
+const defaultWeek: DieselDay[] = [
   { d: "MON", v: 218 },
   { d: "TUE", v: 246 },
   { d: "WED", v: 271 },
@@ -11,11 +13,27 @@ const week = [
   { d: "SUN", v: 300 },
 ];
 
-const TOTAL = week.reduce((a, b) => a + b.v, 0); // 1,840
-const MAX = Math.max(...week.map((w) => w.v));
-const AVG = Math.round(TOTAL / week.length);
+const SKELETON_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+const SKELETON_HEIGHTS = [62, 74, 81, 70, 88, 76, 92];
 
-export function DieselBurden() {
+interface DieselBurdenProps {
+  data?: DieselDay[] | null;
+  isLoading?: boolean;
+}
+
+export function DieselBurden({ data, isLoading = false }: DieselBurdenProps = {}) {
+  if (isLoading) return <DieselBurdenSkeleton />;
+  if (data === null || (Array.isArray(data) && data.length === 0)) {
+    return <DieselBurdenEmpty />;
+  }
+
+  const week = data ?? defaultWeek;
+  const TOTAL = week.reduce((a, b) => a + b.v, 0);
+  const MAX = Math.max(...week.map((w) => w.v));
+  const AVG = Math.round(TOTAL / week.length);
+  const totalFmt = TOTAL.toLocaleString("en-US");
+  const monetary = Math.round(TOTAL * 1180).toLocaleString("en-US");
+
   return (
     <div className="glass-card p-4 md:p-7 flex flex-col gap-4 md:gap-6">
       {/* Header */}
