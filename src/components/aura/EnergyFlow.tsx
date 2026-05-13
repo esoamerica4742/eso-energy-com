@@ -12,6 +12,28 @@ const Particle = ({ d, delay, color }: { d: string; delay: string; color: string
 );
 
 export function EnergyFlow() {
+  const q = useQuery({
+    queryKey: ["latest-power-logs"],
+    queryFn: fetchLatestPowerLogs,
+    staleTime: 30_000,
+  });
+
+  const sites = q.data ?? [];
+  const totals = sites.reduce(
+    (acc, { log }) => {
+      if (!log) return acc;
+      acc.solar += Number(log.solar_generation_kw ?? 0);
+      acc.load += Number(log.load_consumption_kw ?? 0);
+      acc.batt += Number(log.battery_percentage ?? 0);
+      acc.battCount += 1;
+      return acc;
+    },
+    { solar: 0, load: 0, batt: 0, battCount: 0 },
+  );
+  const avgBatt = totals.battCount > 0 ? Math.round(totals.batt / totals.battCount) : 0;
+  const heroSite = sites.find((s) => s.log) ?? sites[0];
+  const heroName = heroSite?.facility.facility_name ?? "AURA Mesh";
+
   // Path coords (in viewBox 1000x260)
   const pathA = "M 165 130 C 280 130, 360 130, 480 130";
   const pathB = "M 520 130 C 640 130, 720 130, 835 130";
@@ -21,7 +43,7 @@ export function EnergyFlow() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <p className="text-[11px] tracking-[0.22em] text-silver uppercase">Energy Orchestration Layer</p>
-          <h2 className="text-xl md:text-2xl font-semibold mt-1 tracking-tight shimmer-text">Live Power Network — Lekki Premium Terminal</h2>
+          <h2 className="text-xl md:text-2xl font-semibold mt-1 tracking-tight shimmer-text">Live Power Network — {heroName}</h2>
         </div>
         <div className="hidden md:flex items-center gap-2 text-[11px] text-silver">
           <span className="h-1.5 w-1.5 rounded-full bg-[oklch(0.74_0.17_165)] ticker-dot" />
