@@ -17,7 +17,7 @@ const AVG = Math.round(TOTAL / week.length);
 
 export function DieselBurden() {
   return (
-    <div className="glass-card p-6 md:p-7 flex flex-col gap-6">
+    <div className="glass-card p-4 md:p-7 flex flex-col gap-4 md:gap-6">
       {/* Header */}
       <header className="flex items-start justify-between">
         <div>
@@ -38,7 +38,7 @@ export function DieselBurden() {
       <div className="flex items-end justify-between gap-4">
         <div>
           <p
-            className="num text-[56px] md:text-[68px] leading-[0.95] font-semibold tracking-[-0.02em]"
+            className="num text-[44px] md:text-[68px] leading-[0.95] font-semibold tracking-[-0.02em]"
             style={{
               background:
                 "linear-gradient(180deg, oklch(0.92 0.14 165) 0%, oklch(0.66 0.16 175) 100%)",
@@ -67,30 +67,29 @@ export function DieselBurden() {
 
       {/* Micro-bar chart */}
       <div>
-        <div className="relative h-28">
+        <div className="relative h-24 md:h-28">
           {/* Average reference line */}
           <div
-            className="absolute left-0 right-10 border-t border-dashed"
+            className="absolute left-0 right-0 md:right-10 border-t border-dashed"
             style={{
               top: `${100 - (AVG / MAX) * 100}%`,
               borderColor: "oklch(0.74 0.17 165 / 0.35)",
             }}
           >
             <span
-              className="absolute -top-2 right-[-44px] text-[9px] tracking-[0.18em] uppercase font-mono text-[oklch(0.82_0.16_165)]"
+              className="absolute -top-3.5 right-0 md:-top-2 md:right-[-44px] text-[9px] tracking-[0.18em] uppercase font-mono text-[oklch(0.82_0.16_165)]"
             >
               avg {AVG}L
             </span>
           </div>
 
           {/* Bars */}
-          <div className="absolute inset-0 flex items-end gap-2 pr-12">
+          <div className="absolute inset-0 flex items-end gap-1 md:gap-2 pr-0 md:pr-12">
             {week.map((b, i) => {
               const isToday = i === week.length - 1;
               const h = (b.v / MAX) * 100;
               return (
                 <div key={b.d} className="flex-1 h-full flex items-end relative group">
-                  {/* hover value */}
                   <span
                     className="absolute left-1/2 -translate-x-1/2 text-[9.5px] font-mono tabular-nums opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     style={{
@@ -119,13 +118,13 @@ export function DieselBurden() {
         </div>
 
         {/* Day axis */}
-        <div className="mt-2 flex items-end gap-2 pr-12">
+        <div className="mt-2 flex items-end gap-1 md:gap-2 pr-0 md:pr-12">
           {week.map((b, i) => {
             const isToday = i === week.length - 1;
             return (
               <div
                 key={b.d}
-                className={`flex-1 text-center text-[9.5px] tracking-[0.22em] font-mono ${
+                className={`flex-1 text-center text-[9px] md:text-[9.5px] tracking-[0.12em] md:tracking-[0.22em] font-mono ${
                   isToday ? "text-[oklch(0.88_0.14_165)]" : "text-silver/60"
                 }`}
               >
@@ -137,11 +136,11 @@ export function DieselBurden() {
       </div>
 
       {/* Footer ledger */}
-      <div className="hairline rounded-xl px-4 py-3 flex items-center justify-between"
+      <div className="hairline rounded-xl px-3 md:px-4 py-2.5 md:py-3 flex items-center justify-between gap-2"
         style={{ background: "linear-gradient(160deg, oklch(0.18 0.04 175 / 0.18), oklch(0.12 0.02 265 / 0.5))" }}>
-        <div className="flex items-baseline gap-2">
-          <span className="text-[10px] tracking-[0.22em] uppercase text-silver">Monetary Equivalent</span>
-          <span className="num text-[15px] font-semibold tracking-tight text-[oklch(0.92_0.05_165)]">
+        <div className="flex flex-col md:flex-row md:items-baseline md:gap-2 min-w-0">
+          <span className="text-[9px] md:text-[10px] tracking-[0.22em] uppercase text-silver">Monetary Equivalent</span>
+          <span className="num text-[14px] md:text-[15px] font-semibold tracking-tight text-[oklch(0.92_0.05_165)]">
             ₦2,171,200
           </span>
         </div>
