@@ -1,33 +1,54 @@
-import { Fuel, TrendingDown, ArrowUpRight, FuelIcon, CloudOff } from "lucide-react";
+import { Fuel, TrendingDown, ArrowUpRight, FuelIcon, CloudOff, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDieselWeek } from "@/lib/diesel";
 
 export type DieselDay = { d: string; v: number };
-
-// Liters of diesel prevented per day (Mon → Sun). Sun = today.
-const defaultWeek: DieselDay[] = [
-  { d: "MON", v: 218 },
-  { d: "TUE", v: 246 },
-  { d: "WED", v: 271 },
-  { d: "THU", v: 252 },
-  { d: "FRI", v: 289 },
-  { d: "SAT", v: 264 },
-  { d: "SUN", v: 300 },
-];
 
 const SKELETON_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 const SKELETON_HEIGHTS = [62, 74, 81, 70, 88, 76, 92];
 
 interface DieselBurdenProps {
+  /** Override telemetry — when omitted, the card fetches via React Query. */
   data?: DieselDay[] | null;
   isLoading?: boolean;
 }
 
-export function DieselBurden({ data, isLoading = false }: DieselBurdenProps = {}) {
-  if (isLoading) return <DieselBurdenSkeleton />;
-  if (data === null || (Array.isArray(data) && data.length === 0)) {
-    return <DieselBurdenEmpty />;
+export function DieselBurden({ data, isLoading }: DieselBurdenProps = {}) {
+  const query = useQuery({
+    queryKey: ["diesel-burden", "week"],
+    queryFn: fetchDieselWeek,
+    enabled: data === undefined && isLoading === undefined,
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  // Resolve effective state: explicit props win over the internal query.
+  const effectiveLoading =
+    isLoading ?? (query.isLoading || query.isFetching);
+  const effectiveData = data !== undefined ? data : query.data ?? null;
+  const isEmpty =
+    effectiveData === null ||
+    (Array.isArray(effectiveData) && effectiveData.length === 0);
+
+  if (effectiveLoading && (isEmpty || query.isLoading)) {
+    return <DieselBurdenSkeleton />;
+  }
+  if (isEmpty) {
+    return (
+      <DieselBurdenEmpty
+        onRetry={() => query.refetch()}
+        isRetrying={query.isFetching}
+      />
+    );
   }
 
-  const week = data ?? defaultWeek;
+  const week = effectiveData as DieselDay[];
+  const TOTAL = week.reduce((a, b) => a + b.v, 0);
+  const MAX = Math.max(...week.map((w) => w.v));
+  const AVG = Math.round(TOTAL / week.length);
+  const totalFmt = TOTAL.toLocaleString("en-US");
+  const monetary = Math.round(TOTAL * 1180).toLocaleString("en-US");
+
   const TOTAL = week.reduce((a, b) => a + b.v, 0);
   const MAX = Math.max(...week.map((w) => w.v));
   const AVG = Math.round(TOTAL / week.length);
