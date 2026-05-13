@@ -1,4 +1,6 @@
 import { Sun, Cpu, Building2, BatteryCharging } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchLatestPowerLogs } from "@/lib/aura";
 
 const Particle = ({ d, delay, color }: { d: string; delay: string; color: string }) => (
   <circle r="3" fill={color} style={{
