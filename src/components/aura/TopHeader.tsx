@@ -1,4 +1,5 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 function Logo() {
   return (
