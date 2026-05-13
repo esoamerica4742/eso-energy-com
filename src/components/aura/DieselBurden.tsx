@@ -136,11 +136,11 @@ export function DieselBurden() {
       </div>
 
       {/* Footer ledger */}
-      <div className="hairline rounded-xl px-4 py-3 flex items-center justify-between"
+      <div className="hairline rounded-xl px-3 md:px-4 py-2.5 md:py-3 flex items-center justify-between gap-2"
         style={{ background: "linear-gradient(160deg, oklch(0.18 0.04 175 / 0.18), oklch(0.12 0.02 265 / 0.5))" }}>
-        <div className="flex items-baseline gap-2">
-          <span className="text-[10px] tracking-[0.22em] uppercase text-silver">Monetary Equivalent</span>
-          <span className="num text-[15px] font-semibold tracking-tight text-[oklch(0.92_0.05_165)]">
+        <div className="flex flex-col md:flex-row md:items-baseline md:gap-2 min-w-0">
+          <span className="text-[9px] md:text-[10px] tracking-[0.22em] uppercase text-silver">Monetary Equivalent</span>
+          <span className="num text-[14px] md:text-[15px] font-semibold tracking-tight text-[oklch(0.92_0.05_165)]">
             ₦2,171,200
           </span>
         </div>
