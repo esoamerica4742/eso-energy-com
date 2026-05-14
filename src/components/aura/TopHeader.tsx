@@ -17,6 +17,7 @@ function Logo() {
 }
 
 export function TopHeader() {
+  const loggingOut = useLogoutActive();
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl"
       style={{
