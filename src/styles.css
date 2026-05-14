@@ -51,9 +51,15 @@
 :root {
   --radius: 0.625rem;
 
-  /* Canvas — Deep Obsidian #0B0F19 → Rich Slate #121827 */
-  --background: oklch(0.135 0.020 270);          /* #0B0F19 */
+  /* Canvas — Deep Void Obsidian #030712 */
+  --background: oklch(0.085 0.015 270);          /* #030712 */
   --foreground: oklch(1 0 0);
+
+  /* 2026 Elite accent system */
+  --jade: oklch(0.74 0.17 165);                  /* Deep Jade Emerald #10B981 */
+  --jade-glow: oklch(0.86 0.16 165);
+  --metal-gold: oklch(0.78 0.16 75);             /* Muted Metallic Gold #F59E0B */
+  --metal-gold-glow: oklch(0.88 0.16 78);
 
   /* Surface layers — slate steps */
   --surface-1: oklch(0.180 0.025 265);            /* #121827 */
