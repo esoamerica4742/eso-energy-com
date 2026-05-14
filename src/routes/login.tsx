@@ -85,22 +85,11 @@ function LoginPage() {
         className="w-full max-w-md glass-card p-8 md:p-10 relative"
         style={{ boxShadow: "0 30px 80px -20px oklch(0 0 0 / 0.7), inset 0 1px 0 oklch(1 0 0 / 0.08)" }}
       >
-        <Link to="/login" className="inline-flex items-center gap-3 mb-8">
-          <span
-            className="h-10 w-10 rounded-xl grid place-items-center"
-            style={{
-              background: "linear-gradient(135deg, oklch(0.22 0.008 265), oklch(0.16 0.005 265))",
-              boxShadow: "0 0 24px oklch(0.78 0.13 86 / 0.35), inset 0 0 0 1px oklch(0.78 0.13 86 / 0.4)",
-            }}
-          >
-            <ShieldCheck className="h-5 w-5 text-[var(--gold)]" />
-          </span>
-          <div className="leading-tight">
-            <p className="text-[15px] font-semibold tracking-[0.18em] text-silver">AURA</p>
-            <p className="text-[10px] tracking-[0.32em] text-silver/70 uppercase">
-              {mode === "signin" ? "Enterprise · Sovereign Access" : "Enterprise · New Operator"}
-            </p>
-          </div>
+        <Link to="/login" className="block mb-7 text-center">
+          <EsoLogo size="lg" className="mx-auto" />
+          <p className="mt-3 text-[10px] tracking-[0.32em] text-silver/70 uppercase font-mono">
+            Secure Multi-Tenant Telemetry Gateway // NGA-Region-2026
+          </p>
         </Link>
 
         {/* Mode toggle */}
