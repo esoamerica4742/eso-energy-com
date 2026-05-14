@@ -208,17 +208,19 @@ export function SignupSuccessCard({
                 Return to Command Deck
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(110deg, transparent 30%, oklch(1 0 0 / 0.45) 50%, transparent 70%)",
-                  backgroundSize: "220% 100%",
-                  animation: "lux-shimmer 2.6s linear infinite",
-                  mixBlendMode: "overlay",
-                }}
-              />
+              {!reduce && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(110deg, transparent 30%, oklch(1 0 0 / 0.45) 50%, transparent 70%)",
+                    backgroundSize: "220% 100%",
+                    animation: "lux-shimmer 2.6s linear infinite",
+                    mixBlendMode: "overlay",
+                  }}
+                />
+              )}
             </button>
 
             <button
