@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
+import { EsoLogo } from "@/components/aura/EsoLogo";
 import {
   Building2,
   Check,
