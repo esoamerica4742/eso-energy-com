@@ -211,6 +211,26 @@ function SignUpPage() {
             placeholder="At least 8 characters"
           />
           {password.length > 0 && <StrengthMeter strength={strength} />}
+          <Field
+            id="confirm"
+            type="password"
+            label="Confirm password"
+            value={confirm}
+            onChange={setConfirm}
+            autoComplete="new-password"
+            icon={<Lock className="h-3.5 w-3.5 text-silver" />}
+            placeholder="Repeat password"
+          />
+          {confirmTouched && (
+            <p
+              className="text-[10px] tracking-[0.22em] uppercase"
+              style={{
+                color: passwordsMatch ? "oklch(0.85 0.16 165)" : "oklch(0.75 0.18 25)",
+              }}
+            >
+              {passwordsMatch ? "Passwords match" : "Passwords do not match"}
+            </p>
+          )}
 
           {err && (
             <p className="text-[12px] text-[oklch(0.85_0.18_25)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_25_/_0.18)]">
