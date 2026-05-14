@@ -1,31 +1,29 @@
 import type { DieselDay } from "@/components/aura/DieselBurden";
-import { supabase, ENTERPRISE_CLIENT_ID } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 
 const DAY_LABEL = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const NAIRA_PER_LITER = 1180;
 
 /**
- * Reads the last 7 days of power_logs for the enterprise client's facilities
+ * Reads the last 7 days of energy_metrics for the company's branches
  * and aggregates `diesel_saved_naira` into liters avoided per day.
- * Returns [] when there is no data — caller renders the empty state.
  */
 export async function fetchDieselWeek(): Promise<DieselDay[]> {
   const since = new Date();
   since.setDate(since.getDate() - 6);
   since.setHours(0, 0, 0, 0);
 
-  const { data: facilities, error: fErr } = await supabase
-    .from("facilities")
-    .select("id")
-    .eq("client_id", ENTERPRISE_CLIENT_ID);
-  if (fErr) throw fErr;
-  const ids = (facilities ?? []).map((f: { id: string }) => f.id);
+  const { data: branches, error: bErr } = await supabase
+    .from("branches")
+    .select("id");
+  if (bErr) throw bErr;
+  const ids = (branches ?? []).map((b: { id: string }) => b.id);
   if (ids.length === 0) return [];
 
   const { data, error } = await supabase
-    .from("power_logs")
+    .from("energy_metrics")
     .select("logged_at, diesel_saved_naira")
-    .in("facility_id", ids)
+    .in("branch_id", ids)
     .gte("logged_at", since.toISOString())
     .order("logged_at", { ascending: true });
   if (error) throw error;
