@@ -139,10 +139,9 @@ function LoginPage() {
           <AnimatePresence mode="wait" initial={false} custom={direction}>
             <motion.div
               key={mode}
-              custom={direction}
-              initial={(d: 1 | -1) => ({ x: 60 * d, opacity: 0, scale: 0.97 })}
+              initial={{ x: 60 * direction, opacity: 0, scale: 0.97 }}
               animate={{ x: 0, opacity: 1, scale: 1 }}
-              exit={(d: 1 | -1) => ({ x: -60 * d, opacity: 0, scale: 0.97 })}
+              exit={{ x: -60 * direction, opacity: 0, scale: 0.97 }}
               transition={{ type: "spring", stiffness: 120, damping: 14 }}
             >
               <h1 className="text-2xl font-semibold tracking-tight">
