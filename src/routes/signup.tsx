@@ -124,6 +124,7 @@ function SignUpPage() {
     try {
       if (!fullName.trim()) throw new Error("Please enter your full name");
       if (!passwordOk) throw new Error("Password is too weak. Strengthen it to continue.");
+      if (!passwordsMatch) throw new Error("Passwords do not match.");
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
