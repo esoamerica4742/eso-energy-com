@@ -687,9 +687,10 @@ function OnboardingWizard() {
 
       <div className="relative w-full max-w-3xl">
         <div className="mb-6 text-center">
-          <p className="eyebrow">EsoEnergy Systems · Provisioning</p>
-          <h1 className="mt-1 text-3xl md:text-[34px] font-semibold tracking-tight">
-            <span className="shimmer-text">Welcome to your sovereign mesh</span>
+          <EsoLogo size="lg" className="mx-auto" />
+          <p className="eyebrow mt-3">EsoEnergy Systems · Provisioning</p>
+          <h1 className="mt-2 text-3xl md:text-[34px] font-semibold tracking-tight">
+            <span className="shimmer-text">Welcome to EsoEnergy Fleet Command</span>
           </h1>
         </div>
 
