@@ -8,8 +8,8 @@ export const Route = createFileRoute("/signup")({
   component: SignUpPage,
   head: () => ({
     meta: [
-      { title: "Create account · AURA Enterprise" },
-      { name: "description", content: "Provision a new operator on the AURA Enterprise command deck." },
+      { title: "Create account · EsoEnergy Systems" },
+      { name: "description", content: "Provision a new operator on the EsoEnergy Systems command deck." },
     ],
   }),
 });

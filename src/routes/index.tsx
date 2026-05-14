@@ -21,7 +21,7 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "AURA Enterprise · Sovereign Energy Orchestration" },
+      { title: "EsoEnergy Systems · Sovereign Energy Orchestration" },
       { name: "description", content: "Hardware-agnostic Energy Management System for elite African corporations, premium banking fleets, and luxury estates." },
     ],
   }),
@@ -163,7 +163,7 @@ function Index() {
 
         {/* Footer */}
         <footer className="mt-10 pt-6 border-t border-border flex flex-wrap items-center justify-between gap-2 text-[11px] text-silver">
-          <p className="tracking-[0.22em] uppercase">AURA Enterprise · v4.2 · Build 2026.05.14</p>
+          <p className="tracking-[0.22em] uppercase">EsoEnergy Systems · v4.2 · Build 2026.05.14</p>
           <p className="font-mono">PoP · Lagos · Frankfurt · Johannesburg · Encrypted Mesh</p>
         </footer>
       </main>

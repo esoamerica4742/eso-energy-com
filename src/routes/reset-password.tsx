@@ -7,8 +7,8 @@ export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
   head: () => ({
     meta: [
-      { title: "Reset password · AURA Enterprise" },
-      { name: "description", content: "Set a new password for your AURA Enterprise account." },
+      { title: "Reset password · EsoEnergy Systems" },
+      { name: "description", content: "Set a new password for your EsoEnergy Systems account." },
     ],
   }),
 });

@@ -7,8 +7,8 @@ export const Route = createFileRoute("/forgot-password")({
   component: ForgotPasswordPage,
   head: () => ({
     meta: [
-      { title: "Forgot password · AURA Enterprise" },
-      { name: "description", content: "Recover access to your AURA Enterprise command deck." },
+      { title: "Forgot password · EsoEnergy Systems" },
+      { name: "description", content: "Recover access to your EsoEnergy Systems command deck." },
     ],
   }),
 });

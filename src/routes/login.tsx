@@ -10,8 +10,8 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
   head: () => ({
     meta: [
-      { title: "Sign in · AURA Enterprise" },
-      { name: "description", content: "Sovereign access to the AURA Enterprise command deck." },
+      { title: "Sign in · EsoEnergy Systems" },
+      { name: "description", content: "Sovereign access to the EsoEnergy Systems command deck." },
     ],
   }),
 });
