@@ -1,20 +1,6 @@
 import { ChevronDown, LogOut } from "lucide-react";
 import { triggerLogout, useLogoutActive } from "@/lib/logout-bus";
-
-function Logo() {
-  return (
-    <svg viewBox="0 0 32 32" className="h-7 w-7">
-      <defs>
-        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="oklch(0.92 0.02 255)" />
-          <stop offset="100%" stopColor="oklch(0.62 0.04 255)" />
-        </linearGradient>
-      </defs>
-      <path d="M16 3 L28 27 H22 L16 14 L10 27 H4 Z" fill="url(#lg)" />
-      <circle cx="16" cy="22" r="2.4" fill="oklch(0.78 0.13 86)" style={{ filter: "drop-shadow(0 0 4px oklch(0.78 0.13 86))" }} />
-    </svg>
-  );
-}
+import { EsoLogo } from "@/components/aura/EsoLogo";
 
 export function TopHeader() {
   const loggingOut = useLogoutActive();
