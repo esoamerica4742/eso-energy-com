@@ -7,6 +7,7 @@ import { DieselOffset } from "@/components/aura/DieselOffset";
 import { DieselBurden } from "@/components/aura/DieselBurden";
 import { FleetCommand } from "@/components/aura/FleetCommand";
 import { FleetCommandView } from "@/components/aura/FleetCommandView";
+import { BatteryLifespanGuard } from "@/components/aura/BatteryLifespanGuard";
 import { DevSeeder } from "@/components/aura/DevSeeder";
 import { useRealtimeTelemetry } from "@/hooks/useRealtimeTelemetry";
 import { useAuth } from "@/hooks/useAuth";
