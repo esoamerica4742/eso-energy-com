@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { ShieldCheck, Thermometer, AlertTriangle, Check, Activity } from "lucide-react";
+import { ShieldCheck, Thermometer, AlertTriangle, Check, Activity, Siren } from "lucide-react";
+import { useSim } from "@/lib/sim-store";
 
-const HEALTH = 94;
+const HEALTH_NORMAL = 94;
+const HEALTH_STRESSED = 71;
 const YEARS_REMAINING = 8;
 
 function HealthRing({ value }: { value: number }) {
