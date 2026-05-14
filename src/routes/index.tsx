@@ -194,12 +194,12 @@ function RibbonSkeleton() {
           key={i}
           className={`glass-card p-6 md:p-7 lg:col-span-${span} h-[220px] relative overflow-hidden`}
         >
-          <div className="h-3 w-40 rounded-full bg-[oklch(1_0_0_/_0.06)] animate-pulse" />
-          <div className="mt-4 h-10 w-56 rounded-md bg-[oklch(1_0_0_/_0.06)] animate-pulse" />
-          <div className="mt-6 h-2 w-full rounded-full bg-[oklch(1_0_0_/_0.06)] animate-pulse" />
+          <div className="h-3 w-40 shimmer-block" />
+          <div className="mt-4 h-10 w-56 shimmer-block" />
+          <div className="mt-6 h-2 w-full shimmer-block" />
           <div className="mt-6 grid grid-cols-3 gap-3">
             {[0, 1, 2].map((j) => (
-              <div key={j} className="h-14 rounded-xl bg-[oklch(1_0_0_/_0.05)] animate-pulse" />
+              <div key={j} className="h-14 shimmer-block" />
             ))}
           </div>
         </div>
