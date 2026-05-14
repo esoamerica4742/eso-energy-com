@@ -1,5 +1,5 @@
 import { ChevronDown, LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { triggerLogout } from "@/lib/logout-bus";
 
 function Logo() {
   return (
