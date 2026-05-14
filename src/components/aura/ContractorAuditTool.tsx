@@ -9,7 +9,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { AlertTriangle, ClipboardCheck, Wrench } from "lucide-react";
+import { AlertTriangle, ClipboardCheck, Wrench, Zap } from "lucide-react";
+import { useSim } from "@/lib/sim-store";
 
 type Point = { hour: string; h: number; expected: number; actual: number };
 
