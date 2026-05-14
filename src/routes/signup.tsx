@@ -236,6 +236,47 @@ function SignUpPage() {
             </p>
           )}
 
+          <div className="space-y-2.5 pt-1">
+            <Consent
+              id="accept-terms"
+              checked={acceptedTerms}
+              onChange={setAcceptedTerms}
+              label={
+                <>
+                  I agree to the{" "}
+                  <a
+                    href="/terms"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[oklch(0.85_0.16_165)] underline-offset-2 hover:underline"
+                  >
+                    Terms of Service
+                  </a>
+                  .
+                </>
+              }
+            />
+            <Consent
+              id="accept-privacy"
+              checked={acceptedPrivacy}
+              onChange={setAcceptedPrivacy}
+              label={
+                <>
+                  I have read the{" "}
+                  <a
+                    href="/privacy"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[oklch(0.85_0.16_165)] underline-offset-2 hover:underline"
+                  >
+                    Privacy Policy
+                  </a>
+                  .
+                </>
+              }
+            />
+          </div>
+
           {err && (
             <p className="text-[12px] text-[oklch(0.85_0.18_25)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_25_/_0.18)]">
               {err}
