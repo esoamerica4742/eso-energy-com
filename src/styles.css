@@ -51,70 +51,70 @@
 :root {
   --radius: 0.625rem;
 
-  /* Canvas — pure obsidian */
-  --background: oklch(0.13 0.003 265);          /* #080808-ish */
-  --foreground: oklch(1 0 0);                    /* pure white headlines */
+  /* Canvas — Deep Obsidian #0B0F19 → Rich Slate #121827 */
+  --background: oklch(0.135 0.020 270);          /* #0B0F19 */
+  --foreground: oklch(1 0 0);
 
-  /* Surface layers — each a touch lighter */
-  --surface-1: oklch(0.16 0.005 265);            /* #111118 */
-  --surface-2: oklch(0.19 0.006 265);            /* #16161F */
-  --surface-3: oklch(0.22 0.008 265);            /* #1C1C27 */
+  /* Surface layers — slate steps */
+  --surface-1: oklch(0.180 0.025 265);            /* #121827 */
+  --surface-2: oklch(0.215 0.028 265);            /* #1A2138 */
+  --surface-3: oklch(0.250 0.030 265);            /* #232C49 */
 
-  --card: oklch(0.16 0.005 265);
+  --card: oklch(0.180 0.025 265);
   --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.18 0.006 265);
+  --popover: oklch(0.180 0.025 265);
   --popover-foreground: oklch(1 0 0);
 
-  /* Primary — liquid gold */
-  --gold: oklch(0.78 0.13 86);                   /* #C9A84C */
-  --champagne: oklch(0.89 0.07 88);              /* #E8D5A3 */
-  --primary: oklch(0.78 0.13 86);
-  --primary-foreground: oklch(0.13 0.003 265);
+  /* Liquid gold (legacy ribbon accent — used sparingly) */
+  --gold: oklch(0.78 0.13 86);
+  --champagne: oklch(0.89 0.07 88);
 
-  /* Secondary — iridescent indigo → violet */
-  --indigo-iris: oklch(0.62 0.20 282);           /* #6C63FF */
-  --violet-iris: oklch(0.55 0.17 320);           /* #9B59B6 */
+  /* PRIMARY — Electric Indigo #6366F1 */
+  --indigo-iris: oklch(0.62 0.20 277);
+  --violet-iris: oklch(0.55 0.17 320);
+  --primary: oklch(0.62 0.20 277);
+  --primary-foreground: oklch(1 0 0);
 
-  --secondary: oklch(0.20 0.007 265);
+  --secondary: oklch(0.215 0.028 265);
   --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.20 0.007 265);
-  --muted-foreground: oklch(0.55 0.02 280);      /* #606080 */
-  --accent: oklch(0.62 0.20 282);
+  --muted: oklch(0.215 0.028 265);
+  --muted-foreground: oklch(0.62 0.025 270);
+  --accent: oklch(0.62 0.20 277);                 /* Electric Indigo accent */
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(1 0 0);
 
-  /* Hairline borders */
-  --border: oklch(1 0 0 / 0.06);
-  --input: oklch(1 0 0 / 0.08);
-  --ring: oklch(0.62 0.20 282 / 0.55);
+  /* Hairline micro-borders */
+  --border: oklch(1 0 0 / 0.05);
+  --input: oklch(1 0 0 / 0.07);
+  --ring: oklch(0.62 0.20 277 / 0.55);
 
-  /* Legacy aliases — kept for existing components */
+  /* Legacy aliases */
   --solar: oklch(0.78 0.13 86);
-  --emerald-mint: oklch(0.74 0.14 165);
-  --storage: oklch(0.62 0.20 282);
+  --emerald-mint: oklch(0.74 0.17 165);            /* Emerald Glow #10B981-ish */
+  --storage: oklch(0.62 0.20 277);
   --alert: oklch(0.62 0.22 25);
-  --silver: oklch(0.72 0.015 280);               /* #A0A0B8 body */
+  --silver: oklch(0.74 0.020 270);
 
   /* Premium gradients */
-  --gradient-obsidian: linear-gradient(160deg, oklch(0.18 0.006 265) 0%, oklch(0.13 0.003 265) 100%);
+  --gradient-obsidian: linear-gradient(160deg, oklch(0.215 0.028 265) 0%, oklch(0.135 0.020 270) 100%);
   --gradient-gold: linear-gradient(135deg, oklch(0.78 0.13 86), oklch(0.89 0.07 88));
-  --gradient-iris: linear-gradient(135deg, oklch(0.62 0.20 282), oklch(0.55 0.17 320));
+  --gradient-iris: linear-gradient(135deg, oklch(0.62 0.20 277), oklch(0.55 0.17 320));
   --gradient-solar: linear-gradient(135deg, oklch(0.78 0.13 86), oklch(0.89 0.07 88));
-  --gradient-emerald: linear-gradient(135deg, oklch(0.74 0.14 165), oklch(0.60 0.14 175));
-  --gradient-storage: linear-gradient(135deg, oklch(0.62 0.20 282), oklch(0.55 0.17 320));
+  --gradient-emerald: linear-gradient(135deg, oklch(0.74 0.17 165), oklch(0.60 0.14 175));
+  --gradient-storage: linear-gradient(135deg, oklch(0.62 0.20 277), oklch(0.55 0.17 320));
 
   --shadow-elevated:
-    inset 0 1px 0 0 oklch(1 0 0 / 0.08),
-    0 8px 40px oklch(0 0 0 / 0.6);
+    inset 0 1px 0 0 oklch(1 0 0 / 0.06),
+    0 12px 48px oklch(0 0 0 / 0.65);
   --shadow-floating:
-    inset 0 1px 0 0 oklch(1 0 0 / 0.10),
-    0 24px 80px -20px oklch(0 0 0 / 0.75);
-  --glow-gold: 0 0 40px oklch(0.78 0.13 86 / 0.35);
-  --glow-iris: 0 0 32px oklch(0.62 0.20 282 / 0.40);
-  --glow-solar: 0 0 40px oklch(0.78 0.13 86 / 0.35);
-  --glow-emerald: 0 0 28px oklch(0.74 0.14 165 / 0.30);
-  --glow-storage: 0 0 28px oklch(0.62 0.20 282 / 0.40);
+    inset 0 1px 0 0 oklch(1 0 0 / 0.08),
+    0 28px 80px -20px oklch(0 0 0 / 0.8);
+  --glow-gold: 0 0 40px oklch(0.78 0.13 86 / 0.30);
+  --glow-iris: 0 0 36px oklch(0.62 0.20 277 / 0.45);
+  --glow-solar: 0 0 40px oklch(0.78 0.13 86 / 0.30);
+  --glow-emerald: 0 0 28px oklch(0.74 0.17 165 / 0.35);
+  --glow-storage: 0 0 28px oklch(0.62 0.20 277 / 0.45);
   --glow-alert: 0 0 24px oklch(0.62 0.22 25 / 0.45);
 }
 
