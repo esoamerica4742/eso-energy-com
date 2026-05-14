@@ -125,7 +125,7 @@ export function DevSeeder() {
     setSeeding(true);
     setError(null);
     try {
-      const ids = await ensureFacilities();
+      const ids = await ensureCompanyAndBranches();
       const rows = [];
       const now = new Date();
       for (let d = 6; d >= 0; d--) {
@@ -138,7 +138,7 @@ export function DevSeeder() {
           }
         }
       }
-      const { error: insErr } = await supabase.from("power_logs").insert(rows);
+      const { error: insErr } = await supabase.from("energy_metrics").insert(rows);
       if (insErr) throw insErr;
       setSeedFlash(true);
       window.setTimeout(() => setSeedFlash(false), 1400);
@@ -150,15 +150,15 @@ export function DevSeeder() {
   };
 
   // ---------------------------------------------------------------------------
-  // Live stream — INSERT a row every TICK_MS into a random facility.
+  // Live stream — INSERT a row every TICK_MS into a random branch.
   // ---------------------------------------------------------------------------
   const startStream = async () => {
     if (streaming) return;
     setError(null);
     try {
-      facilityIdsRef.current = await ensureFacilities();
+      facilityIdsRef.current = await ensureCompanyAndBranches();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Could not provision facilities");
+      setError(e instanceof Error ? e.message : "Could not provision branches");
       return;
     }
     setStreaming(true);
@@ -173,32 +173,20 @@ export function DevSeeder() {
       const ids = facilityIdsRef.current;
       const fid = ids[Math.floor(Math.random() * ids.length)];
       try {
-        await supabase.from("power_logs").insert(powerSample(fid, new Date()));
+        await supabase.from("energy_metrics").insert(powerSample(fid, new Date()));
       } catch {
         // Realtime subscription will fall behind quietly; surface in error chip.
       }
 
-      // Random alert ~5% per tick.
+      // Local-only alert banner (~5% per tick) — security_alerts table not in B2B schema.
       if (Math.random() < 0.05) {
         const def = ALERT_TYPES[Math.floor(Math.random() * ALERT_TYPES.length)];
         const liters = Math.round(8 + Math.random() * 22);
         const message = def.msg(liters);
-        const alertRow = {
-          facility_id: fid,
-          alert_type: def.type,
-          message,
-          severity: def.severity,
-          is_resolved: false,
-        };
-        try {
-          await supabase.from("security_alerts").insert(alertRow);
-          if (def.severity === "critical") {
-            const banner = { id: `${now}`, site: "AURA Mesh", code: def.type, message };
-            setLatestAlert(banner);
-            window.setTimeout(() => setLatestAlert((a) => (a?.id === banner.id ? null : a)), 8000);
-          }
-        } catch {
-          // ignore
+        if (def.severity === "critical") {
+          const banner = { id: `${now}`, site: "AURA Mesh", code: def.type, message };
+          setLatestAlert(banner);
+          window.setTimeout(() => setLatestAlert((a) => (a?.id === banner.id ? null : a)), 8000);
         }
       }
 
