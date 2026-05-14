@@ -121,7 +121,7 @@ function SignUpPage() {
     setInfo(null);
     try {
       if (!fullName.trim()) throw new Error("Please enter your full name");
-      if (password.length < 8) throw new Error("Password must be at least 8 characters");
+      if (!passwordOk) throw new Error("Password is too weak. Strengthen it to continue.");
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
