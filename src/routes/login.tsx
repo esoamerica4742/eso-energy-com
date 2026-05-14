@@ -5,6 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Lock, Mail, User } from "lucide-react";
 import { EsoLogo } from "@/components/aura/EsoLogo";
+import {
+  SignupSuccessCard,
+  AuthenticatingOverlay,
+} from "@/components/aura/AuthOverlays";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
