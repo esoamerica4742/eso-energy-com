@@ -10,6 +10,7 @@ import { FleetCommandView } from "@/components/aura/FleetCommandView";
 import { BatteryLifespanGuard } from "@/components/aura/BatteryLifespanGuard";
 import { ContractorAuditTool } from "@/components/aura/ContractorAuditTool";
 import { ExecutiveRibbons } from "@/components/aura/ExecutiveRibbons";
+import { ExecutiveReporting } from "@/components/aura/ExecutiveReporting";
 import { ThermalLoadTracker } from "@/components/aura/ThermalLoadTracker";
 import { DevSeeder } from "@/components/aura/DevSeeder";
 import { useRealtimeTelemetry } from "@/hooks/useRealtimeTelemetry";
@@ -126,6 +127,11 @@ function Index() {
         <div key={`ca-${selected?.id ?? "all"}`}>
           <ContractorAuditTool />
         </div>
+
+        <Divider />
+
+        {/* 5 · Executive Reporting & Diesel Fraud Audit Hub */}
+        <ExecutiveReporting />
 
         <Divider />
 
