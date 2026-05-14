@@ -38,49 +38,88 @@
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
+/* ============================================================
+   Luxury tech theme — Linear / Stripe inspired
+   Single accent (refined indigo), near-black canvas,
+   ultra-thin translucent borders, soft ambient gradients.
+   ============================================================ */
 :root {
-  --radius: 0.875rem;
-  /* Rich black-slate base #030712 */
-  --background: oklch(0.143 0.018 265);
-  --foreground: oklch(0.96 0.01 250);
-  /* Obsidian glass #0b0f19 */
-  --card: oklch(0.19 0.022 265);
-  --card-foreground: oklch(0.96 0.01 250);
-  --popover: oklch(0.19 0.022 265);
-  --popover-foreground: oklch(0.96 0.01 250);
-  --primary: oklch(0.78 0.16 75);
-  --primary-foreground: oklch(0.15 0.02 265);
-  --secondary: oklch(0.24 0.025 265);
-  --secondary-foreground: oklch(0.92 0.01 250);
-  --muted: oklch(0.22 0.022 265);
-  /* Metallic silver #94a3b8 */
-  --muted-foreground: oklch(0.71 0.025 255);
-  --accent: oklch(0.26 0.03 265);
-  --accent-foreground: oklch(0.96 0.01 250);
-  --destructive: oklch(0.65 0.24 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  /* Razor-thin border #1e293b */
-  --border: oklch(0.30 0.03 265);
-  --input: oklch(0.28 0.025 265);
-  --ring: oklch(0.78 0.16 75);
+  --radius: 0.75rem;
 
-  /* Brand accents */
-  --solar: oklch(0.78 0.17 75);          /* #f59e0b amber */
-  --emerald-mint: oklch(0.74 0.17 165);  /* #10b981 */
-  --storage: oklch(0.74 0.13 215);       /* #06b6d4 cyan */
-  --alert: oklch(0.66 0.24 25);          /* #ef4444 */
-  --silver: oklch(0.74 0.025 255);       /* #94a3b8 */
+  /* Canvas — near-black with a faint cool cast */
+  --background: oklch(0.16 0.012 265);
+  --foreground: oklch(0.97 0.005 250);
 
-  /* Gradients & shadows */
-  --gradient-obsidian: linear-gradient(160deg, oklch(0.20 0.025 265) 0%, oklch(0.16 0.02 265) 100%);
-  --gradient-solar: linear-gradient(135deg, oklch(0.82 0.17 75), oklch(0.68 0.18 55));
-  --gradient-emerald: linear-gradient(135deg, oklch(0.78 0.17 165), oklch(0.62 0.16 175));
-  --gradient-storage: linear-gradient(135deg, oklch(0.78 0.13 215), oklch(0.58 0.14 230));
-  --shadow-elevated: 0 30px 60px -20px oklch(0 0 0 / 0.6), 0 0 0 1px oklch(0.30 0.03 265 / 0.5) inset;
-  --glow-solar: 0 0 28px oklch(0.78 0.17 75 / 0.45);
-  --glow-emerald: 0 0 28px oklch(0.74 0.17 165 / 0.4);
-  --glow-storage: 0 0 28px oklch(0.74 0.13 215 / 0.45);
-  --glow-alert: 0 0 24px oklch(0.66 0.24 25 / 0.55);
+  /* Surfaces — barely lighter than canvas, layered with translucency */
+  --card: oklch(0.20 0.012 265);
+  --card-foreground: oklch(0.97 0.005 250);
+  --popover: oklch(0.19 0.012 265);
+  --popover-foreground: oklch(0.97 0.005 250);
+
+  /* Single luxury accent — refined indigo (Linear-esque) */
+  --primary: oklch(0.66 0.18 274);
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary: oklch(0.23 0.012 265);
+  --secondary-foreground: oklch(0.95 0.005 250);
+  --muted: oklch(0.22 0.010 265);
+  --muted-foreground: oklch(0.66 0.015 260);
+  --accent: oklch(0.25 0.015 270);
+  --accent-foreground: oklch(0.97 0.005 250);
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  /* Ultra-thin, high-transparency borders */
+  --border: oklch(0.98 0.005 250 / 0.08);
+  --input: oklch(0.98 0.005 250 / 0.10);
+  --ring: oklch(0.66 0.18 274 / 0.6);
+
+  /* Legacy brand accents — re-tuned to align with single accent */
+  --solar: oklch(0.66 0.18 274);
+  --emerald-mint: oklch(0.74 0.14 165);
+  --storage: oklch(0.72 0.12 230);
+  --alert: oklch(0.62 0.22 25);
+  --silver: oklch(0.66 0.012 260);
+
+  /* Gradients & shadows — soft, ambient, premium */
+  --gradient-obsidian: linear-gradient(160deg, oklch(0.21 0.012 265) 0%, oklch(0.16 0.012 265) 100%);
+  --gradient-solar: linear-gradient(135deg, oklch(0.72 0.18 274), oklch(0.58 0.20 280));
+  --gradient-emerald: linear-gradient(135deg, oklch(0.74 0.14 165), oklch(0.60 0.14 175));
+  --gradient-storage: linear-gradient(135deg, oklch(0.74 0.12 230), oklch(0.58 0.14 245));
+  --shadow-elevated:
+    0 1px 0 0 oklch(1 0 0 / 0.04) inset,
+    0 0 0 1px oklch(1 0 0 / 0.04) inset,
+    0 30px 80px -30px oklch(0 0 0 / 0.7);
+  --glow-solar: 0 0 40px oklch(0.66 0.18 274 / 0.35);
+  --glow-emerald: 0 0 28px oklch(0.74 0.14 165 / 0.30);
+  --glow-storage: 0 0 28px oklch(0.72 0.12 230 / 0.35);
+  --glow-alert: 0 0 24px oklch(0.62 0.22 25 / 0.45);
+}
+
+/* Light mode — Stripe-like clean white surfaces */
+.light {
+  --background: oklch(0.995 0.002 250);
+  --foreground: oklch(0.18 0.012 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.012 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.012 265);
+  --primary: oklch(0.55 0.20 275);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.97 0.005 250);
+  --secondary-foreground: oklch(0.20 0.012 265);
+  --muted: oklch(0.97 0.005 250);
+  --muted-foreground: oklch(0.48 0.012 260);
+  --accent: oklch(0.96 0.008 270);
+  --accent-foreground: oklch(0.20 0.012 265);
+  --border: oklch(0.18 0.012 265 / 0.08);
+  --input: oklch(0.18 0.012 265 / 0.12);
+  --ring: oklch(0.55 0.20 275 / 0.5);
+  --silver: oklch(0.48 0.012 260);
+  --shadow-elevated:
+    0 1px 0 0 oklch(1 0 0 / 0.6) inset,
+    0 0 0 1px oklch(0.18 0.012 265 / 0.06) inset,
+    0 20px 60px -25px oklch(0.18 0.012 265 / 0.18);
 }
 
 @layer base {
@@ -88,31 +127,43 @@
   html, body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: var(--font-display);
-    font-feature-settings: "ss01", "cv11", "tnum";
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11", "tnum", "calt";
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.011em;
   }
   body {
     background-image:
-      radial-gradient(1200px 600px at 20% -10%, oklch(0.30 0.05 75 / 0.10), transparent 60%),
-      radial-gradient(900px 500px at 90% 10%, oklch(0.30 0.06 215 / 0.10), transparent 60%),
-      radial-gradient(800px 400px at 50% 110%, oklch(0.30 0.06 165 / 0.08), transparent 60%);
+      radial-gradient(1100px 700px at 15% -15%, oklch(0.66 0.18 274 / 0.10), transparent 60%),
+      radial-gradient(900px 600px at 95% 5%, oklch(0.66 0.18 274 / 0.06), transparent 60%),
+      radial-gradient(800px 500px at 50% 120%, oklch(0.66 0.18 274 / 0.05), transparent 60%);
     background-attachment: fixed;
   }
+  h1, h2, h3, h4 { letter-spacing: -0.022em; }
 }
 
 @layer components {
   .glass-card {
-    background: linear-gradient(160deg, oklch(0.20 0.025 265 / 0.85), oklch(0.16 0.02 265 / 0.75));
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
-    border: 1px solid oklch(0.30 0.03 265 / 0.7);
+    background: linear-gradient(180deg, oklch(1 0 0 / 0.03), oklch(1 0 0 / 0.01));
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid oklch(1 0 0 / 0.06);
     box-shadow: var(--shadow-elevated);
     border-radius: var(--radius);
   }
-  .hairline { border: 1px solid oklch(0.30 0.03 265 / 0.8); }
+  .light .glass-card {
+    background: linear-gradient(180deg, oklch(1 0 0 / 0.9), oklch(1 0 0 / 0.7));
+    border: 1px solid oklch(0.18 0.012 265 / 0.06);
+  }
+  .hairline { border: 1px solid oklch(1 0 0 / 0.06); }
+  .light .hairline { border: 1px solid oklch(0.18 0.012 265 / 0.08); }
   .text-silver { color: var(--silver); }
   .num { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+
+  /* Generous section spacing for premium feel */
+  .section-pad { padding-block: clamp(3rem, 6vw, 6rem); }
+  .stack-lg > * + * { margin-top: clamp(1.5rem, 3vw, 2.5rem); }
 }
 
 /* Energy flow particle animation */
