@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 /* ============== Ambient particles ============== */
 function Particles() {
+  const reduce = useReducedMotion();
+  if (reduce) return null;
   // deterministic seeds
   const dots = Array.from({ length: 18 }).map((_, i) => ({
     id: i,
@@ -14,7 +16,7 @@ function Particles() {
     size: 1 + (i % 3),
   }));
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
       {dots.map((d) => (
         <motion.span
           key={d.id}
