@@ -140,86 +140,102 @@ function LoginPage() {
         </div>
 
         <div className="relative min-h-[420px]">
-          <AnimatePresence mode="wait" initial={false} custom={direction}>
-            <motion.div
-              key={mode}
-              initial={{ x: 60 * direction, opacity: 0, scale: 0.97 }}
-              animate={{ x: 0, opacity: 1, scale: 1 }}
-              exit={{ x: -60 * direction, opacity: 0, scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 120, damping: 14 }}
-            >
-              <h1 className="text-2xl font-semibold tracking-tight">
-                {mode === "signin" ? "Sign in to your command deck" : "Provision a new operator"}
-              </h1>
-              <p className="mt-1.5 text-[12px] tracking-wide text-silver/80">
-                {mode === "signin"
-                  ? "AES-256 session · Verified bearer token · Africa premium tier."
-                  : "Sovereign access in under 30 seconds. Encrypted by default."}
-              </p>
+          <motion.div
+            animate={
+              phase === "signup-success"
+                ? { opacity: 0, filter: "blur(12px)", y: -10, scale: 0.98 }
+                : { opacity: 1, filter: "blur(0px)", y: 0, scale: 1 }
+            }
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            style={{ pointerEvents: phase === "signup-success" ? "none" : "auto" }}
+          >
+            <AnimatePresence mode="wait" initial={false} custom={direction}>
+              <motion.div
+                key={mode}
+                initial={{ x: 60 * direction, opacity: 0, scale: 0.97 }}
+                animate={{ x: 0, opacity: 1, scale: 1 }}
+                exit={{ x: -60 * direction, opacity: 0, scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 120, damping: 14 }}
+              >
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  {mode === "signin" ? "Sign in to your command deck" : "Provision a new operator"}
+                </h1>
+                <p className="mt-1.5 text-[12px] tracking-wide text-silver/80">
+                  {mode === "signin"
+                    ? "AES-256 session · Verified bearer token · Africa premium tier."
+                    : "Sovereign access in under 30 seconds. Encrypted by default."}
+                </p>
 
-              <form onSubmit={submit} className="mt-7 space-y-4">
-                <StaggerList key={mode}>
-                  {mode === "signup" && (
+                <form onSubmit={submit} className="mt-7 space-y-4">
+                  <StaggerList key={mode}>
+                    {mode === "signup" && (
+                      <Field
+                        id="fullName"
+                        type="text"
+                        label="Full Name"
+                        value={fullName}
+                        onChange={setFullName}
+                        autoComplete="name"
+                        icon={<User className="h-3.5 w-3.5 text-silver" />}
+                        placeholder="Ada Lovelace"
+                      />
+                    )}
                     <Field
-                      id="fullName"
-                      type="text"
-                      label="Full Name"
-                      value={fullName}
-                      onChange={setFullName}
-                      autoComplete="name"
-                      icon={<User className="h-3.5 w-3.5 text-silver" />}
-                      placeholder="Ada Lovelace"
+                      id="email"
+                      type="email"
+                      label="Email"
+                      value={email}
+                      onChange={setEmail}
+                      autoComplete="email"
+                      icon={<Mail className="h-3.5 w-3.5 text-silver" />}
+                      placeholder="operator@bank.ng"
                     />
-                  )}
-                  <Field
-                    id="email"
-                    type="email"
-                    label="Email"
-                    value={email}
-                    onChange={setEmail}
-                    autoComplete="email"
-                    icon={<Mail className="h-3.5 w-3.5 text-silver" />}
-                    placeholder="operator@bank.ng"
-                  />
-                  <Field
-                    id="password"
-                    type="password"
-                    label="Password"
-                    value={password}
-                    onChange={setPassword}
-                    autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                    icon={<Lock className="h-3.5 w-3.5 text-silver" />}
-                    placeholder={mode === "signin" ? "••••••••••" : "At least 8 characters"}
-                  />
+                    <Field
+                      id="password"
+                      type="password"
+                      label="Password"
+                      value={password}
+                      onChange={setPassword}
+                      autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                      icon={<Lock className="h-3.5 w-3.5 text-silver" />}
+                      placeholder={mode === "signin" ? "••••••••••" : "At least 8 characters"}
+                    />
 
-                  {err && (
-                    <p className="text-[12px] text-[oklch(0.85_0.18_25)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_25_/_0.18)]">
-                      {err}
-                    </p>
-                  )}
-                  {info && (
-                    <p className="text-[12px] text-[var(--gold)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_165_/_0.18)]">
-                      {info}
-                    </p>
-                  )}
+                    {err && (
+                      <p className="text-[12px] text-[oklch(0.85_0.18_25)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_25_/_0.18)]">
+                        {err}
+                      </p>
+                    )}
+                    {info && (
+                      <p className="text-[12px] text-[var(--gold)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_165_/_0.18)]">
+                        {info}
+                      </p>
+                    )}
 
-                  <ShimmerButton busy={busy} label={
-                    busy
-                      ? mode === "signin" ? "Initializing…" : "Provisioning…"
-                      : mode === "signin" ? "Initialize Command Flow" : "Submit Access Setup"
-                  } />
+                    <ShimmerButton busy={busy} label={
+                      busy
+                        ? mode === "signin" ? "Initializing…" : "Provisioning…"
+                        : mode === "signin" ? "Initialize Command Flow" : "Submit Access Setup"
+                    } />
 
-                  {mode === "signin" && (
-                    <Link
-                      to="/forgot-password"
-                      className="block w-full text-center text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[var(--gold)] transition-colors"
-                    >
-                      Forgot password?
-                    </Link>
-                  )}
-                </StaggerList>
-              </form>
-            </motion.div>
+                    {mode === "signin" && (
+                      <Link
+                        to="/forgot-password"
+                        className="block w-full text-center text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[var(--gold)] transition-colors"
+                      >
+                        Forgot password?
+                      </Link>
+                    )}
+                  </StaggerList>
+                </form>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+
+          <AnimatePresence>
+            {phase === "signup-success" && (
+              <SignupSuccessCard onReturn={returnToDeck} />
+            )}
           </AnimatePresence>
         </div>
 
