@@ -469,16 +469,58 @@ function StepSync({
             ))}
           </select>
         </Field>
-        <Field label="Datalogger Serial / Dongle ID" htmlFor="serial" hint="Found on the Wi-Fi dongle sticker">
-          <input
-            id="serial"
-            className={inputClass}
-            placeholder="DGL-2026-A8F33C"
-            value={values.serial}
-            onChange={(e) => setValues({ ...values, serial: e.target.value })}
-          />
-        </Field>
       </div>
+
+      <AnimatePresence initial={false}>
+        {values.brand && (
+          <motion.div
+            key="creds"
+            initial={{ opacity: 0, y: 12, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -8, height: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              <Field label={`${values.brand} Account Email / Username`} htmlFor="accountEmail">
+                <input
+                  id="accountEmail"
+                  className={inputClass}
+                  placeholder="operator@enterprise.com"
+                  value={values.accountEmail}
+                  onChange={(e) => setValues({ ...values, accountEmail: e.target.value })}
+                  autoComplete="off"
+                />
+              </Field>
+              <Field label="Account Password" htmlFor="accountPassword">
+                <input
+                  id="accountPassword"
+                  type="password"
+                  className={inputClass}
+                  placeholder="••••••••"
+                  value={values.accountPassword}
+                  onChange={(e) => setValues({ ...values, accountPassword: e.target.value })}
+                  autoComplete="new-password"
+                />
+              </Field>
+            </div>
+            <div
+              className="mt-4 flex items-start gap-2.5 rounded-lg hairline px-3.5 py-3"
+              style={{
+                background:
+                  "linear-gradient(135deg, oklch(0.30 0.10 165 / 0.18), oklch(0.18 0.018 265 / 0.4))",
+              }}
+            >
+              <span className="text-sm leading-none mt-0.5">🔒</span>
+              <p className="text-[10.5px] leading-relaxed tracking-[0.04em] text-silver/85 font-light">
+                <span className="text-foreground font-medium">Secured with 256-bit Enterprise Encryption.</span>{" "}
+                Your credentials are used solely to establish the initial API token handshake and are
+                <span className="text-foreground"> never stored on our servers</span>.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Sync visual */}
       <div className="flex justify-center pt-4">
