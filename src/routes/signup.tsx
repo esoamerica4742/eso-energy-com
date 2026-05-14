@@ -107,6 +107,8 @@ function SignUpPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
 
   useEffect(() => {
     if (!loading && session) navigate({ to: "/" });
@@ -125,6 +127,8 @@ function SignUpPage() {
       if (!fullName.trim()) throw new Error("Please enter your full name");
       if (!passwordOk) throw new Error("Password is too weak. Strengthen it to continue.");
       if (!passwordsMatch) throw new Error("Passwords do not match.");
+      if (!acceptedTerms || !acceptedPrivacy)
+        throw new Error("You must accept the Terms of Service and Privacy Policy.");
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
@@ -232,6 +236,47 @@ function SignUpPage() {
             </p>
           )}
 
+          <div className="space-y-2.5 pt-1">
+            <Consent
+              id="accept-terms"
+              checked={acceptedTerms}
+              onChange={setAcceptedTerms}
+              label={
+                <>
+                  I agree to the{" "}
+                  <a
+                    href="/terms"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[oklch(0.85_0.16_165)] underline-offset-2 hover:underline"
+                  >
+                    Terms of Service
+                  </a>
+                  .
+                </>
+              }
+            />
+            <Consent
+              id="accept-privacy"
+              checked={acceptedPrivacy}
+              onChange={setAcceptedPrivacy}
+              label={
+                <>
+                  I have read the{" "}
+                  <a
+                    href="/privacy"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[oklch(0.85_0.16_165)] underline-offset-2 hover:underline"
+                  >
+                    Privacy Policy
+                  </a>
+                  .
+                </>
+              }
+            />
+          </div>
+
           {err && (
             <p className="text-[12px] text-[oklch(0.85_0.18_25)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_25_/_0.18)]">
               {err}
@@ -245,7 +290,7 @@ function SignUpPage() {
 
           <button
             type="submit"
-            disabled={busy || !passwordOk || !passwordsMatch}
+            disabled={busy || !passwordOk || !passwordsMatch || !acceptedTerms || !acceptedPrivacy}
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase transition-all disabled:opacity-60"
             style={{
               background:
@@ -311,6 +356,50 @@ function Field({
         placeholder={placeholder}
         className="w-full rounded-lg hairline bg-[oklch(0.13_0.02_265_/_0.7)] px-3.5 py-2.5 text-[13px] text-foreground placeholder:text-silver/40 focus:outline-none focus:ring-2 focus:ring-[oklch(0.74_0.17_165_/_0.4)] transition-shadow"
       />
+    </label>
+  );
+}
+
+function Consent({
+  id,
+  checked,
+  onChange,
+  label,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: React.ReactNode;
+}) {
+  return (
+    <label htmlFor={id} className="flex items-start gap-2.5 cursor-pointer select-none">
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="peer sr-only"
+      />
+      <span
+        aria-hidden
+        className="mt-0.5 grid place-items-center h-4 w-4 shrink-0 rounded-[5px] hairline bg-[oklch(0.13_0.02_265_/_0.7)] transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[oklch(0.74_0.17_165_/_0.5)]"
+        style={
+          checked
+            ? {
+                background:
+                  "linear-gradient(135deg, oklch(0.78 0.17 165 / 0.95), oklch(0.62 0.15 195 / 0.95))",
+                boxShadow: "0 0 0 1px oklch(0.74 0.17 165 / 0.7)",
+              }
+            : undefined
+        }
+      >
+        {checked && (
+          <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="oklch(0.10 0.02 265)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 8.5L6.5 12L13 4.5" />
+          </svg>
+        )}
+      </span>
+      <span className="text-[12px] leading-snug text-silver/85">{label}</span>
     </label>
   );
 }
