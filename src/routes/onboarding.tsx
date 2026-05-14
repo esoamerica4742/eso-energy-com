@@ -574,7 +574,7 @@ function StepSync({
         </SecondaryButton>
         <button
           type="button"
-          onClick={onComplete}
+          onClick={() => onComplete("")}
           disabled={syncing}
           className="text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-foreground transition-colors"
         >
