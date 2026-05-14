@@ -130,6 +130,11 @@ function Index() {
 
         <Divider />
 
+        {/* 5 · Executive Reporting & Diesel Fraud Audit Hub */}
+        <ExecutiveReporting />
+
+        <Divider />
+
         {/* Hero Energy Flow */}
         <div>
           <EnergyFlow />
