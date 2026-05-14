@@ -207,6 +207,7 @@ function SignUpPage() {
             icon={<Lock className="h-3.5 w-3.5 text-silver" />}
             placeholder="At least 8 characters"
           />
+          {password.length > 0 && <StrengthMeter strength={strength} />}
 
           {err && (
             <p className="text-[12px] text-[oklch(0.85_0.18_25)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_25_/_0.18)]">
