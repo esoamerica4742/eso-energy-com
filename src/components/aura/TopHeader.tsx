@@ -59,7 +59,7 @@ export function TopHeader() {
           </button>
           <button
             type="button"
-            onClick={() => supabase.auth.signOut()}
+            onClick={() => triggerLogout()}
             aria-label="Sign out"
             className="hairline rounded-full p-2 text-silver hover:text-[oklch(0.85_0.18_25)] hover:bg-[oklch(0.66_0.24_25_/_0.1)] transition-colors"
             style={{ background: "oklch(0.19 0.006 265)" }}
