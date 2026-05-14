@@ -429,6 +429,8 @@ function StepSync({
   }
 
   return (
+    <>
+    <ConnectingModal open={syncing} onComplete={handleConnectionComplete} />
     <form onSubmit={handleSync} className="space-y-5">
       <div>
         <p className="eyebrow">Step 03 · Telemetry</p>
@@ -524,6 +526,7 @@ function StepSync({
         </button>
       </div>
     </form>
+    </>
   );
 }
 
