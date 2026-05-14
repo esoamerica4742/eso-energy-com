@@ -36,8 +36,12 @@ function HealthRing({ value, stressed }: { value: number; stressed: boolean }) {
             <stop offset="100%" stopColor="oklch(0.78 0.13 86)" />
           </linearGradient>
         </defs>
+        {/* Outer hairline track */}
+        <circle cx={size / 2} cy={size / 2} r={r + 6} fill="none" stroke="oklch(1 0 0 / 0.04)" strokeWidth={1} />
         {/* Track */}
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="oklch(1 0 0 / 0.06)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="oklch(1 0 0 / 0.05)" strokeWidth={stroke} />
+        {/* Inner hairline track */}
+        <circle cx={size / 2} cy={size / 2} r={r - 14} fill="none" stroke="oklch(1 0 0 / 0.035)" strokeWidth={1} />
         {/* Progress */}
         <circle
           cx={size / 2}
@@ -49,10 +53,24 @@ function HealthRing({ value, stressed }: { value: number; stressed: boolean }) {
           strokeLinecap="round"
           strokeDasharray={`${dash} ${c - dash}`}
           style={{
-            filter: `drop-shadow(0 0 10px ${ringHue.replace(")", " / 0.6)")})`,
+            filter: `drop-shadow(0 0 12px ${ringHue.replace(")", " / 0.7)")})`,
             transition: "stroke-dasharray 900ms cubic-bezier(0.22, 1, 0.36, 1), stroke 600ms ease",
           }}
         />
+        {/* Sweeping pulse arc */}
+        <g className="gauge-sweep">
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            fill="none"
+            stroke={ringHueLight}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeDasharray={`${c * 0.06} ${c}`}
+            style={{ filter: `drop-shadow(0 0 8px ${ringHueLight})`, opacity: 0.85 }}
+          />
+        </g>
       </svg>
       {/* Center label */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">

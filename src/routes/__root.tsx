@@ -7,6 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import { Toaster } from "sonner";
 
@@ -115,6 +116,25 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // Cursor-tracked spotlight on every .glass-card
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let raf = 0;
+    const onMove = (e: PointerEvent) => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const target = (e.target as Element | null)?.closest?.(".glass-card") as HTMLElement | null;
+        if (!target) return;
+        const r = target.getBoundingClientRect();
+        target.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        target.style.setProperty("--my", `${e.clientY - r.top}px`);
+      });
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
