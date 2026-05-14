@@ -6,38 +6,38 @@ const HEALTH_NORMAL = 94;
 const HEALTH_STRESSED = 71;
 const YEARS_REMAINING = 8;
 
-function HealthRing({ value }: { value: number }) {
+function HealthRing({ value, stressed }: { value: number; stressed: boolean }) {
   const size = 220;
   const stroke = 12;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const dash = (value / 100) * c;
+  const ringHue = stressed ? "oklch(0.78 0.18 25)" : "oklch(0.74 0.17 165)";
+  const ringHueLight = stressed ? "oklch(0.92 0.16 25)" : "oklch(0.88 0.16 165)";
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
       {/* Ambient glow */}
       <div
         className="absolute inset-0 rounded-full"
-        style={{ boxShadow: "0 0 80px oklch(0.74 0.17 165 / 0.35), inset 0 0 40px oklch(0.74 0.17 165 / 0.15)" }}
+        style={{
+          boxShadow: stressed
+            ? "0 0 80px oklch(0.78 0.18 25 / 0.40), inset 0 0 40px oklch(0.78 0.18 25 / 0.18)"
+            : "0 0 80px oklch(0.74 0.17 165 / 0.35), inset 0 0 40px oklch(0.74 0.17 165 / 0.15)",
+          transition: "box-shadow 600ms ease",
+        }}
         aria-hidden
       />
       <svg width={size} height={size} className="relative -rotate-90">
         <defs>
           <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="oklch(0.88 0.16 165)" />
-            <stop offset="55%" stopColor="oklch(0.78 0.17 165)" />
+            <stop offset="0%" stopColor={stressed ? "oklch(0.92 0.16 25)" : "oklch(0.88 0.16 165)"} />
+            <stop offset="55%" stopColor={ringHue} />
             <stop offset="100%" stopColor="oklch(0.78 0.13 86)" />
           </linearGradient>
         </defs>
         {/* Track */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke="oklch(1 0 0 / 0.06)"
-          strokeWidth={stroke}
-        />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="oklch(1 0 0 / 0.06)" strokeWidth={stroke} />
         {/* Progress */}
         <circle
           cx={size / 2}
@@ -49,20 +49,34 @@ function HealthRing({ value }: { value: number }) {
           strokeLinecap="round"
           strokeDasharray={`${dash} ${c - dash}`}
           style={{
-            filter: "drop-shadow(0 0 10px oklch(0.74 0.17 165 / 0.6))",
-            transition: "stroke-dasharray 1.2s cubic-bezier(0.22, 1, 0.36, 1)",
+            filter: `drop-shadow(0 0 10px ${ringHue.replace(")", " / 0.6)")})`,
+            transition: "stroke-dasharray 900ms cubic-bezier(0.22, 1, 0.36, 1), stroke 600ms ease",
           }}
         />
       </svg>
       {/* Center label */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         <p className="text-[9px] tracking-[0.32em] uppercase text-silver/80">Cell Health</p>
-        <p className="num text-5xl font-semibold mt-1 tracking-tight" style={{ color: "oklch(0.92 0.12 165)" }}>
+        <p
+          className="num text-5xl font-semibold mt-1 tracking-tight tabular-nums"
+          style={{ color: ringHueLight, transition: "color 600ms ease" }}
+        >
           {value}
           <span className="text-2xl text-silver/70 align-top">%</span>
         </p>
-        <span className="mt-2 inline-flex items-center gap-1 text-[10px] tracking-[0.18em] uppercase" style={{ color: "oklch(0.88 0.16 165)" }}>
-          <ShieldCheck className="h-3 w-3" /> Optimal
+        <span
+          className="mt-2 inline-flex items-center gap-1 text-[10px] tracking-[0.18em] uppercase"
+          style={{ color: ringHueLight, transition: "color 600ms ease" }}
+        >
+          {stressed ? (
+            <>
+              <AlertTriangle className="h-3 w-3" /> High Thermal Stress
+            </>
+          ) : (
+            <>
+              <ShieldCheck className="h-3 w-3" /> Optimal
+            </>
+          )}
         </span>
       </div>
     </div>
