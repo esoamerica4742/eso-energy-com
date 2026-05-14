@@ -233,7 +233,12 @@ function BranchCard({
   );
 }
 
-export function FleetCommandView() {
+type FleetProps = {
+  selectedId?: string | null;
+  onSelect?: (b: { id: string; name: string } | null) => void;
+};
+
+export function FleetCommandView({ selectedId, onSelect }: FleetProps = {}) {
   const counts = BRANCHES.reduce(
     (acc, b) => {
       acc[b.source] += 1;
@@ -268,7 +273,15 @@ export function FleetCommandView() {
         <div className="lg:col-span-7">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {BRANCHES.map((b) => (
-              <BranchCard key={b.id} branch={b} />
+              <BranchCard
+                key={b.id}
+                branch={b}
+                selected={selectedId === b.id}
+                onClick={() => {
+                  if (selectedId === b.id) onSelect?.(null);
+                  else onSelect?.({ id: b.id, name: b.name });
+                }}
+              />
             ))}
           </div>
         </div>
