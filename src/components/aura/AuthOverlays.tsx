@@ -48,27 +48,30 @@ function Particles() {
 
 /* ============== Animated Gradient Wash ============== */
 function GradientWash() {
+  const reduce = useReducedMotion();
   return (
     <motion.div
       aria-hidden
       className="pointer-events-none absolute inset-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.9 }}
+      transition={{ duration: reduce ? 0 : 0.9 }}
       style={{
         background:
           "radial-gradient(700px 420px at 50% 30%, oklch(0.62 0.20 282 / 0.28), transparent 60%), radial-gradient(600px 360px at 50% 90%, oklch(0.74 0.17 165 / 0.18), transparent 65%)",
       }}
     >
-      <motion.div
-        className="absolute inset-0"
-        animate={{ opacity: [0.6, 1, 0.6] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        style={{
-          background:
-            "radial-gradient(900px 500px at 30% 70%, oklch(0.68 0.18 282 / 0.18), transparent 60%)",
-        }}
-      />
+      {!reduce && (
+        <motion.div
+          className="absolute inset-0"
+          animate={{ opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          style={{
+            background:
+              "radial-gradient(900px 500px at 30% 70%, oklch(0.68 0.18 282 / 0.18), transparent 60%)",
+          }}
+        />
+      )}
     </motion.div>
   );
 }
