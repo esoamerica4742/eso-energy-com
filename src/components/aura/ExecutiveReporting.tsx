@@ -519,12 +519,32 @@ function EmailDigest() {
 /* ─────────────────────────── Hub Wrapper ─────────────────────────── */
 
 export function ExecutiveReporting() {
+  const sim = useSim();
+
+  const rows = useMemo<Row[]>(() => {
+    if (!sim.diesel) return ROWS;
+    // Inject Abuja Hub fraud row: invoiced 30% above expected.
+    const expected = 320;
+    const invoiced = Math.round(expected * 1.3);
+    const injected: Row = {
+      id: "sim-abuja-hub",
+      branch: "Abuja Hub",
+      region: "FCT · Sim",
+      runtimeHrs: 80,
+      expectedLitres: expected,
+      invoicedLitres: invoiced,
+      pricePerLitre: 1325,
+      simulated: true,
+    };
+    return [injected, ...ROWS];
+  }, [sim.diesel]);
+
   const totalDelta = useMemo(
     () =>
-      ROWS.reduce((s, r) => s + Math.max(0, r.invoicedLitres - r.expectedLitres) * r.pricePerLitre, 0),
-    [],
+      rows.reduce((s, r) => s + Math.max(0, r.invoicedLitres - r.expectedLitres) * r.pricePerLitre, 0),
+    [rows],
   );
-  const flaggedCount = useMemo(() => ROWS.filter((r) => flagPct(r) > FRAUD_THRESHOLD).length, []);
+  const flaggedCount = useMemo(() => rows.filter((r) => flagPct(r) > FRAUD_THRESHOLD).length, [rows]);
 
   return (
     <section className="glass-card p-6 md:p-8">
@@ -584,7 +604,7 @@ export function ExecutiveReporting() {
               </tr>
             </thead>
             <tbody>
-              {ROWS.map((r) => (
+              {rows.map((r) => (
                 <DiscrepancyRow key={r.id} row={r} />
               ))}
             </tbody>
