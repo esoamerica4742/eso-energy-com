@@ -84,21 +84,24 @@ export function SignupSuccessCard({
   onReturn: () => void;
   onTrack?: () => void;
 }) {
+  const reduce = useReducedMotion();
   return (
     <motion.div
       key="signup-success"
-      initial={{ opacity: 0, y: 24, filter: "blur(14px)", scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
-      exit={{ opacity: 0, y: -16, filter: "blur(10px)", scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 130, damping: 18 }}
+      initial={reduce ? { opacity: 0 } : { opacity: 0, y: 24, filter: "blur(14px)", scale: 0.96 }}
+      animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0, filter: "blur(0px)", scale: 1 }}
+      exit={reduce ? { opacity: 0 } : { opacity: 0, y: -16, filter: "blur(10px)", scale: 0.98 }}
+      transition={reduce ? { duration: 0.2 } : { type: "spring", stiffness: 130, damping: 18 }}
       className="absolute inset-0 z-30 flex items-center justify-center"
+      role="status"
+      aria-live="polite"
     >
       <GradientWash />
       <Particles />
 
       <motion.div
-        animate={{ y: [0, -6, 0] }}
-        transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+        animate={reduce ? undefined : { y: [0, -6, 0] }}
+        transition={reduce ? undefined : { duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
         className="relative w-full max-w-md mx-auto px-6"
       >
         <div
