@@ -73,7 +73,7 @@ function ResetPasswordPage() {
         className="w-full max-w-md glass-card p-6 sm:p-8 md:p-10"
         style={{ boxShadow: "0 30px 80px -20px oklch(0 0 0 / 0.7), inset 0 0 0 1px oklch(0.30 0.03 265 / 0.5)" }}
       >
-        <div className="inline-flex items-center gap-3 mb-8">
+        <div className="inline-flex items-center gap-3 mb-6 sm:mb-8">
           <span
             className="h-10 w-10 rounded-xl grid place-items-center"
             style={{
