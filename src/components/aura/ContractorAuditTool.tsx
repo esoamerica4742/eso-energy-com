@@ -22,16 +22,15 @@ function bell(h: number, peak = 13, sigma = 3.2, max = 320) {
 const ANOMALY_START = 12;
 const ANOMALY_END = 14;
 
-function buildSeries(): Point[] {
+function buildSeries(wiringFault = false): Point[] {
   const out: Point[] = [];
+  const dipMultiplier = wiringFault ? 0.55 : 0.6; // -45% vs -40%
   for (let h = 0; h < 24; h++) {
     const expected = Math.round(bell(h));
     let actual = expected;
     if (h >= ANOMALY_START && h <= ANOMALY_END) {
-      // 40% drop in the anomaly window
-      actual = Math.round(expected * 0.6);
+      actual = Math.round(expected * dipMultiplier);
     } else if (h >= 6 && h <= 18) {
-      // gentle realistic noise during daylight
       const wobble = (Math.sin(h * 1.7) + Math.cos(h * 0.9)) * 6;
       actual = Math.max(0, Math.round(expected + wobble));
     }
