@@ -33,10 +33,15 @@ function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [phase, setPhase] = useState<"idle" | "authenticating" | "signup-success">("idle");
 
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/" });
-  }, [loading, session, navigate]);
+    if (!loading && session && phase !== "signup-success") {
+      // small delay so the authenticating overlay can breathe
+      const t = setTimeout(() => navigate({ to: "/" }), 900);
+      return () => clearTimeout(t);
+    }
+  }, [loading, session, navigate, phase]);
 
   const switchMode = (next: Mode) => {
     if (next === mode) return;
@@ -55,9 +60,10 @@ function LoginPage() {
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        setPhase("authenticating");
       } else {
         if (!fullName.trim()) throw new Error("Please enter your full name");
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
@@ -66,16 +72,20 @@ function LoginPage() {
           },
         });
         if (error) throw error;
-        if (!data.session) {
-          setInfo("Check your inbox to verify your email, then sign in.");
-          switchMode("signin");
-        }
+        setPhase("signup-success");
       }
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Authentication failed");
     } finally {
       setBusy(false);
     }
+  };
+
+  const returnToDeck = () => {
+    setPhase("idle");
+    setFullName("");
+    setPassword("");
+    switchMode("signin");
   };
 
   return (
