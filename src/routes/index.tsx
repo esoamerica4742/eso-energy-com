@@ -161,6 +161,7 @@ function Index() {
         </footer>
       </main>
       <DevSeeder />
+      <PitchSimPanel />
     </div>
   );
 }
