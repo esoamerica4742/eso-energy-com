@@ -14,16 +14,17 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useSim } from "@/lib/sim-store";
 
 type Row = {
   id: string;
   branch: string;
   region: string;
   runtimeHrs: number;
-  // litres/hour assumed efficiency baseline (industry: ~3.5 L/h per 30kVA)
   expectedLitres: number;
   invoicedLitres: number;
-  pricePerLitre: number; // ₦
+  pricePerLitre: number;
+  simulated?: boolean;
 };
 
 const ROWS: Row[] = [
@@ -54,9 +55,14 @@ function DiscrepancyRow({ row }: { row: Row }) {
       <tr
         onClick={() => flagged && setOpen((o) => !o)}
         className={`group transition-colors ${
-          flagged ? "cursor-pointer hover:bg-[oklch(0.30_0.12_28_/_0.06)]" : ""
-        }`}
-        style={{ borderTop: "1px solid oklch(1 0 0 / 0.05)" }}
+          row.simulated ? "sim-flash-row" : ""
+        } ${flagged ? "cursor-pointer hover:bg-[oklch(0.30_0.12_28_/_0.06)]" : ""}`}
+        style={{
+          borderTop: "1px solid oklch(1 0 0 / 0.05)",
+          background: row.simulated
+            ? "linear-gradient(90deg, oklch(0.30 0.14 75 / 0.14), oklch(0.30 0.14 75 / 0.06))"
+            : undefined,
+        }}
       >
         <td className="px-4 py-3.5 align-top">
           <div className="flex items-start gap-2.5">
@@ -513,12 +519,32 @@ function EmailDigest() {
 /* ─────────────────────────── Hub Wrapper ─────────────────────────── */
 
 export function ExecutiveReporting() {
+  const sim = useSim();
+
+  const rows = useMemo<Row[]>(() => {
+    if (!sim.diesel) return ROWS;
+    // Inject Abuja Hub fraud row: invoiced 30% above expected.
+    const expected = 320;
+    const invoiced = Math.round(expected * 1.3);
+    const injected: Row = {
+      id: "sim-abuja-hub",
+      branch: "Abuja Hub",
+      region: "FCT · Sim",
+      runtimeHrs: 80,
+      expectedLitres: expected,
+      invoicedLitres: invoiced,
+      pricePerLitre: 1325,
+      simulated: true,
+    };
+    return [injected, ...ROWS];
+  }, [sim.diesel]);
+
   const totalDelta = useMemo(
     () =>
-      ROWS.reduce((s, r) => s + Math.max(0, r.invoicedLitres - r.expectedLitres) * r.pricePerLitre, 0),
-    [],
+      rows.reduce((s, r) => s + Math.max(0, r.invoicedLitres - r.expectedLitres) * r.pricePerLitre, 0),
+    [rows],
   );
-  const flaggedCount = useMemo(() => ROWS.filter((r) => flagPct(r) > FRAUD_THRESHOLD).length, []);
+  const flaggedCount = useMemo(() => rows.filter((r) => flagPct(r) > FRAUD_THRESHOLD).length, [rows]);
 
   return (
     <section className="glass-card p-6 md:p-8">
@@ -578,7 +604,7 @@ export function ExecutiveReporting() {
               </tr>
             </thead>
             <tbody>
-              {ROWS.map((r) => (
+              {rows.map((r) => (
                 <DiscrepancyRow key={r.id} row={r} />
               ))}
             </tbody>

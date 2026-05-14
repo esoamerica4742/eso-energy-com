@@ -12,6 +12,7 @@ import { ContractorAuditTool } from "@/components/aura/ContractorAuditTool";
 import { ExecutiveRibbons } from "@/components/aura/ExecutiveRibbons";
 import { ExecutiveReporting } from "@/components/aura/ExecutiveReporting";
 import { ThermalLoadTracker } from "@/components/aura/ThermalLoadTracker";
+import { PitchSimPanel } from "@/components/aura/PitchSimPanel";
 import { DevSeeder } from "@/components/aura/DevSeeder";
 import { useRealtimeTelemetry } from "@/hooks/useRealtimeTelemetry";
 import { useAuth } from "@/hooks/useAuth";
@@ -160,6 +161,7 @@ function Index() {
         </footer>
       </main>
       <DevSeeder />
+      <PitchSimPanel />
     </div>
   );
 }
