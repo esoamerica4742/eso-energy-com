@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useSim } from "@/lib/sim-store";
 
 type Row = {
   id: string;
