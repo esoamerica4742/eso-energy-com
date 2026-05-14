@@ -140,6 +140,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <LogoutOverlay />
       <Toaster
         position="top-right"
         theme="dark"
