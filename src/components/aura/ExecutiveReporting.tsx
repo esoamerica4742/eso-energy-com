@@ -55,9 +55,14 @@ function DiscrepancyRow({ row }: { row: Row }) {
       <tr
         onClick={() => flagged && setOpen((o) => !o)}
         className={`group transition-colors ${
-          flagged ? "cursor-pointer hover:bg-[oklch(0.30_0.12_28_/_0.06)]" : ""
-        }`}
-        style={{ borderTop: "1px solid oklch(1 0 0 / 0.05)" }}
+          row.simulated ? "sim-flash-row" : ""
+        } ${flagged ? "cursor-pointer hover:bg-[oklch(0.30_0.12_28_/_0.06)]" : ""}`}
+        style={{
+          borderTop: "1px solid oklch(1 0 0 / 0.05)",
+          background: row.simulated
+            ? "linear-gradient(90deg, oklch(0.30 0.14 75 / 0.14), oklch(0.30 0.14 75 / 0.06))"
+            : undefined,
+        }}
       >
         <td className="px-4 py-3.5 align-top">
           <div className="flex items-start gap-2.5">
