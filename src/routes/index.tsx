@@ -77,7 +77,7 @@ function Index() {
         </div>
 
         {/* Footer */}
-        <footer className="mt-10 pt-6 border-t border-[oklch(0.30_0.03_265_/_0.5)] flex flex-wrap items-center justify-between gap-2 text-[11px] text-silver">
+        <footer className="mt-10 pt-6 border-t border-border flex flex-wrap items-center justify-between gap-2 text-[11px] text-silver">
           <p className="tracking-[0.22em] uppercase">AURA Enterprise · v4.2 · Build 2026.05.14</p>
           <p className="font-mono">PoP · Lagos · Frankfurt · Johannesburg · Encrypted Mesh</p>
         </footer>
