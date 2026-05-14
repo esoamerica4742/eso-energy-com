@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FlaskConical, Loader2, Radio, ShieldAlert, Square, X } from "lucide-react";
-import { supabase, ENTERPRISE_CLIENT_ID } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Hidden developer control bar.
