@@ -21,7 +21,12 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { session, loading } = useAuth();
+  const { session, user, loading } = useAuth();
+  const displayName =
+    (user?.user_metadata?.full_name as string | undefined) ||
+    (user?.user_metadata?.name as string | undefined) ||
+    user?.email?.split("@")[0] ||
+    "Operator";
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,7 +51,7 @@ function Index() {
           <div>
             <p className="text-[10px] tracking-[0.32em] text-silver uppercase">Command Deck · 14 May 2026 · 14:36 WAT</p>
             <h1 className="mt-1 text-2xl md:text-[28px] font-semibold tracking-tight">
-              Good afternoon, <span className="shimmer-text">Mr. Adeyemi</span>. Three sites are streaming nominally.
+              Good afternoon, <span className="shimmer-text">{displayName}</span>. Three sites are streaming nominally.
             </h1>
           </div>
           <div className="flex items-center gap-2 text-[11px] text-silver">
