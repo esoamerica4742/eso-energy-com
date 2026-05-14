@@ -1,5 +1,5 @@
 import { ChevronDown, LogOut } from "lucide-react";
-import { triggerLogout } from "@/lib/logout-bus";
+import { triggerLogout, useLogoutActive } from "@/lib/logout-bus";
 
 function Logo() {
   return (
