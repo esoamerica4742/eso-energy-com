@@ -1,14 +1,15 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ShieldCheck, Lock } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
+import { EsoLogo } from "@/components/aura/EsoLogo";
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
   head: () => ({
     meta: [
-      { title: "Reset password · AURA Enterprise" },
-      { name: "description", content: "Set a new password for your AURA Enterprise account." },
+      { title: "Reset password · EsoEnergy Systems" },
+      { name: "description", content: "Set a new password for your EsoEnergy Systems account." },
     ],
   }),
 });
@@ -73,20 +74,11 @@ function ResetPasswordPage() {
         className="w-full max-w-md glass-card p-6 sm:p-8 md:p-10"
         style={{ boxShadow: "0 30px 80px -20px oklch(0 0 0 / 0.7), inset 0 1px 0 oklch(1 0 0 / 0.08)" }}
       >
-        <div className="inline-flex items-center gap-3 mb-6 sm:mb-8">
-          <span
-            className="h-10 w-10 rounded-xl grid place-items-center"
-            style={{
-              background: "linear-gradient(135deg, oklch(0.22 0.008 265), oklch(0.16 0.005 265))",
-              boxShadow: "0 0 24px oklch(0.78 0.13 86 / 0.35), inset 0 0 0 1px oklch(0.78 0.13 86 / 0.4)",
-            }}
-          >
-            <ShieldCheck className="h-5 w-5 text-[var(--gold)]" />
-          </span>
-          <div className="leading-tight">
-            <p className="text-[15px] font-semibold tracking-[0.18em] text-silver">AURA</p>
-            <p className="text-[10px] tracking-[0.32em] text-silver/70 uppercase">Enterprise · Recovery</p>
-          </div>
+        <div className="block mb-6 sm:mb-8 text-center">
+          <EsoLogo size="lg" className="mx-auto" />
+          <p className="mt-3 text-[10px] tracking-[0.32em] text-silver/70 uppercase font-mono">
+            EsoEnergy Systems · Recovery
+          </p>
         </div>
 
         <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Set a new password</h1>

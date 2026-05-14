@@ -2,14 +2,15 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, ShieldCheck, Lock, Mail, User } from "lucide-react";
+import { Loader2, Lock, Mail, User } from "lucide-react";
+import { EsoLogo } from "@/components/aura/EsoLogo";
 
 export const Route = createFileRoute("/signup")({
   component: SignUpPage,
   head: () => ({
     meta: [
-      { title: "Create account · AURA Enterprise" },
-      { name: "description", content: "Provision a new operator on the AURA Enterprise command deck." },
+      { title: "Create account · EsoEnergy Systems" },
+      { name: "description", content: "Provision a new operator on the EsoEnergy Systems command deck." },
     ],
   }),
 });
@@ -162,20 +163,11 @@ function SignUpPage() {
         className="w-full max-w-md glass-card p-8 md:p-10"
         style={{ boxShadow: "0 30px 80px -20px oklch(0 0 0 / 0.7), inset 0 1px 0 oklch(1 0 0 / 0.08)" }}
       >
-        <Link to="/signup" className="inline-flex items-center gap-3 mb-8">
-          <span
-            className="h-10 w-10 rounded-xl grid place-items-center"
-            style={{
-              background: "linear-gradient(135deg, oklch(0.22 0.008 265), oklch(0.16 0.005 265))",
-              boxShadow: "0 0 24px oklch(0.78 0.13 86 / 0.35), inset 0 0 0 1px oklch(0.78 0.13 86 / 0.4)",
-            }}
-          >
-            <ShieldCheck className="h-5 w-5 text-[var(--gold)]" />
-          </span>
-          <div className="leading-tight">
-            <p className="text-[15px] font-semibold tracking-[0.18em] text-silver">AURA</p>
-            <p className="text-[10px] tracking-[0.32em] text-silver/70 uppercase">Enterprise · New Operator</p>
-          </div>
+        <Link to="/signup" className="block mb-7 text-center">
+          <EsoLogo size="lg" className="mx-auto" />
+          <p className="mt-3 text-[10px] tracking-[0.32em] text-silver/70 uppercase font-mono">
+            EsoEnergy Systems · New Operator
+          </p>
         </Link>
 
         <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>

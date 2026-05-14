@@ -294,7 +294,7 @@ function DieselBurdenEmpty({
             7-day regression dataset unavailable
           </p>
           <p className="text-[11px] leading-relaxed text-silver/70">
-            Fuel-flow telemetry from the AURA mesh hasn't synchronized yet.
+            Fuel-flow telemetry from the EsoEnergy mesh hasn't synchronized yet.
             Bars will materialize the moment a site reports.
           </p>
         </div>

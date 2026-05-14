@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
+import { EsoLogo } from "@/components/aura/EsoLogo";
 import {
   Building2,
   Check,
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/onboarding")({
   component: OnboardingWizard,
   head: () => ({
     meta: [
-      { title: "Onboarding · AURA Enterprise" },
+      { title: "Onboarding · EsoEnergy Systems" },
       { name: "description", content: "Provision your sovereign energy fleet in three premium steps." },
     ],
   }),
@@ -658,10 +659,10 @@ function OnboardingWizard() {
   const [sync, setSync] = useState({ brand: "", serial: "", accountEmail: "", accountPassword: "" });
 
   function complete(generatedSerial?: string) {
-    toast.success("Onboarding complete", {
+    toast.success("EsoEnergy Systems · Onboarding complete", {
       description: generatedSerial
-        ? `Dongle ${generatedSerial} bonded · routing to the Command Deck…`
-        : "Routing you to the Command Deck…",
+        ? `Dongle ${generatedSerial} bonded · routing to EsoEnergy Fleet Command…`
+        : "Routing you to EsoEnergy Fleet Command…",
     });
     setTimeout(() => navigate({ to: "/" }), 900);
   }
@@ -687,9 +688,10 @@ function OnboardingWizard() {
 
       <div className="relative w-full max-w-3xl">
         <div className="mb-6 text-center">
-          <p className="eyebrow">AURA Enterprise · Provisioning</p>
-          <h1 className="mt-1 text-3xl md:text-[34px] font-semibold tracking-tight">
-            <span className="shimmer-text">Welcome to your sovereign mesh</span>
+          <EsoLogo size="lg" className="mx-auto" />
+          <p className="eyebrow mt-3">EsoEnergy Systems · Provisioning</p>
+          <h1 className="mt-2 text-3xl md:text-[34px] font-semibold tracking-tight">
+            <span className="shimmer-text">Welcome to EsoEnergy Fleet Command</span>
           </h1>
         </div>
 

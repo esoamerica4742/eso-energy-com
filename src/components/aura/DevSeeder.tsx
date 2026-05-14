@@ -184,7 +184,7 @@ export function DevSeeder() {
         const liters = Math.round(8 + Math.random() * 22);
         const message = def.msg(liters);
         if (def.severity === "critical") {
-          const banner = { id: `${now}`, site: "AURA Mesh", code: def.type, message };
+          const banner = { id: `${now}`, site: "EsoEnergy Mesh", code: def.type, message };
           setLatestAlert(banner);
           window.setTimeout(() => setLatestAlert((a) => (a?.id === banner.id ? null : a)), 8000);
         }

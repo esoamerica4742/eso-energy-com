@@ -1,20 +1,6 @@
 import { ChevronDown, LogOut } from "lucide-react";
 import { triggerLogout, useLogoutActive } from "@/lib/logout-bus";
-
-function Logo() {
-  return (
-    <svg viewBox="0 0 32 32" className="h-7 w-7">
-      <defs>
-        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="oklch(0.92 0.02 255)" />
-          <stop offset="100%" stopColor="oklch(0.62 0.04 255)" />
-        </linearGradient>
-      </defs>
-      <path d="M16 3 L28 27 H22 L16 14 L10 27 H4 Z" fill="url(#lg)" />
-      <circle cx="16" cy="22" r="2.4" fill="oklch(0.78 0.13 86)" style={{ filter: "drop-shadow(0 0 4px oklch(0.78 0.13 86))" }} />
-    </svg>
-  );
-}
+import { EsoLogo } from "@/components/aura/EsoLogo";
 
 export function TopHeader() {
   const loggingOut = useLogoutActive();
@@ -25,12 +11,8 @@ export function TopHeader() {
         borderBottom: "1px solid oklch(1 0 0 / 0.06)",
       }}>
       <div className="mx-auto max-w-[1440px] px-5 md:px-8 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Logo />
-          <div className="flex items-baseline gap-3">
-            <span className="text-[15px] font-semibold tracking-[0.18em] text-silver">AURA</span>
-            <span className="text-[11px] tracking-[0.32em] text-silver/70 hidden sm:inline">ENTERPRISE</span>
-          </div>
+        <div className="flex items-center gap-3 min-w-0">
+          <EsoLogo size="md" />
           <span className="hidden md:inline-flex items-center gap-1.5 ml-3 rounded-full hairline px-2.5 py-1 text-[10px] tracking-[0.2em] uppercase"
             style={{
               color: "oklch(0.85 0.13 86)",
