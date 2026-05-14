@@ -6,6 +6,7 @@ import { EnergyFlow } from "@/components/aura/EnergyFlow";
 import { DieselOffset } from "@/components/aura/DieselOffset";
 import { DieselBurden } from "@/components/aura/DieselBurden";
 import { FleetCommand } from "@/components/aura/FleetCommand";
+import { FleetCommandView } from "@/components/aura/FleetCommandView";
 import { DevSeeder } from "@/components/aura/DevSeeder";
 import { useRealtimeTelemetry } from "@/hooks/useRealtimeTelemetry";
 import { useAuth } from "@/hooks/useAuth";
@@ -60,8 +61,13 @@ function Index() {
           </div>
         </div>
 
+        {/* Multi-Site Fleet Command View */}
+        <FleetCommandView />
+
         {/* Hero Energy Flow */}
-        <EnergyFlow />
+        <div className="mt-6">
+          <EnergyFlow />
+        </div>
 
         {/* Two-column secondary grid */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
