@@ -159,13 +159,34 @@ function NigeriaMap() {
   );
 }
 
-function BranchCard({ branch }: { branch: Branch }) {
+function BranchCard({
+  branch,
+  selected,
+  onClick,
+}: {
+  branch: Branch;
+  selected: boolean;
+  onClick: () => void;
+}) {
   const m = SOURCE_META[branch.source];
   return (
     <article
-      className="group glass-card relative overflow-hidden p-4 transition-all duration-300 hover:-translate-y-1"
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className={`group glass-card relative overflow-hidden p-4 transition-all duration-300 hover:-translate-y-1 cursor-pointer focus:outline-none ${
+        selected ? "ring-1 ring-[oklch(0.78_0.13_86_/_0.6)]" : ""
+      }`}
       style={{
-        boxShadow: "0 8px 40px oklch(0 0 0 / 0.5)",
+        boxShadow: selected
+          ? "0 12px 48px oklch(0 0 0 / 0.6), 0 0 28px oklch(0.78 0.13 86 / 0.35)"
+          : "0 8px 40px oklch(0 0 0 / 0.5)",
       }}
     >
       {/* Accent rail */}
