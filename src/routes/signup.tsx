@@ -127,6 +127,8 @@ function SignUpPage() {
       if (!fullName.trim()) throw new Error("Please enter your full name");
       if (!passwordOk) throw new Error("Password is too weak. Strengthen it to continue.");
       if (!passwordsMatch) throw new Error("Passwords do not match.");
+      if (!acceptedTerms || !acceptedPrivacy)
+        throw new Error("You must accept the Terms of Service and Privacy Policy.");
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
