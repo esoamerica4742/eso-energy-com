@@ -132,8 +132,8 @@ export function SignupSuccessCard({
             {/* outer halo */}
             <motion.span
               className="absolute inset-0 rounded-full"
-              animate={{ scale: [1, 1.18, 1], opacity: [0.45, 0.15, 0.45] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+              animate={reduce ? { opacity: 0.35 } : { scale: [1, 1.18, 1], opacity: [0.45, 0.15, 0.45] }}
+              transition={reduce ? { duration: 0 } : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
               style={{
                 background:
                   "radial-gradient(circle, oklch(0.74 0.17 165 / 0.55), transparent 65%)",
@@ -141,18 +141,20 @@ export function SignupSuccessCard({
               }}
             />
             {/* expanding ring */}
-            <motion.span
-              className="absolute inset-0 rounded-full"
-              initial={{ scale: 0.6, opacity: 0.7 }}
-              animate={{ scale: [0.7, 1.4], opacity: [0.7, 0] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
-              style={{ border: "1px solid oklch(0.74 0.17 165 / 0.6)" }}
-            />
+            {!reduce && (
+              <motion.span
+                className="absolute inset-0 rounded-full"
+                initial={{ scale: 0.6, opacity: 0.7 }}
+                animate={{ scale: [0.7, 1.4], opacity: [0.7, 0] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
+                style={{ border: "1px solid oklch(0.74 0.17 165 / 0.6)" }}
+              />
+            )}
             {/* core disc */}
             <motion.div
-              initial={{ scale: 0.4, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 200, damping: 14, delay: 0.15 }}
+              initial={reduce ? { opacity: 0 } : { scale: 0.4, opacity: 0 }}
+              animate={reduce ? { opacity: 1 } : { scale: 1, opacity: 1 }}
+              transition={reduce ? { duration: 0.2 } : { type: "spring", stiffness: 200, damping: 14, delay: 0.15 }}
               className="absolute inset-2 rounded-full flex items-center justify-center"
               style={{
                 background:
@@ -161,13 +163,7 @@ export function SignupSuccessCard({
                   "0 14px 30px -10px oklch(0.74 0.17 165 / 0.7), inset 0 1px 0 oklch(1 0 0 / 0.4)",
               }}
             >
-              <motion.div
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ delay: 0.45, duration: 0.6, ease: "easeOut" }}
-              >
-                <Check className="h-9 w-9 text-[oklch(0.10_0.02_165)]" strokeWidth={3} />
-              </motion.div>
+              <Check className="h-9 w-9 text-[oklch(0.10_0.02_165)]" strokeWidth={3} />
             </motion.div>
           </div>
 
