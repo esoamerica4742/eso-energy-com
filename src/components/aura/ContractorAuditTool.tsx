@@ -144,13 +144,15 @@ function LuxuryTooltip({ active, payload, label }: any) {
 }
 
 export function ContractorAuditTool() {
-  const [data, setData] = useState<Point[] | null>(null);
+  const sim = useSim();
+  const [loaded, setLoaded] = useState(false);
 
-  // Simulated Supabase fetch with skeleton loading
   useEffect(() => {
-    const t = setTimeout(() => setData(buildSeries()), 900);
+    const t = setTimeout(() => setLoaded(true), 900);
     return () => clearTimeout(t);
   }, []);
+
+  const data = loaded ? buildSeries(sim.wiring) : null;
 
   const totalExpected = data?.reduce((a, p) => a + p.expected, 0) ?? 0;
   const totalActual = data?.reduce((a, p) => a + p.actual, 0) ?? 0;
@@ -160,11 +162,25 @@ export function ContractorAuditTool() {
   return (
     <section className="glass-card p-6 md:p-8">
       <header className="flex flex-wrap items-end justify-between gap-3 mb-5">
-        <div>
-          <p className="text-[11px] tracking-[0.32em] uppercase text-silver">Contractor Audit Tool</p>
-          <h2 className="mt-1 text-2xl md:text-[28px] font-semibold tracking-tight">
-            <span className="shimmer-text">24-hour generation curve</span> · expected vs actual
-          </h2>
+        <div className="flex items-center gap-3 flex-wrap">
+          <div>
+            <p className="text-[11px] tracking-[0.32em] uppercase text-silver">Contractor Audit Tool</p>
+            <h2 className="mt-1 text-2xl md:text-[28px] font-semibold tracking-tight">
+              <span className="shimmer-text">24-hour generation curve</span> · expected vs actual
+            </h2>
+          </div>
+          {sim.wiring && (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-[0.18em] uppercase sim-flash"
+              style={{
+                color: "oklch(0.95 0.16 75)",
+                background: "oklch(0.30 0.14 75 / 0.18)",
+              }}
+              title="Anomaly Flagged: Potential structural shading or loose string wiring detected."
+            >
+              <Zap className="h-3 w-3" /> Wiring Anomaly Active
+            </span>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Legend swatch="oklch(0.86 0.02 255)" label="Expected Output" dashed />
