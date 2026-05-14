@@ -655,11 +655,13 @@ function OnboardingWizard() {
   const [branches, setBranches] = useState<Branch[]>([
     { id: crypto.randomUUID(), name: "", state: "" },
   ]);
-  const [sync, setSync] = useState({ brand: "", serial: "" });
+  const [sync, setSync] = useState({ brand: "", serial: "", accountEmail: "", accountPassword: "" });
 
-  function complete() {
+  function complete(generatedSerial?: string) {
     toast.success("Onboarding complete", {
-      description: "Routing you to the Command Deck…",
+      description: generatedSerial
+        ? `Dongle ${generatedSerial} bonded · routing to the Command Deck…`
+        : "Routing you to the Command Deck…",
     });
     setTimeout(() => navigate({ to: "/" }), 900);
   }
