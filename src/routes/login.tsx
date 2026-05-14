@@ -156,6 +156,15 @@ function LoginPage() {
             {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
             {mode === "signin" ? "Enter Command Deck" : "Create Operator"}
           </button>
+
+          <button
+            type="button"
+            onClick={forgot}
+            disabled={busy}
+            className="w-full text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[oklch(0.85_0.16_165)] transition-colors disabled:opacity-50"
+          >
+            Forgot password?
+          </button>
         </form>
 
         <Link
