@@ -21,10 +21,10 @@ type Row = {
   branch: string;
   region: string;
   runtimeHrs: number;
-  // litres/hour assumed efficiency baseline (industry: ~3.5 L/h per 30kVA)
   expectedLitres: number;
   invoicedLitres: number;
-  pricePerLitre: number; // ₦
+  pricePerLitre: number;
+  simulated?: boolean;
 };
 
 const ROWS: Row[] = [
