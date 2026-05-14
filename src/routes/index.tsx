@@ -75,30 +75,35 @@ function Index() {
         </div>
 
         {/* 1 · Executive Summary Ribbons */}
-        {hydrated ? (
-          <ExecutiveRibbons siteLabel={selected?.name} />
-        ) : (
-          <RibbonSkeleton />
-        )}
+        <div className="stagger-item" style={{ ["--i" as any]: 0 }}>
+          {hydrated ? (
+            <ExecutiveRibbons siteLabel={selected?.name} />
+          ) : (
+            <RibbonSkeleton />
+          )}
+        </div>
 
         {/* Thin translucent divider */}
         <Divider />
 
         {/* 2 · Multi-Site Fleet Command View (interactive) */}
-        <FleetCommandView selectedId={selected?.id ?? null} onSelect={setSelected} />
+        <div className="stagger-item" style={{ ["--i" as any]: 1 }}>
+          <FleetCommandView selectedId={selected?.id ?? null} onSelect={setSelected} />
+        </div>
 
         {/* Filter banner */}
         {selected && (
           <div
-            className="mt-4 flex items-center justify-between gap-3 rounded-xl hairline px-4 py-2.5 backdrop-blur-md"
+            className="mt-4 flex items-center justify-between gap-3 rounded-xl hairline px-4 py-2.5 backdrop-blur-md stagger-item"
             style={{
-              background: "oklch(0.30 0.10 86 / 0.10)",
-              boxShadow: "inset 0 0 0 1px oklch(0.78 0.13 86 / 0.35), 0 0 24px oklch(0.78 0.13 86 / 0.18)",
+              ["--i" as any]: 0,
+              background: "oklch(0.62 0.20 277 / 0.10)",
+              boxShadow: "inset 0 0 0 1px oklch(0.62 0.20 277 / 0.35), 0 0 24px oklch(0.62 0.20 277 / 0.18)",
             }}
           >
             <p className="text-[11px] tracking-[0.22em] uppercase text-silver flex items-center gap-2">
-              <Filter className="h-3.5 w-3.5" style={{ color: "oklch(0.92 0.12 86)" }} />
-              Analytics filtered to <span className="text-[oklch(0.92_0.12_86)] font-semibold tracking-normal normal-case ml-1">{selected.name}</span>
+              <Filter className="h-3.5 w-3.5" style={{ color: "oklch(0.78 0.18 277)" }} />
+              Analytics filtered to <span className="text-[oklch(0.78_0.18_277)] font-semibold tracking-normal normal-case ml-1">{selected.name}</span>
             </p>
             <button
               type="button"
@@ -113,43 +118,45 @@ function Index() {
         <Divider />
 
         {/* 3 · Battery Lifespan Guard (ring + alert) */}
-        <div key={`bg-${selected?.id ?? "all"}`}>
+        <div key={`bg-${selected?.id ?? "all"}`} className="stagger-item" style={{ ["--i" as any]: 2 }}>
           <BatteryLifespanGuard />
         </div>
 
         {/* Thermal & Load historical chart */}
-        <div className="mt-6">
+        <div className="mt-6 stagger-item" style={{ ["--i" as any]: 3 }}>
           <ThermalLoadTracker siteLabel={selected?.name} />
         </div>
 
         <Divider />
 
         {/* 4 · Contractor Audit Graph */}
-        <div key={`ca-${selected?.id ?? "all"}`}>
+        <div key={`ca-${selected?.id ?? "all"}`} className="stagger-item" style={{ ["--i" as any]: 4 }}>
           <ContractorAuditTool />
         </div>
 
         <Divider />
 
         {/* 5 · Executive Reporting & Diesel Fraud Audit Hub */}
-        <ExecutiveReporting />
+        <div className="stagger-item" style={{ ["--i" as any]: 5 }}>
+          <ExecutiveReporting />
+        </div>
 
         <Divider />
 
         {/* Hero Energy Flow */}
-        <div>
+        <div className="stagger-item" style={{ ["--i" as any]: 6 }}>
           <EnergyFlow />
         </div>
 
         {/* Two-column secondary grid */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5 stagger-item" style={{ ["--i" as any]: 7 }}>
             <DieselOffset />
           </div>
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 stagger-item" style={{ ["--i" as any]: 8 }}>
             <FleetCommand />
           </div>
-          <div className="lg:col-span-12">
+          <div className="lg:col-span-12 stagger-item" style={{ ["--i" as any]: 9 }}>
             <DieselBurden />
           </div>
         </div>
@@ -172,7 +179,7 @@ function Divider() {
       className="my-8 h-px w-full"
       style={{
         background:
-          "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.10) 20%, oklch(0.78 0.13 86 / 0.25) 50%, oklch(1 0 0 / 0.10) 80%, transparent)",
+          "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.08) 20%, oklch(0.62 0.20 277 / 0.30) 50%, oklch(1 0 0 / 0.08) 80%, transparent)",
       }}
       aria-hidden
     />
@@ -187,12 +194,12 @@ function RibbonSkeleton() {
           key={i}
           className={`glass-card p-6 md:p-7 lg:col-span-${span} h-[220px] relative overflow-hidden`}
         >
-          <div className="h-3 w-40 rounded-full bg-[oklch(1_0_0_/_0.06)] animate-pulse" />
-          <div className="mt-4 h-10 w-56 rounded-md bg-[oklch(1_0_0_/_0.06)] animate-pulse" />
-          <div className="mt-6 h-2 w-full rounded-full bg-[oklch(1_0_0_/_0.06)] animate-pulse" />
+          <div className="h-3 w-40 shimmer-block" />
+          <div className="mt-4 h-10 w-56 shimmer-block" />
+          <div className="mt-6 h-2 w-full shimmer-block" />
           <div className="mt-6 grid grid-cols-3 gap-3">
             {[0, 1, 2].map((j) => (
-              <div key={j} className="h-14 rounded-xl bg-[oklch(1_0_0_/_0.05)] animate-pulse" />
+              <div key={j} className="h-14 shimmer-block" />
             ))}
           </div>
         </div>
