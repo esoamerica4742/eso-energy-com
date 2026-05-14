@@ -10,6 +10,7 @@ import {
 import { useEffect } from "react";
 
 import { Toaster } from "sonner";
+import { LogoutOverlay } from "@/components/aura/LogoutOverlay";
 
 import appCss from "../styles.css?url";
 
