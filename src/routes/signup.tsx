@@ -382,13 +382,13 @@ function Consent({
       />
       <span
         aria-hidden
-        className="mt-0.5 grid place-items-center h-4 w-4 shrink-0 rounded-[5px] hairline bg-[oklch(0.13_0.003_265_/_0.6)] transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[oklch(0.74_0.17_165_/_0.5)]"
+        className="mt-0.5 grid place-items-center h-4 w-4 shrink-0 rounded-[5px] hairline bg-[oklch(0.13_0.003_265_/_0.6)] transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[oklch(0.62_0.20_282_/_0.5)]"
         style={
           checked
             ? {
                 background:
                   "linear-gradient(135deg, oklch(0.78 0.13 86), oklch(0.89 0.07 88))",
-                boxShadow: "0 0 0 1px oklch(0.74 0.17 165 / 0.7)",
+                boxShadow: "0 0 0 1px oklch(0.78 0.13 86 / 0.7)",
               }
             : undefined
         }
