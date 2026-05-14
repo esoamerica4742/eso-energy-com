@@ -11,12 +11,8 @@ export function TopHeader() {
         borderBottom: "1px solid oklch(1 0 0 / 0.06)",
       }}>
       <div className="mx-auto max-w-[1440px] px-5 md:px-8 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Logo />
-          <div className="flex items-baseline gap-3">
-            <span className="text-[15px] font-semibold tracking-[0.18em] text-silver">AURA</span>
-            <span className="text-[11px] tracking-[0.32em] text-silver/70 hidden sm:inline">ENTERPRISE</span>
-          </div>
+        <div className="flex items-center gap-3 min-w-0">
+          <EsoLogo size="md" />
           <span className="hidden md:inline-flex items-center gap-1.5 ml-3 rounded-full hairline px-2.5 py-1 text-[10px] tracking-[0.2em] uppercase"
             style={{
               color: "oklch(0.85 0.13 86)",
