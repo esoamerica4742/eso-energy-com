@@ -80,10 +80,45 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 
 export function BatteryLifespanGuard() {
   const [acknowledged, setAcknowledged] = useState(false);
+  const sim = useSim();
+  const stressed = sim.thermal;
+  const HEALTH = stressed ? HEALTH_STRESSED : HEALTH_NORMAL;
 
   return (
     <section className="glass-card relative overflow-hidden p-6 md:p-8">
-      {/* Header */}
+      {/* Pitch sim push notification */}
+      {stressed && (
+        <div
+          role="alert"
+          className="mb-5 flex items-start gap-3 rounded-xl p-3.5 sim-flash"
+          style={{
+            background:
+              "linear-gradient(135deg, oklch(0.30 0.14 25 / 0.40), oklch(0.18 0.04 265 / 0.7))",
+            boxShadow:
+              "inset 0 0 0 1px oklch(0.78 0.18 25 / 0.55), 0 0 36px oklch(0.78 0.18 25 / 0.30)",
+          }}
+        >
+          <span
+            className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+            style={{
+              background: "oklch(0.30 0.14 25 / 0.45)",
+              color: "oklch(0.95 0.14 25)",
+              boxShadow: "inset 0 0 0 1px oklch(0.78 0.18 25 / 0.6)",
+            }}
+          >
+            <Siren className="h-3.5 w-3.5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[10px] tracking-[0.28em] uppercase font-semibold" style={{ color: "oklch(0.95 0.14 25)" }}>
+              Critical · Push Notification
+            </p>
+            <p className="mt-1 text-[13px] leading-relaxed text-foreground/95">
+              <span className="font-semibold">CRITICAL:</span> Heavy AC load detected on Battery
+              Bank B. Overheating imminent.
+            </p>
+          </div>
+        </div>
+      )}
       <header className="flex flex-wrap items-end justify-between gap-3 mb-6">
         <div>
           <p className="text-[11px] tracking-[0.32em] uppercase text-silver">Battery Lifespan Guard</p>
