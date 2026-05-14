@@ -63,7 +63,7 @@ function ResetPasswordPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-5 py-10"
+      className="min-h-screen flex items-center justify-center px-4 py-8 sm:px-5 sm:py-10"
       style={{
         background:
           "radial-gradient(1100px 600px at 20% 0%, oklch(0.22 0.06 265 / 0.55), transparent 60%), radial-gradient(900px 500px at 100% 100%, oklch(0.20 0.05 175 / 0.35), transparent 60%), oklch(0.10 0.02 265)",
