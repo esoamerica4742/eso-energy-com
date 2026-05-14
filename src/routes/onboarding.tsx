@@ -659,10 +659,10 @@ function OnboardingWizard() {
   const [sync, setSync] = useState({ brand: "", serial: "", accountEmail: "", accountPassword: "" });
 
   function complete(generatedSerial?: string) {
-    toast.success("Onboarding complete", {
+    toast.success("EsoEnergy Systems · Onboarding complete", {
       description: generatedSerial
-        ? `Dongle ${generatedSerial} bonded · routing to the Command Deck…`
-        : "Routing you to the Command Deck…",
+        ? `Dongle ${generatedSerial} bonded · routing to EsoEnergy Fleet Command…`
+        : "Routing you to EsoEnergy Fleet Command…",
     });
     setTimeout(() => navigate({ to: "/" }), 900);
   }
