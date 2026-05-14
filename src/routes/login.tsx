@@ -54,27 +54,6 @@ function LoginPage() {
     }
   };
 
-  const forgot = async () => {
-    setErr(null);
-    setInfo(null);
-    if (!email.trim()) {
-      setErr("Enter your email above, then tap Forgot password.");
-      return;
-    }
-    setBusy(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (error) throw error;
-      setInfo("Password reset link sent. Check your inbox.");
-    } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Could not send reset email");
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
     <div
       className="min-h-screen flex items-center justify-center px-5 py-10"
