@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, ShieldCheck, Mail, ArrowLeft } from "lucide-react";
+import { Loader2, Mail, ArrowLeft } from "lucide-react";
+import { EsoLogo } from "@/components/aura/EsoLogo";
 
 export const Route = createFileRoute("/forgot-password")({
   component: ForgotPasswordPage,
