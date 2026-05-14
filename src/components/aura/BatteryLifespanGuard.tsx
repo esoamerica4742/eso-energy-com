@@ -148,7 +148,7 @@ export function BatteryLifespanGuard() {
       {/* Hero ring + stats */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
         <div className="md:col-span-5 flex justify-center">
-          <HealthRing value={HEALTH} />
+          <HealthRing value={HEALTH} stressed={stressed} />
         </div>
         <div className="md:col-span-7 space-y-4">
           <div>
