@@ -65,6 +65,11 @@ function Index() {
         {/* Multi-Site Fleet Command View */}
         <FleetCommandView />
 
+        {/* Battery Lifespan Guard */}
+        <div className="mt-6">
+          <BatteryLifespanGuard />
+        </div>
+
         {/* Hero Energy Flow */}
         <div className="mt-6">
           <EnergyFlow />
