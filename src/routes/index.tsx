@@ -8,6 +8,7 @@ import { DieselBurden } from "@/components/aura/DieselBurden";
 import { FleetCommand } from "@/components/aura/FleetCommand";
 import { FleetCommandView } from "@/components/aura/FleetCommandView";
 import { BatteryLifespanGuard } from "@/components/aura/BatteryLifespanGuard";
+import { ContractorAuditTool } from "@/components/aura/ContractorAuditTool";
 import { DevSeeder } from "@/components/aura/DevSeeder";
 import { useRealtimeTelemetry } from "@/hooks/useRealtimeTelemetry";
 import { useAuth } from "@/hooks/useAuth";
@@ -85,6 +86,9 @@ function Index() {
           </div>
           <div className="lg:col-span-12">
             <DieselBurden />
+          </div>
+          <div className="lg:col-span-12">
+            <ContractorAuditTool />
           </div>
         </div>
 
