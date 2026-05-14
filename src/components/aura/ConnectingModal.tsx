@@ -166,7 +166,7 @@ export function ConnectingModal({
                     transition={{ duration: 0.4, delay: 0.1 }}
                     className="mt-1 text-sm text-silver"
                   >
-                    Welcome to Fleet Command Command.
+                    Welcome to EsoEnergy Fleet Command.
                   </motion.p>
                 )}
               </AnimatePresence>
