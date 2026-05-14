@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Filter, X } from "lucide-react";
 import { TopHeader } from "@/components/aura/TopHeader";
 import { EnergyFlow } from "@/components/aura/EnergyFlow";
 import { DieselOffset } from "@/components/aura/DieselOffset";
@@ -9,6 +9,8 @@ import { FleetCommand } from "@/components/aura/FleetCommand";
 import { FleetCommandView } from "@/components/aura/FleetCommandView";
 import { BatteryLifespanGuard } from "@/components/aura/BatteryLifespanGuard";
 import { ContractorAuditTool } from "@/components/aura/ContractorAuditTool";
+import { ExecutiveRibbons } from "@/components/aura/ExecutiveRibbons";
+import { ThermalLoadTracker } from "@/components/aura/ThermalLoadTracker";
 import { DevSeeder } from "@/components/aura/DevSeeder";
 import { useRealtimeTelemetry } from "@/hooks/useRealtimeTelemetry";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,10 +33,17 @@ function Index() {
     user?.email?.split("@")[0] ||
     "Operator";
   const navigate = useNavigate();
+  const [selected, setSelected] = useState<{ id: string; name: string } | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     if (!loading && !session) navigate({ to: "/login" });
   }, [loading, session, navigate]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setHydrated(true), 700);
+    return () => clearTimeout(t);
+  }, []);
 
   useRealtimeTelemetry();
 
@@ -63,16 +72,65 @@ function Index() {
           </div>
         </div>
 
-        {/* Multi-Site Fleet Command View */}
-        <FleetCommandView />
+        {/* 1 · Executive Summary Ribbons */}
+        {hydrated ? (
+          <ExecutiveRibbons siteLabel={selected?.name} />
+        ) : (
+          <RibbonSkeleton />
+        )}
 
-        {/* Battery Lifespan Guard */}
-        <div className="mt-6">
+        {/* Thin translucent divider */}
+        <Divider />
+
+        {/* 2 · Multi-Site Fleet Command View (interactive) */}
+        <FleetCommandView selectedId={selected?.id ?? null} onSelect={setSelected} />
+
+        {/* Filter banner */}
+        {selected && (
+          <div
+            className="mt-4 flex items-center justify-between gap-3 rounded-xl hairline px-4 py-2.5 backdrop-blur-md"
+            style={{
+              background: "oklch(0.30 0.10 86 / 0.10)",
+              boxShadow: "inset 0 0 0 1px oklch(0.78 0.13 86 / 0.35), 0 0 24px oklch(0.78 0.13 86 / 0.18)",
+            }}
+          >
+            <p className="text-[11px] tracking-[0.22em] uppercase text-silver flex items-center gap-2">
+              <Filter className="h-3.5 w-3.5" style={{ color: "oklch(0.92 0.12 86)" }} />
+              Analytics filtered to <span className="text-[oklch(0.92_0.12_86)] font-semibold tracking-normal normal-case ml-1">{selected.name}</span>
+            </p>
+            <button
+              type="button"
+              onClick={() => setSelected(null)}
+              className="inline-flex items-center gap-1.5 text-[11px] tracking-[0.18em] uppercase text-silver hover:text-white transition-colors"
+            >
+              <X className="h-3.5 w-3.5" /> Clear
+            </button>
+          </div>
+        )}
+
+        <Divider />
+
+        {/* 3 · Battery Lifespan Guard (ring + alert) */}
+        <div key={`bg-${selected?.id ?? "all"}`}>
           <BatteryLifespanGuard />
         </div>
 
-        {/* Hero Energy Flow */}
+        {/* Thermal & Load historical chart */}
         <div className="mt-6">
+          <ThermalLoadTracker siteLabel={selected?.name} />
+        </div>
+
+        <Divider />
+
+        {/* 4 · Contractor Audit Graph */}
+        <div key={`ca-${selected?.id ?? "all"}`}>
+          <ContractorAuditTool />
+        </div>
+
+        <Divider />
+
+        {/* Hero Energy Flow */}
+        <div>
           <EnergyFlow />
         </div>
 
@@ -87,9 +145,6 @@ function Index() {
           <div className="lg:col-span-12">
             <DieselBurden />
           </div>
-          <div className="lg:col-span-12">
-            <ContractorAuditTool />
-          </div>
         </div>
 
         {/* Footer */}
@@ -102,3 +157,39 @@ function Index() {
     </div>
   );
 }
+
+function Divider() {
+  return (
+    <div
+      className="my-8 h-px w-full"
+      style={{
+        background:
+          "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.10) 20%, oklch(0.78 0.13 86 / 0.25) 50%, oklch(1 0 0 / 0.10) 80%, transparent)",
+      }}
+      aria-hidden
+    />
+  );
+}
+
+function RibbonSkeleton() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {[7, 5].map((span, i) => (
+        <div
+          key={i}
+          className={`glass-card p-6 md:p-7 lg:col-span-${span} h-[220px] relative overflow-hidden`}
+        >
+          <div className="h-3 w-40 rounded-full bg-[oklch(1_0_0_/_0.06)] animate-pulse" />
+          <div className="mt-4 h-10 w-56 rounded-md bg-[oklch(1_0_0_/_0.06)] animate-pulse" />
+          <div className="mt-6 h-2 w-full rounded-full bg-[oklch(1_0_0_/_0.06)] animate-pulse" />
+          <div className="mt-6 grid grid-cols-3 gap-3">
+            {[0, 1, 2].map((j) => (
+              <div key={j} className="h-14 rounded-xl bg-[oklch(1_0_0_/_0.05)] animate-pulse" />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
