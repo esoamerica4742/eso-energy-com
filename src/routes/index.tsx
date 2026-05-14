@@ -179,7 +179,7 @@ function Divider() {
       className="my-8 h-px w-full"
       style={{
         background:
-          "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.10) 20%, oklch(0.78 0.13 86 / 0.25) 50%, oklch(1 0 0 / 0.10) 80%, transparent)",
+          "linear-gradient(90deg, transparent, oklch(1 0 0 / 0.08) 20%, oklch(0.62 0.20 277 / 0.30) 50%, oklch(1 0 0 / 0.08) 80%, transparent)",
       }}
       aria-hidden
     />
