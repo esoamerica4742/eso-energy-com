@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Check, ArrowRight, Activity, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 
