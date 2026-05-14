@@ -406,26 +406,40 @@ function StepSync({
   onBack,
   onComplete,
 }: {
-  values: { brand: string; serial: string };
+  values: { brand: string; serial: string; accountEmail: string; accountPassword: string };
   setValues: (v: typeof values) => void;
   onBack: () => void;
-  onComplete: () => void;
+  onComplete: (generatedSerial: string) => void;
 }) {
   const [syncing, setSyncing] = useState(false);
+  const [generatedSerial, setGeneratedSerial] = useState<string>("");
+
+  function generateDongleSerial(brand: string) {
+    const prefix = (brand || "DGL").slice(0, 3).toUpperCase();
+    const year = new Date().getFullYear();
+    const rand = Array.from({ length: 6 }, () =>
+      "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]
+    ).join("");
+    return `${prefix}-${year}-${rand}`;
+  }
 
   function handleSync(e: React.FormEvent) {
     e.preventDefault();
     if (!values.brand) return toast.error("Select your inverter brand");
-    if (values.serial.trim().length < 4) return toast.error("Enter a valid datalogger serial");
+    if (!values.accountEmail.trim()) return toast.error("Enter your manufacturer account email");
+    if (values.accountPassword.length < 4) return toast.error("Enter your account password");
+    const serial = generateDongleSerial(values.brand);
+    setGeneratedSerial(serial);
+    setValues({ ...values, serial });
     setSyncing(true);
   }
 
   function handleConnectionComplete() {
     setSyncing(false);
     toast.success("Remote sync established", {
-      description: "AURA mesh is now reading live telemetry from your inverter.",
+      description: `Dongle ${generatedSerial} bonded to your fleet mesh.`,
     });
-    onComplete();
+    onComplete(generatedSerial);
   }
 
   return (
