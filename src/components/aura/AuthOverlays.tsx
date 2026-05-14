@@ -253,20 +253,25 @@ const STATUS_LINES = [
 ];
 
 export function AuthenticatingOverlay() {
+  const reduce = useReducedMotion();
   const [step, setStep] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setStep((s) => Math.min(s + 1, STATUS_LINES.length - 1)), 520);
+    const cadence = reduce ? 900 : 520;
+    const id = setInterval(() => setStep((s) => Math.min(s + 1, STATUS_LINES.length - 1)), cadence);
     return () => clearInterval(id);
-  }, []);
+  }, [reduce]);
 
   return (
     <motion.div
       key="authenticating"
-      initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-      animate={{ opacity: 1, backdropFilter: "blur(20px)" }}
+      initial={reduce ? { opacity: 0 } : { opacity: 0, backdropFilter: "blur(0px)" }}
+      animate={reduce ? { opacity: 1 } : { opacity: 1, backdropFilter: "blur(20px)" }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: reduce ? 0.2 : 0.5 }}
       className="fixed inset-0 z-[9998] flex items-center justify-center"
+      role="status"
+      aria-live="polite"
+      aria-label="Authenticating access"
       style={{
         background:
           "radial-gradient(900px 500px at 50% 50%, oklch(0.10 0.02 265 / 0.85), oklch(0.05 0.005 265 / 0.95))",
@@ -277,20 +282,22 @@ export function AuthenticatingOverlay() {
       <Particles />
 
       {/* ambient pulse */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        animate={{ opacity: [0.35, 0.7, 0.35] }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-        style={{
-          background:
-            "radial-gradient(500px 320px at 50% 50%, oklch(0.62 0.20 282 / 0.30), transparent 65%)",
-        }}
-      />
+      {!reduce && (
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          animate={{ opacity: [0.35, 0.7, 0.35] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+          style={{
+            background:
+              "radial-gradient(500px 320px at 50% 50%, oklch(0.62 0.20 282 / 0.30), transparent 65%)",
+          }}
+        />
+      )}
 
       <motion.div
-        initial={{ scale: 0.96, opacity: 0, y: 12 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 140, damping: 18 }}
+        initial={reduce ? { opacity: 0 } : { scale: 0.96, opacity: 0, y: 12 }}
+        animate={reduce ? { opacity: 1 } : { scale: 1, opacity: 1, y: 0 }}
+        transition={reduce ? { duration: 0.2 } : { type: "spring", stiffness: 140, damping: 18 }}
         className="relative px-8 py-10 text-center max-w-sm w-full mx-5"
         style={{
           borderRadius: 28,
@@ -303,25 +310,32 @@ export function AuthenticatingOverlay() {
         }}
       >
         {/* concentric pulsing rings */}
-        <div className="relative mx-auto h-24 w-24 mb-7">
-          {[0, 1, 2].map((i) => (
-            <motion.span
-              key={i}
+        <div className="relative mx-auto h-24 w-24 mb-7" aria-hidden>
+          {!reduce &&
+            [0, 1, 2].map((i) => (
+              <motion.span
+                key={i}
+                className="absolute inset-0 rounded-full"
+                animate={{ scale: [0.5, 1.2], opacity: [0.7, 0] }}
+                transition={{
+                  duration: 2.2,
+                  delay: i * 0.55,
+                  repeat: Infinity,
+                  ease: "easeOut",
+                }}
+                style={{ border: "1px solid oklch(0.62 0.20 282 / 0.55)" }}
+              />
+            ))}
+          {reduce && (
+            <span
               className="absolute inset-0 rounded-full"
-              animate={{ scale: [0.5, 1.2], opacity: [0.7, 0] }}
-              transition={{
-                duration: 2.2,
-                delay: i * 0.55,
-                repeat: Infinity,
-                ease: "easeOut",
-              }}
               style={{ border: "1px solid oklch(0.62 0.20 282 / 0.55)" }}
             />
-          ))}
+          )}
           <motion.div
             className="absolute inset-5 rounded-full"
-            animate={{ scale: [1, 1.08, 1] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+            animate={reduce ? undefined : { scale: [1, 1.08, 1] }}
+            transition={reduce ? undefined : { duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
             style={{
               background:
                 "radial-gradient(circle, oklch(0.78 0.13 86 / 0.95), oklch(0.62 0.20 282 / 0.4))",
@@ -334,10 +348,10 @@ export function AuthenticatingOverlay() {
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
-            initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -8, filter: "blur(6px)" }}
-            transition={{ duration: 0.35 }}
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 8, filter: "blur(6px)" }}
+            animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8, filter: "blur(6px)" }}
+            transition={{ duration: reduce ? 0.15 : 0.35 }}
             className="text-[12px] tracking-[0.32em] uppercase text-foreground font-medium"
           >
             {STATUS_LINES[step]}
@@ -345,17 +359,34 @@ export function AuthenticatingOverlay() {
         </AnimatePresence>
 
         {/* futuristic progress bar */}
-        <div className="relative mt-6 mx-auto h-[2px] w-56 overflow-hidden rounded-full bg-white/5">
-          <motion.div
-            className="absolute inset-y-0 left-0 w-1/3 rounded-full"
-            animate={{ x: ["-100%", "300%"] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-            style={{
-              background:
-                "linear-gradient(90deg, transparent, oklch(0.78 0.13 86 / 0.95), transparent)",
-              boxShadow: "0 0 16px oklch(0.78 0.13 86 / 0.8)",
-            }}
-          />
+        <div
+          className="relative mt-6 mx-auto h-[2px] w-56 overflow-hidden rounded-full bg-white/5"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={STATUS_LINES.length - 1}
+          aria-valuenow={step}
+        >
+          {reduce ? (
+            <div
+              className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-300"
+              style={{
+                width: `${((step + 1) / STATUS_LINES.length) * 100}%`,
+                background:
+                  "linear-gradient(90deg, oklch(0.62 0.20 282 / 0.8), oklch(0.78 0.13 86 / 0.95))",
+              }}
+            />
+          ) : (
+            <motion.div
+              className="absolute inset-y-0 left-0 w-1/3 rounded-full"
+              animate={{ x: ["-100%", "300%"] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, oklch(0.78 0.13 86 / 0.95), transparent)",
+                boxShadow: "0 0 16px oklch(0.78 0.13 86 / 0.8)",
+              }}
+            />
+          )}
         </div>
 
         <p className="mt-5 text-[9.5px] tracking-[0.28em] uppercase text-silver/55">
