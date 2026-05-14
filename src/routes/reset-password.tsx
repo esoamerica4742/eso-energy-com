@@ -66,22 +66,22 @@ function ResetPasswordPage() {
       className="min-h-screen flex items-center justify-center px-4 py-8 sm:px-5 sm:py-10"
       style={{
         background:
-          "radial-gradient(1100px 600px at 20% 0%, oklch(0.22 0.06 265 / 0.55), transparent 60%), radial-gradient(900px 500px at 100% 100%, oklch(0.20 0.05 175 / 0.35), transparent 60%), oklch(0.10 0.02 265)",
+          "radial-gradient(1100px 600px at 20% 0%, oklch(0.62 0.20 282 / 0.18), transparent 60%), radial-gradient(900px 500px at 100% 100%, oklch(0.78 0.13 86 / 0.10), transparent 60%), oklch(0.13 0.003 265)",
       }}
     >
       <div
         className="w-full max-w-md glass-card p-6 sm:p-8 md:p-10"
-        style={{ boxShadow: "0 30px 80px -20px oklch(0 0 0 / 0.7), inset 0 0 0 1px oklch(0.30 0.03 265 / 0.5)" }}
+        style={{ boxShadow: "0 30px 80px -20px oklch(0 0 0 / 0.7), inset 0 1px 0 oklch(1 0 0 / 0.08)" }}
       >
         <div className="inline-flex items-center gap-3 mb-6 sm:mb-8">
           <span
             className="h-10 w-10 rounded-xl grid place-items-center"
             style={{
-              background: "linear-gradient(135deg, oklch(0.32 0.05 265), oklch(0.18 0.03 265))",
-              boxShadow: "0 0 24px oklch(0.74 0.17 165 / 0.35), inset 0 0 0 1px oklch(0.74 0.17 165 / 0.4)",
+              background: "linear-gradient(135deg, oklch(0.22 0.008 265), oklch(0.16 0.005 265))",
+              boxShadow: "0 0 24px oklch(0.78 0.13 86 / 0.35), inset 0 0 0 1px oklch(0.78 0.13 86 / 0.4)",
             }}
           >
-            <ShieldCheck className="h-5 w-5 text-[oklch(0.85_0.16_165)]" />
+            <ShieldCheck className="h-5 w-5 text-[var(--gold)]" />
           </span>
           <div className="leading-tight">
             <p className="text-[15px] font-semibold tracking-[0.18em] text-silver">AURA</p>
@@ -118,7 +118,7 @@ function ResetPasswordPage() {
             </p>
           )}
           {info && (
-            <p className="text-[12px] text-[oklch(0.85_0.16_165)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_165_/_0.18)]">
+            <p className="text-[12px] text-[var(--gold)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_165_/_0.18)]">
               {info}
             </p>
           )}
@@ -129,10 +129,10 @@ function ResetPasswordPage() {
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase transition-all disabled:opacity-60"
             style={{
               background:
-                "linear-gradient(135deg, oklch(0.78 0.17 165 / 0.95), oklch(0.62 0.15 195 / 0.95))",
+                "linear-gradient(135deg, oklch(0.78 0.13 86), oklch(0.89 0.07 88))",
               color: "oklch(0.10 0.02 265)",
               boxShadow:
-                "0 0 0 1px oklch(0.74 0.17 165 / 0.6), 0 18px 40px -12px oklch(0.74 0.17 165 / 0.55)",
+                "inset 0 1px 0 oklch(1 0 0 / 0.4), 0 18px 40px -12px oklch(0.78 0.13 86 / 0.45)",
             }}
           >
             {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
@@ -142,7 +142,7 @@ function ResetPasswordPage() {
 
         <Link
           to="/login"
-          className="mt-5 block w-full text-center text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[oklch(0.85_0.16_165)] transition-colors"
+          className="mt-5 block w-full text-center text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[var(--gold)] transition-colors"
         >
           ← Back to sign in
         </Link>
@@ -178,7 +178,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg hairline bg-[oklch(0.13_0.02_265_/_0.7)] px-3.5 py-2.5 text-[13px] text-foreground placeholder:text-silver/40 focus:outline-none focus:ring-2 focus:ring-[oklch(0.74_0.17_165_/_0.4)] transition-shadow"
+        className="w-full rounded-lg hairline bg-[oklch(0.13_0.003_265_/_0.6)] px-3.5 py-2.5 text-[13px] text-foreground placeholder:text-silver/40 focus:outline-none focus:ring-2 focus:ring-[oklch(0.62_0.20_282_/_0.5)] transition-shadow"
       />
     </label>
   );
