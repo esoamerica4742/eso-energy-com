@@ -206,11 +206,12 @@ export function ContractorAuditTool() {
             <AreaChart data={data} margin={{ top: 10, right: 16, left: -8, bottom: 0 }}>
               <defs>
                 <linearGradient id="actualFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="oklch(0.78 0.17 165)" stopOpacity={0.45} />
+                  <stop offset="0%" stopColor="oklch(0.86 0.16 165)" stopOpacity={0.55} />
+                  <stop offset="55%" stopColor="oklch(0.78 0.17 165)" stopOpacity={0.18} />
                   <stop offset="100%" stopColor="oklch(0.78 0.17 165)" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="expectedFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="oklch(0.86 0.02 255)" stopOpacity={0.18} />
+                  <stop offset="0%" stopColor="oklch(0.86 0.02 255)" stopOpacity={0.12} />
                   <stop offset="100%" stopColor="oklch(0.86 0.02 255)" stopOpacity={0} />
                 </linearGradient>
               </defs>
