@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { ConnectingModal } from "@/components/aura/ConnectingModal";
 
 export const Route = createFileRoute("/onboarding")({
   component: OnboardingWizard,
@@ -412,17 +413,14 @@ function StepSync({
 }) {
   const [syncing, setSyncing] = useState(false);
 
-  async function handleSync(e: React.FormEvent) {
+  function handleSync(e: React.FormEvent) {
     e.preventDefault();
     if (!values.brand) return toast.error("Select your inverter brand");
     if (values.serial.trim().length < 4) return toast.error("Enter a valid datalogger serial");
-
     setSyncing(true);
-    toast("Initializing remote handshake…", { description: `Reaching ${values.brand} dongle ${values.serial}` });
+  }
 
-    // Simulated handshake
-    await new Promise((r) => setTimeout(r, 2200));
-
+  function handleConnectionComplete() {
     setSyncing(false);
     toast.success("Remote sync established", {
       description: "AURA mesh is now reading live telemetry from your inverter.",
@@ -431,6 +429,8 @@ function StepSync({
   }
 
   return (
+    <>
+    <ConnectingModal open={syncing} onComplete={handleConnectionComplete} />
     <form onSubmit={handleSync} className="space-y-5">
       <div>
         <p className="eyebrow">Step 03 · Telemetry</p>
@@ -526,6 +526,7 @@ function StepSync({
         </button>
       </div>
     </form>
+    </>
   );
 }
 
