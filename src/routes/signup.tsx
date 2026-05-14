@@ -114,7 +114,8 @@ function SignUpPage() {
 
   const strength = scorePassword(password);
   const passwordOk = strength.score >= MIN_ACCEPTABLE_SCORE;
-
+  const confirmTouched = confirm.length > 0;
+  const passwordsMatch = password === confirm && confirmTouched;
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
