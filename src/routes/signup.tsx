@@ -290,7 +290,7 @@ function SignUpPage() {
 
           <button
             type="submit"
-            disabled={busy || !passwordOk || !passwordsMatch}
+            disabled={busy || !passwordOk || !passwordsMatch || !acceptedTerms || !acceptedPrivacy}
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase transition-all disabled:opacity-60"
             style={{
               background:
