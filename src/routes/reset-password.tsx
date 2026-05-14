@@ -89,7 +89,7 @@ function ResetPasswordPage() {
           </div>
         </div>
 
-        <h1 className="text-2xl font-semibold tracking-tight">Set a new password</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Set a new password</h1>
         <p className="mt-1.5 text-[12px] tracking-wide text-silver/80">
           {ready
             ? "Choose a strong password for your operator account."
