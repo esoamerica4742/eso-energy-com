@@ -111,6 +111,9 @@ function SignUpPage() {
     if (!loading && session) navigate({ to: "/" });
   }, [loading, session, navigate]);
 
+  const strength = scorePassword(password);
+  const passwordOk = strength.score >= MIN_ACCEPTABLE_SCORE;
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
