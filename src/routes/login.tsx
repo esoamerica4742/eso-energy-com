@@ -137,17 +137,12 @@ function LoginPage() {
           </button>
         </form>
 
-        <button
-          type="button"
-          onClick={() => {
-            setMode((m) => (m === "signin" ? "signup" : "signin"));
-            setErr(null);
-            setInfo(null);
-          }}
-          className="mt-5 w-full text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[oklch(0.85_0.16_165)] transition-colors"
+        <Link
+          to="/signup"
+          className="mt-5 block w-full text-center text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[oklch(0.85_0.16_165)] transition-colors"
         >
-          {mode === "signin" ? "Need access? Provision new operator →" : "← Back to sign in"}
-        </button>
+          Need access? Create an account →
+        </Link>
 
         <div className="mt-8 pt-5 border-t border-[oklch(0.30_0.03_265_/_0.5)] flex items-center justify-between text-[10px] tracking-[0.22em] uppercase text-silver/60">
           <span>v4.2 · Encrypted Mesh</span>
