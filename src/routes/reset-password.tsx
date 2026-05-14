@@ -1,75 +1,61 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { Loader2, ShieldCheck, Lock, Mail } from "lucide-react";
+import { Loader2, ShieldCheck, Lock } from "lucide-react";
 
-export const Route = createFileRoute("/login")({
-  component: LoginPage,
+export const Route = createFileRoute("/reset-password")({
+  component: ResetPasswordPage,
   head: () => ({
     meta: [
-      { title: "Sign in · AURA Enterprise" },
-      { name: "description", content: "Sovereign access to the AURA Enterprise command deck." },
+      { title: "Reset password · AURA Enterprise" },
+      { name: "description", content: "Set a new password for your AURA Enterprise account." },
     ],
   }),
 });
 
-function LoginPage() {
+function ResetPasswordPage() {
   const navigate = useNavigate();
-  const { session, loading } = useAuth();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("");
+  const [ready, setReady] = useState(false);
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
+  // Wait for Supabase to detect the recovery token in the URL hash and emit
+  // a PASSWORD_RECOVERY event before allowing the form to submit.
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/" });
-  }, [loading, session, navigate]);
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
+        setReady(true);
+      }
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setReady(true);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setBusy(true);
     setErr(null);
     setInfo(null);
-    try {
-      if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        setInfo("Check your inbox to verify your email, then sign in.");
-        setMode("signin");
-      }
-    } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Authentication failed");
-    } finally {
-      setBusy(false);
+    if (password.length < 8) {
+      setErr("Password must be at least 8 characters.");
+      return;
     }
-  };
-
-  const forgot = async () => {
-    setErr(null);
-    setInfo(null);
-    if (!email.trim()) {
-      setErr("Enter your email above, then tap Forgot password.");
+    if (password !== confirm) {
+      setErr("Passwords do not match.");
       return;
     }
     setBusy(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
+      const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      setInfo("Password reset link sent. Check your inbox.");
+      setInfo("Password updated. Redirecting to your command deck…");
+      setTimeout(() => navigate({ to: "/" }), 1200);
     } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Could not send reset email");
+      setErr(e instanceof Error ? e.message : "Could not update password");
     } finally {
       setBusy(false);
     }
@@ -87,7 +73,7 @@ function LoginPage() {
         className="w-full max-w-md glass-card p-8 md:p-10"
         style={{ boxShadow: "0 30px 80px -20px oklch(0 0 0 / 0.7), inset 0 0 0 1px oklch(0.30 0.03 265 / 0.5)" }}
       >
-        <Link to="/login" className="inline-flex items-center gap-3 mb-8">
+        <div className="inline-flex items-center gap-3 mb-8">
           <span
             className="h-10 w-10 rounded-xl grid place-items-center"
             style={{
@@ -99,35 +85,31 @@ function LoginPage() {
           </span>
           <div className="leading-tight">
             <p className="text-[15px] font-semibold tracking-[0.18em] text-silver">AURA</p>
-            <p className="text-[10px] tracking-[0.32em] text-silver/70 uppercase">Enterprise · Sovereign Access</p>
+            <p className="text-[10px] tracking-[0.32em] text-silver/70 uppercase">Enterprise · Recovery</p>
           </div>
-        </Link>
+        </div>
 
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {mode === "signin" ? "Sign in to your command deck" : "Provision a new operator"}
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Set a new password</h1>
         <p className="mt-1.5 text-[12px] tracking-wide text-silver/80">
-          AES-256 session · Verified bearer token · Africa premium tier.
+          {ready
+            ? "Choose a strong password for your operator account."
+            : "Verifying your recovery link…"}
         </p>
 
         <form onSubmit={submit} className="mt-7 space-y-4">
           <Field
-            id="email"
-            type="email"
-            label="Email"
-            value={email}
-            onChange={setEmail}
-            icon={<Mail className="h-3.5 w-3.5 text-silver" />}
-            placeholder="operator@bank.ng"
-          />
-          <Field
             id="password"
-            type="password"
-            label="Password"
+            label="New password"
             value={password}
             onChange={setPassword}
-            icon={<Lock className="h-3.5 w-3.5 text-silver" />}
-            placeholder="••••••••••"
+            placeholder="At least 8 characters"
+          />
+          <Field
+            id="confirm"
+            label="Confirm password"
+            value={confirm}
+            onChange={setConfirm}
+            placeholder="Repeat new password"
           />
 
           {err && (
@@ -143,7 +125,7 @@ function LoginPage() {
 
           <button
             type="submit"
-            disabled={busy}
+            disabled={busy || !ready}
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase transition-all disabled:opacity-60"
             style={{
               background:
@@ -154,30 +136,16 @@ function LoginPage() {
             }}
           >
             {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-            {mode === "signin" ? "Enter Command Deck" : "Create Operator"}
-          </button>
-
-          <button
-            type="button"
-            onClick={forgot}
-            disabled={busy}
-            className="w-full text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[oklch(0.85_0.16_165)] transition-colors disabled:opacity-50"
-          >
-            Forgot password?
+            Update password
           </button>
         </form>
 
         <Link
-          to="/signup"
+          to="/login"
           className="mt-5 block w-full text-center text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[oklch(0.85_0.16_165)] transition-colors"
         >
-          Need access? Create an account →
+          ← Back to sign in
         </Link>
-
-        <div className="mt-8 pt-5 border-t border-[oklch(0.30_0.03_265_/_0.5)] flex items-center justify-between text-[10px] tracking-[0.22em] uppercase text-silver/60">
-          <span>v4.2 · Encrypted Mesh</span>
-          <span>PoP · Lagos · Frankfurt</span>
-        </div>
       </div>
     </div>
   );
@@ -186,31 +154,27 @@ function LoginPage() {
 function Field({
   id,
   label,
-  type,
   value,
   onChange,
-  icon,
   placeholder,
 }: {
   id: string;
   label: string;
-  type: string;
   value: string;
   onChange: (v: string) => void;
-  icon: React.ReactNode;
   placeholder?: string;
 }) {
   return (
     <label htmlFor={id} className="block">
       <span className="flex items-center gap-1.5 text-[10px] tracking-[0.22em] uppercase text-silver/80 mb-1.5">
-        {icon}
+        <Lock className="h-3.5 w-3.5 text-silver" />
         {label}
       </span>
       <input
         id={id}
-        type={type}
+        type="password"
         required
-        autoComplete={type === "password" ? "current-password" : "email"}
+        autoComplete="new-password"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
