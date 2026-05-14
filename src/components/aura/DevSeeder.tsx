@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FlaskConical, Loader2, Radio, ShieldAlert, Square, X } from "lucide-react";
-import { supabase, ENTERPRISE_CLIENT_ID } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Hidden developer control bar.
@@ -18,9 +18,9 @@ const STREAM_DURATION_MS = 5 * 60 * 1000;
 const TICK_MS = 2000;
 
 const SITES = [
-  { facility_name: "Ikeja Corporate HQ", location_state: "Lagos", status: "online" },
-  { facility_name: "Lekki Premium Terminal", location_state: "Lagos", status: "online" },
-  { facility_name: "Abuja Operations Annex", location_state: "FCT", status: "online" },
+  { name: "Ikeja Corporate HQ", location_state: "Lagos", status: "online" },
+  { name: "Lekki Premium Terminal", location_state: "Lagos", status: "online" },
+  { name: "Abuja Operations Annex", location_state: "FCT", status: "online" },
 ];
 
 const ALERT_TYPES = [
@@ -29,35 +29,61 @@ const ALERT_TYPES = [
   { type: "PERIMETER_HANDSHAKE", severity: "info", msg: () => "Perimeter sensor handshake verified." },
 ];
 
-async function ensureFacilities(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("facilities")
+async function ensureCompanyAndBranches(): Promise<string[]> {
+  const { data: userRes } = await supabase.auth.getUser();
+  const uid = userRes?.user?.id;
+  if (!uid) throw new Error("Sign in required to seed data.");
+
+  // Ensure profile + company
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("company_id")
+    .eq("id", uid)
+    .maybeSingle();
+
+  let companyId = profile?.company_id ?? null;
+  if (!companyId) {
+    const { data: company, error: cErr } = await supabase
+      .from("companies")
+      .insert({ name: "Demo Enterprise" })
+      .select("id")
+      .single();
+    if (cErr) throw cErr;
+    companyId = company.id;
+    const { error: pErr } = await supabase
+      .from("profiles")
+      .update({ company_id: companyId })
+      .eq("id", uid);
+    if (pErr) throw pErr;
+  }
+
+  const { data: existing, error: bErr } = await supabase
+    .from("branches")
     .select("id")
-    .eq("client_id", ENTERPRISE_CLIENT_ID);
-  if (error) throw error;
-  if (data && data.length > 0) return data.map((d: { id: string }) => d.id);
+    .eq("company_id", companyId);
+  if (bErr) throw bErr;
+  if (existing && existing.length > 0) return existing.map((d) => d.id as string);
 
   const { data: inserted, error: insErr } = await supabase
-    .from("facilities")
-    .insert(SITES.map((s) => ({ ...s, client_id: ENTERPRISE_CLIENT_ID })))
+    .from("branches")
+    .insert(SITES.map((s) => ({ ...s, company_id: companyId! })))
     .select("id");
   if (insErr) throw insErr;
-  return (inserted ?? []).map((d: { id: string }) => d.id);
+  return (inserted ?? []).map((d) => d.id as string);
 }
 
-function powerSample(facilityId: string, when: Date) {
-  const phase = (when.getHours() + when.getMinutes() / 60 - 6) / 12; // 0 at 6am, peak midday
+function powerSample(branchId: string, when: Date) {
+  const phase = (when.getHours() + when.getMinutes() / 60 - 6) / 12;
   const dayBoost = Math.max(0, Math.sin(phase * Math.PI));
   const solar = +(380 * dayBoost + Math.random() * 40).toFixed(2);
   const load = +(290 + Math.random() * 80).toFixed(2);
   const battery = Math.round(70 + Math.random() * 25);
   const battTemp = +(28 + Math.random() * 6).toFixed(1);
   const grid = solar > load ? "online" : Math.random() < 0.15 ? "diesel" : "online";
-  // Naira saved = liters not burned * ₦1180 (rough heuristic from solar contribution).
   const litersAvoided = Math.max(0, Math.min(solar, load)) * 0.25;
   const naira = Math.round(litersAvoided * 1180);
   return {
-    facility_id: facilityId,
+    branch_id: branchId,
     solar_generation_kw: solar,
     load_consumption_kw: load,
     battery_percentage: battery,
@@ -99,7 +125,7 @@ export function DevSeeder() {
     setSeeding(true);
     setError(null);
     try {
-      const ids = await ensureFacilities();
+      const ids = await ensureCompanyAndBranches();
       const rows = [];
       const now = new Date();
       for (let d = 6; d >= 0; d--) {
@@ -112,7 +138,7 @@ export function DevSeeder() {
           }
         }
       }
-      const { error: insErr } = await supabase.from("power_logs").insert(rows);
+      const { error: insErr } = await supabase.from("energy_metrics").insert(rows);
       if (insErr) throw insErr;
       setSeedFlash(true);
       window.setTimeout(() => setSeedFlash(false), 1400);
@@ -124,15 +150,15 @@ export function DevSeeder() {
   };
 
   // ---------------------------------------------------------------------------
-  // Live stream — INSERT a row every TICK_MS into a random facility.
+  // Live stream — INSERT a row every TICK_MS into a random branch.
   // ---------------------------------------------------------------------------
   const startStream = async () => {
     if (streaming) return;
     setError(null);
     try {
-      facilityIdsRef.current = await ensureFacilities();
+      facilityIdsRef.current = await ensureCompanyAndBranches();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Could not provision facilities");
+      setError(e instanceof Error ? e.message : "Could not provision branches");
       return;
     }
     setStreaming(true);
@@ -147,32 +173,20 @@ export function DevSeeder() {
       const ids = facilityIdsRef.current;
       const fid = ids[Math.floor(Math.random() * ids.length)];
       try {
-        await supabase.from("power_logs").insert(powerSample(fid, new Date()));
+        await supabase.from("energy_metrics").insert(powerSample(fid, new Date()));
       } catch {
         // Realtime subscription will fall behind quietly; surface in error chip.
       }
 
-      // Random alert ~5% per tick.
+      // Local-only alert banner (~5% per tick) — security_alerts table not in B2B schema.
       if (Math.random() < 0.05) {
         const def = ALERT_TYPES[Math.floor(Math.random() * ALERT_TYPES.length)];
         const liters = Math.round(8 + Math.random() * 22);
         const message = def.msg(liters);
-        const alertRow = {
-          facility_id: fid,
-          alert_type: def.type,
-          message,
-          severity: def.severity,
-          is_resolved: false,
-        };
-        try {
-          await supabase.from("security_alerts").insert(alertRow);
-          if (def.severity === "critical") {
-            const banner = { id: `${now}`, site: "AURA Mesh", code: def.type, message };
-            setLatestAlert(banner);
-            window.setTimeout(() => setLatestAlert((a) => (a?.id === banner.id ? null : a)), 8000);
-          }
-        } catch {
-          // ignore
+        if (def.severity === "critical") {
+          const banner = { id: `${now}`, site: "AURA Mesh", code: def.type, message };
+          setLatestAlert(banner);
+          window.setTimeout(() => setLatestAlert((a) => (a?.id === banner.id ? null : a)), 8000);
         }
       }
 

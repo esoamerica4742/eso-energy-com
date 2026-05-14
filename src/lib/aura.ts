@@ -1,4 +1,4 @@
-import { supabase, ENTERPRISE_CLIENT_ID } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Facility = {
   id: string;
@@ -30,14 +30,20 @@ export type SecurityAlert = {
   created_at: string;
 };
 
+/** Returns branches the signed-in user's company owns, mapped to the legacy Facility shape. */
 export async function fetchFacilities(): Promise<Facility[]> {
   const { data, error } = await supabase
-    .from("facilities")
-    .select("id, client_id, facility_name, location_state, status")
-    .eq("client_id", ENTERPRISE_CLIENT_ID)
-    .order("facility_name", { ascending: true });
+    .from("branches")
+    .select("id, company_id, name, location_state, status")
+    .order("name", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as Facility[];
+  return (data ?? []).map((b) => ({
+    id: b.id,
+    client_id: b.company_id ?? "",
+    facility_name: b.name,
+    location_state: b.location_state ?? "",
+    status: b.status ?? "online",
+  }));
 }
 
 async function facilityIds(): Promise<string[]> {
@@ -45,7 +51,7 @@ async function facilityIds(): Promise<string[]> {
   return list.map((f) => f.id);
 }
 
-/** Latest power_log per facility for the enterprise client. */
+/** Latest energy_metrics row per branch for the company. */
 export async function fetchLatestPowerLogs(): Promise<
   Array<{ facility: Facility; log: PowerLog | null }>
 > {
@@ -53,30 +59,46 @@ export async function fetchLatestPowerLogs(): Promise<
   if (facilities.length === 0) return [];
   const ids = facilities.map((f) => f.id);
   const { data, error } = await supabase
-    .from("power_logs")
+    .from("energy_metrics")
     .select(
-      "id, facility_id, solar_generation_kw, load_consumption_kw, battery_percentage, battery_temperature_c, grid_status, diesel_saved_naira, logged_at",
+      "id, branch_id, solar_generation_kw, load_consumption_kw, battery_percentage, battery_temperature_c, grid_status, diesel_saved_naira, logged_at",
     )
-    .in("facility_id", ids)
+    .in("branch_id", ids)
     .order("logged_at", { ascending: false })
     .limit(500);
   if (error) throw error;
   const latest = new Map<string, PowerLog>();
-  for (const row of (data ?? []) as PowerLog[]) {
-    if (!latest.has(row.facility_id)) latest.set(row.facility_id, row);
+  for (const row of (data ?? []) as Array<{
+    id: number; branch_id: string; solar_generation_kw: number; load_consumption_kw: number;
+    battery_percentage: number; battery_temperature_c: number; grid_status: string;
+    diesel_saved_naira: number; logged_at: string;
+  }>) {
+    if (!latest.has(row.branch_id)) {
+      latest.set(row.branch_id, {
+        id: row.id,
+        facility_id: row.branch_id,
+        solar_generation_kw: Number(row.solar_generation_kw),
+        load_consumption_kw: Number(row.load_consumption_kw),
+        battery_percentage: row.battery_percentage,
+        battery_temperature_c: Number(row.battery_temperature_c),
+        grid_status: row.grid_status,
+        diesel_saved_naira: Number(row.diesel_saved_naira),
+        logged_at: row.logged_at,
+      });
+    }
   }
   return facilities.map((f) => ({ facility: f, log: latest.get(f.id) ?? null }));
 }
 
-/** Sum diesel_saved_naira over the last 24h for the client. */
+/** Sum diesel_saved_naira over the last 24h for the company. */
 export async function fetchDailyOffsetNaira(): Promise<number> {
   const ids = await facilityIds();
   if (ids.length === 0) return 0;
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { data, error } = await supabase
-    .from("power_logs")
+    .from("energy_metrics")
     .select("diesel_saved_naira")
-    .in("facility_id", ids)
+    .in("branch_id", ids)
     .gte("logged_at", since);
   if (error) throw error;
   return (data ?? []).reduce(
@@ -86,15 +108,7 @@ export async function fetchDailyOffsetNaira(): Promise<number> {
   );
 }
 
-export async function fetchActiveAlerts(limit = 6): Promise<SecurityAlert[]> {
-  const ids = await facilityIds();
-  if (ids.length === 0) return [];
-  const { data, error } = await supabase
-    .from("security_alerts")
-    .select("id, facility_id, alert_type, message, severity, is_resolved, created_at")
-    .in("facility_id", ids)
-    .order("created_at", { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return (data ?? []) as SecurityAlert[];
+/** Security alerts table is not part of the new B2B schema; return empty. */
+export async function fetchActiveAlerts(_limit = 6): Promise<SecurityAlert[]> {
+  return [];
 }
