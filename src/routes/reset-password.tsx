@@ -63,17 +63,17 @@ function ResetPasswordPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-5 py-10"
+      className="min-h-screen flex items-center justify-center px-4 py-8 sm:px-5 sm:py-10"
       style={{
         background:
           "radial-gradient(1100px 600px at 20% 0%, oklch(0.22 0.06 265 / 0.55), transparent 60%), radial-gradient(900px 500px at 100% 100%, oklch(0.20 0.05 175 / 0.35), transparent 60%), oklch(0.10 0.02 265)",
       }}
     >
       <div
-        className="w-full max-w-md glass-card p-8 md:p-10"
+        className="w-full max-w-md glass-card p-6 sm:p-8 md:p-10"
         style={{ boxShadow: "0 30px 80px -20px oklch(0 0 0 / 0.7), inset 0 0 0 1px oklch(0.30 0.03 265 / 0.5)" }}
       >
-        <div className="inline-flex items-center gap-3 mb-8">
+        <div className="inline-flex items-center gap-3 mb-6 sm:mb-8">
           <span
             className="h-10 w-10 rounded-xl grid place-items-center"
             style={{
@@ -89,7 +89,7 @@ function ResetPasswordPage() {
           </div>
         </div>
 
-        <h1 className="text-2xl font-semibold tracking-tight">Set a new password</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Set a new password</h1>
         <p className="mt-1.5 text-[12px] tracking-wide text-silver/80">
           {ready
             ? "Choose a strong password for your operator account."

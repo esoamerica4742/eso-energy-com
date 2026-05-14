@@ -54,27 +54,6 @@ function LoginPage() {
     }
   };
 
-  const forgot = async () => {
-    setErr(null);
-    setInfo(null);
-    if (!email.trim()) {
-      setErr("Enter your email above, then tap Forgot password.");
-      return;
-    }
-    setBusy(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (error) throw error;
-      setInfo("Password reset link sent. Check your inbox.");
-    } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Could not send reset email");
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
     <div
       className="min-h-screen flex items-center justify-center px-5 py-10"
@@ -157,14 +136,12 @@ function LoginPage() {
             {mode === "signin" ? "Enter Command Deck" : "Create Operator"}
           </button>
 
-          <button
-            type="button"
-            onClick={forgot}
-            disabled={busy}
-            className="w-full text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[oklch(0.85_0.16_165)] transition-colors disabled:opacity-50"
+          <Link
+            to="/forgot-password"
+            className="block w-full text-center text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[oklch(0.85_0.16_165)] transition-colors"
           >
             Forgot password?
-          </button>
+          </Link>
         </form>
 
         <Link
