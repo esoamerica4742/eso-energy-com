@@ -1,5 +1,5 @@
 import { ChevronDown, LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { triggerLogout, useLogoutActive } from "@/lib/logout-bus";
 
 function Logo() {
   return (
@@ -17,6 +17,7 @@ function Logo() {
 }
 
 export function TopHeader() {
+  const loggingOut = useLogoutActive();
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl"
       style={{
@@ -59,12 +60,18 @@ export function TopHeader() {
           </button>
           <button
             type="button"
-            onClick={() => supabase.auth.signOut()}
+            onClick={() => triggerLogout()}
+            disabled={loggingOut}
             aria-label="Sign out"
-            className="hairline rounded-full p-2 text-silver hover:text-[oklch(0.85_0.18_25)] hover:bg-[oklch(0.66_0.24_25_/_0.1)] transition-colors"
+            className="hairline rounded-full px-3 py-2 inline-flex items-center gap-2 text-silver hover:text-[oklch(0.85_0.18_25)] hover:bg-[oklch(0.66_0.24_25_/_0.1)] transition-colors disabled:opacity-90"
             style={{ background: "oklch(0.19 0.006 265)" }}
           >
             <LogOut className="h-3.5 w-3.5" />
+            {loggingOut && (
+              <span className="text-[10px] font-mono tracking-[0.28em] uppercase text-[oklch(0.85_0.18_25)]">
+                De-initializing…
+              </span>
+            )}
           </button>
         </div>
       </div>

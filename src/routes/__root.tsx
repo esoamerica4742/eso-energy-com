@@ -10,6 +10,7 @@ import {
 import { useEffect } from "react";
 
 import { Toaster } from "sonner";
+import { LogoutOverlay } from "@/components/aura/LogoutOverlay";
 
 import appCss from "../styles.css?url";
 
@@ -139,6 +140,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <LogoutOverlay />
       <Toaster
         position="top-right"
         theme="dark"
