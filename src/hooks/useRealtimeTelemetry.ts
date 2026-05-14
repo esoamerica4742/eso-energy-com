@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Subscribes to realtime changes on power_logs / security_alerts / facilities
- * and invalidates the AURA dashboard caches.
+ * and invalidates the EsoEnergy dashboard caches.
  */
 export function useRealtimeTelemetry() {
   const qc = useQueryClient();

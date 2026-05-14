@@ -130,7 +130,7 @@ export function ConnectingModal({
             {/* Header */}
             <div className="mt-6 text-center">
               <p className="text-[10px] tracking-[0.32em] uppercase text-silver/80">
-                AURA Mesh · Remote Handshake
+                EsoEnergy Mesh · Remote Handshake
               </p>
               <AnimatePresence mode="wait">
                 {stage === "scanning" ? (

@@ -32,7 +32,7 @@ export function EnergyFlow() {
   );
   const avgBatt = totals.battCount > 0 ? Math.round(totals.batt / totals.battCount) : 0;
   const heroSite = sites.find((s) => s.log) ?? sites[0];
-  const heroName = heroSite?.facility.facility_name ?? "AURA Mesh";
+  const heroName = heroSite?.facility.facility_name ?? "EsoEnergy Mesh";
 
   // Path coords (in viewBox 1000x260)
   const pathA = "M 165 130 C 280 130, 360 130, 480 130";
@@ -81,7 +81,7 @@ export function EnergyFlow() {
         {/* Nodes overlay */}
         <div className="absolute inset-0 grid grid-cols-3 items-center px-2 md:px-6">
           <Node label="Solar Capture Fields" sub={`${totals.solar.toFixed(1)} kW · ${sites.length} site${sites.length === 1 ? "" : "s"}`} icon={<Sun className="h-7 w-7" />} accent="solar" />
-          <Node label="AURA Inverter Intelligence" sub="MPPT · 98.2% η" icon={<Cpu className="h-7 w-7" />} accent="silver" central />
+          <Node label="EsoEnergy Inverter Intelligence" sub="MPPT · 98.2% η" icon={<Cpu className="h-7 w-7" />} accent="silver" central />
           <Node label="Facility Grid Load" sub={`${totals.load.toFixed(1)} kW draw`} icon={<Building2 className="h-7 w-7" />} accent="storage" />
         </div>
       </div>
