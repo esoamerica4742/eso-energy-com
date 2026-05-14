@@ -244,6 +244,10 @@ function LoginPage() {
           <span>PoP · Lagos · Frankfurt</span>
         </div>
       </div>
+
+      <AnimatePresence>
+        {phase === "authenticating" && <AuthenticatingOverlay />}
+      </AnimatePresence>
     </div>
   );
 }
