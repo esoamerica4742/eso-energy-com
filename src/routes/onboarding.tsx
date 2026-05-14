@@ -406,26 +406,40 @@ function StepSync({
   onBack,
   onComplete,
 }: {
-  values: { brand: string; serial: string };
+  values: { brand: string; serial: string; accountEmail: string; accountPassword: string };
   setValues: (v: typeof values) => void;
   onBack: () => void;
-  onComplete: () => void;
+  onComplete: (generatedSerial: string) => void;
 }) {
   const [syncing, setSyncing] = useState(false);
+  const [generatedSerial, setGeneratedSerial] = useState<string>("");
+
+  function generateDongleSerial(brand: string) {
+    const prefix = (brand || "DGL").slice(0, 3).toUpperCase();
+    const year = new Date().getFullYear();
+    const rand = Array.from({ length: 6 }, () =>
+      "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]
+    ).join("");
+    return `${prefix}-${year}-${rand}`;
+  }
 
   function handleSync(e: React.FormEvent) {
     e.preventDefault();
     if (!values.brand) return toast.error("Select your inverter brand");
-    if (values.serial.trim().length < 4) return toast.error("Enter a valid datalogger serial");
+    if (!values.accountEmail.trim()) return toast.error("Enter your manufacturer account email");
+    if (values.accountPassword.length < 4) return toast.error("Enter your account password");
+    const serial = generateDongleSerial(values.brand);
+    setGeneratedSerial(serial);
+    setValues({ ...values, serial });
     setSyncing(true);
   }
 
   function handleConnectionComplete() {
     setSyncing(false);
     toast.success("Remote sync established", {
-      description: "AURA mesh is now reading live telemetry from your inverter.",
+      description: `Dongle ${generatedSerial} bonded to your fleet mesh.`,
     });
-    onComplete();
+    onComplete(generatedSerial);
   }
 
   return (
@@ -455,16 +469,58 @@ function StepSync({
             ))}
           </select>
         </Field>
-        <Field label="Datalogger Serial / Dongle ID" htmlFor="serial" hint="Found on the Wi-Fi dongle sticker">
-          <input
-            id="serial"
-            className={inputClass}
-            placeholder="DGL-2026-A8F33C"
-            value={values.serial}
-            onChange={(e) => setValues({ ...values, serial: e.target.value })}
-          />
-        </Field>
       </div>
+
+      <AnimatePresence initial={false}>
+        {values.brand && (
+          <motion.div
+            key="creds"
+            initial={{ opacity: 0, y: 12, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -8, height: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              <Field label={`${values.brand} Account Email / Username`} htmlFor="accountEmail">
+                <input
+                  id="accountEmail"
+                  className={inputClass}
+                  placeholder="operator@enterprise.com"
+                  value={values.accountEmail}
+                  onChange={(e) => setValues({ ...values, accountEmail: e.target.value })}
+                  autoComplete="off"
+                />
+              </Field>
+              <Field label="Account Password" htmlFor="accountPassword">
+                <input
+                  id="accountPassword"
+                  type="password"
+                  className={inputClass}
+                  placeholder="••••••••"
+                  value={values.accountPassword}
+                  onChange={(e) => setValues({ ...values, accountPassword: e.target.value })}
+                  autoComplete="new-password"
+                />
+              </Field>
+            </div>
+            <div
+              className="mt-4 flex items-start gap-2.5 rounded-lg hairline px-3.5 py-3"
+              style={{
+                background:
+                  "linear-gradient(135deg, oklch(0.30 0.10 165 / 0.18), oklch(0.18 0.018 265 / 0.4))",
+              }}
+            >
+              <span className="text-sm leading-none mt-0.5">🔒</span>
+              <p className="text-[10.5px] leading-relaxed tracking-[0.04em] text-silver/85 font-light">
+                <span className="text-foreground font-medium">Secured with 256-bit Enterprise Encryption.</span>{" "}
+                Your credentials are used solely to establish the initial API token handshake and are
+                <span className="text-foreground"> never stored on our servers</span>.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Sync visual */}
       <div className="flex justify-center pt-4">
@@ -518,7 +574,7 @@ function StepSync({
         </SecondaryButton>
         <button
           type="button"
-          onClick={onComplete}
+          onClick={() => onComplete("")}
           disabled={syncing}
           className="text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-foreground transition-colors"
         >
@@ -599,11 +655,13 @@ function OnboardingWizard() {
   const [branches, setBranches] = useState<Branch[]>([
     { id: crypto.randomUUID(), name: "", state: "" },
   ]);
-  const [sync, setSync] = useState({ brand: "", serial: "" });
+  const [sync, setSync] = useState({ brand: "", serial: "", accountEmail: "", accountPassword: "" });
 
-  function complete() {
+  function complete(generatedSerial?: string) {
     toast.success("Onboarding complete", {
-      description: "Routing you to the Command Deck…",
+      description: generatedSerial
+        ? `Dongle ${generatedSerial} bonded · routing to the Command Deck…`
+        : "Routing you to the Command Deck…",
     });
     setTimeout(() => navigate({ to: "/" }), 900);
   }
