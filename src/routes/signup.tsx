@@ -359,3 +359,47 @@ function Field({
     </label>
   );
 }
+
+function Consent({
+  id,
+  checked,
+  onChange,
+  label,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: React.ReactNode;
+}) {
+  return (
+    <label htmlFor={id} className="flex items-start gap-2.5 cursor-pointer select-none">
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="peer sr-only"
+      />
+      <span
+        aria-hidden
+        className="mt-0.5 grid place-items-center h-4 w-4 shrink-0 rounded-[5px] hairline bg-[oklch(0.13_0.02_265_/_0.7)] transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[oklch(0.74_0.17_165_/_0.5)]"
+        style={
+          checked
+            ? {
+                background:
+                  "linear-gradient(135deg, oklch(0.78 0.17 165 / 0.95), oklch(0.62 0.15 195 / 0.95))",
+                boxShadow: "0 0 0 1px oklch(0.74 0.17 165 / 0.7)",
+              }
+            : undefined
+        }
+      >
+        {checked && (
+          <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="oklch(0.10 0.02 265)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 8.5L6.5 12L13 4.5" />
+          </svg>
+        )}
+      </span>
+      <span className="text-[12px] leading-snug text-silver/85">{label}</span>
+    </label>
+  );
+}
