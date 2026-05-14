@@ -2,22 +2,22 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, ShieldCheck, Lock, Mail } from "lucide-react";
+import { Loader2, ShieldCheck, Lock, Mail, User } from "lucide-react";
 
-export const Route = createFileRoute("/login")({
-  component: LoginPage,
+export const Route = createFileRoute("/signup")({
+  component: SignUpPage,
   head: () => ({
     meta: [
-      { title: "Sign in · AURA Enterprise" },
-      { name: "description", content: "Sovereign access to the AURA Enterprise command deck." },
+      { title: "Create account · AURA Enterprise" },
+      { name: "description", content: "Provision a new operator on the AURA Enterprise command deck." },
     ],
   }),
 });
 
-function LoginPage() {
+function SignUpPage() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -34,21 +34,24 @@ function LoginPage() {
     setErr(null);
     setInfo(null);
     try {
-      if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+      if (!fullName.trim()) throw new Error("Please enter your full name");
+      if (password.length < 8) throw new Error("Password must be at least 8 characters");
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: { full_name: fullName.trim() },
+        },
+      });
+      if (error) throw error;
+      if (data.session) {
+        navigate({ to: "/" });
       } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
         setInfo("Check your inbox to verify your email, then sign in.");
-        setMode("signin");
       }
     } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Authentication failed");
+      setErr(e instanceof Error ? e.message : "Sign up failed");
     } finally {
       setBusy(false);
     }
@@ -66,7 +69,7 @@ function LoginPage() {
         className="w-full max-w-md glass-card p-8 md:p-10"
         style={{ boxShadow: "0 30px 80px -20px oklch(0 0 0 / 0.7), inset 0 0 0 1px oklch(0.30 0.03 265 / 0.5)" }}
       >
-        <Link to="/login" className="inline-flex items-center gap-3 mb-8">
+        <Link to="/signup" className="inline-flex items-center gap-3 mb-8">
           <span
             className="h-10 w-10 rounded-xl grid place-items-center"
             style={{
@@ -78,24 +81,33 @@ function LoginPage() {
           </span>
           <div className="leading-tight">
             <p className="text-[15px] font-semibold tracking-[0.18em] text-silver">AURA</p>
-            <p className="text-[10px] tracking-[0.32em] text-silver/70 uppercase">Enterprise · Sovereign Access</p>
+            <p className="text-[10px] tracking-[0.32em] text-silver/70 uppercase">Enterprise · New Operator</p>
           </div>
         </Link>
 
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {mode === "signin" ? "Sign in to your command deck" : "Provision a new operator"}
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
         <p className="mt-1.5 text-[12px] tracking-wide text-silver/80">
-          AES-256 session · Verified bearer token · Africa premium tier.
+          Provision sovereign access in under 30 seconds.
         </p>
 
         <form onSubmit={submit} className="mt-7 space-y-4">
+          <Field
+            id="fullName"
+            type="text"
+            label="Full Name"
+            value={fullName}
+            onChange={setFullName}
+            autoComplete="name"
+            icon={<User className="h-3.5 w-3.5 text-silver" />}
+            placeholder="Ada Lovelace"
+          />
           <Field
             id="email"
             type="email"
             label="Email"
             value={email}
             onChange={setEmail}
+            autoComplete="email"
             icon={<Mail className="h-3.5 w-3.5 text-silver" />}
             placeholder="operator@bank.ng"
           />
@@ -105,8 +117,9 @@ function LoginPage() {
             label="Password"
             value={password}
             onChange={setPassword}
+            autoComplete="new-password"
             icon={<Lock className="h-3.5 w-3.5 text-silver" />}
-            placeholder="••••••••••"
+            placeholder="At least 8 characters"
           />
 
           {err && (
@@ -133,15 +146,15 @@ function LoginPage() {
             }}
           >
             {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-            {mode === "signin" ? "Enter Command Deck" : "Create Operator"}
+            Create Account
           </button>
         </form>
 
         <Link
-          to="/signup"
+          to="/login"
           className="mt-5 block w-full text-center text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[oklch(0.85_0.16_165)] transition-colors"
         >
-          Need access? Create an account →
+          Already an operator? Sign in →
         </Link>
 
         <div className="mt-8 pt-5 border-t border-[oklch(0.30_0.03_265_/_0.5)] flex items-center justify-between text-[10px] tracking-[0.22em] uppercase text-silver/60">
@@ -161,6 +174,7 @@ function Field({
   onChange,
   icon,
   placeholder,
+  autoComplete,
 }: {
   id: string;
   label: string;
@@ -169,6 +183,7 @@ function Field({
   onChange: (v: string) => void;
   icon: React.ReactNode;
   placeholder?: string;
+  autoComplete?: string;
 }) {
   return (
     <label htmlFor={id} className="block">
@@ -180,7 +195,7 @@ function Field({
         id={id}
         type={type}
         required
-        autoComplete={type === "password" ? "current-password" : "email"}
+        autoComplete={autoComplete}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
