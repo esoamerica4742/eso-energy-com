@@ -103,6 +103,7 @@ function SignUpPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -113,7 +114,8 @@ function SignUpPage() {
 
   const strength = scorePassword(password);
   const passwordOk = strength.score >= MIN_ACCEPTABLE_SCORE;
-
+  const confirmTouched = confirm.length > 0;
+  const passwordsMatch = password === confirm && confirmTouched;
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
@@ -122,6 +124,7 @@ function SignUpPage() {
     try {
       if (!fullName.trim()) throw new Error("Please enter your full name");
       if (!passwordOk) throw new Error("Password is too weak. Strengthen it to continue.");
+      if (!passwordsMatch) throw new Error("Passwords do not match.");
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
@@ -208,6 +211,26 @@ function SignUpPage() {
             placeholder="At least 8 characters"
           />
           {password.length > 0 && <StrengthMeter strength={strength} />}
+          <Field
+            id="confirm"
+            type="password"
+            label="Confirm password"
+            value={confirm}
+            onChange={setConfirm}
+            autoComplete="new-password"
+            icon={<Lock className="h-3.5 w-3.5 text-silver" />}
+            placeholder="Repeat password"
+          />
+          {confirmTouched && (
+            <p
+              className="text-[10px] tracking-[0.22em] uppercase"
+              style={{
+                color: passwordsMatch ? "oklch(0.85 0.16 165)" : "oklch(0.75 0.18 25)",
+              }}
+            >
+              {passwordsMatch ? "Passwords match" : "Passwords do not match"}
+            </p>
+          )}
 
           {err && (
             <p className="text-[12px] text-[oklch(0.85_0.18_25)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_25_/_0.18)]">
@@ -222,7 +245,7 @@ function SignUpPage() {
 
           <button
             type="submit"
-            disabled={busy || !passwordOk}
+            disabled={busy || !passwordOk || !passwordsMatch}
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase transition-all disabled:opacity-60"
             style={{
               background:
