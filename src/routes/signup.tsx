@@ -14,6 +14,89 @@ export const Route = createFileRoute("/signup")({
   }),
 });
 
+type Strength = {
+  score: 0 | 1 | 2 | 3 | 4;
+  label: string;
+  color: string;
+  checks: { len: boolean; lower: boolean; upper: boolean; digit: boolean; symbol: boolean };
+};
+
+const MIN_ACCEPTABLE_SCORE = 3;
+
+function scorePassword(pw: string): Strength {
+  const checks = {
+    len: pw.length >= 8,
+    lower: /[a-z]/.test(pw),
+    upper: /[A-Z]/.test(pw),
+    digit: /\d/.test(pw),
+    symbol: /[^A-Za-z0-9]/.test(pw),
+  };
+  const passed = Object.values(checks).filter(Boolean).length;
+  let score: Strength["score"] = 0;
+  if (pw.length === 0) score = 0;
+  else if (passed <= 2 || pw.length < 8) score = 1;
+  else if (passed === 3) score = 2;
+  else if (passed === 4) score = 3;
+  else score = 4;
+  if (pw.length >= 14 && score < 4) score = (score + 1) as Strength["score"];
+
+  const labels = ["", "Too weak", "Fair", "Strong", "Excellent"];
+  const colors = [
+    "oklch(0.30 0.03 265)",
+    "oklch(0.65 0.20 25)",
+    "oklch(0.78 0.16 75)",
+    "oklch(0.78 0.17 165)",
+    "oklch(0.85 0.16 165)",
+  ];
+  return { score, label: labels[score], color: colors[score], checks };
+}
+
+function StrengthMeter({ strength }: { strength: Strength }) {
+  const { score, label, color, checks } = strength;
+  return (
+    <div className="space-y-2" aria-live="polite">
+      <div className="flex gap-1">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="h-1 flex-1 rounded-full transition-colors"
+            style={{ background: i <= score ? color : "oklch(0.25 0.03 265 / 0.5)" }}
+          />
+        ))}
+      </div>
+      {score > 0 && (
+        <div className="flex items-center justify-between text-[10px] tracking-[0.22em] uppercase">
+          <span style={{ color }}>{label}</span>
+          <span className="text-silver/60">
+            {score >= MIN_ACCEPTABLE_SCORE ? "Acceptable" : "Strengthen to continue"}
+          </span>
+        </div>
+      )}
+      {score > 0 && score < MIN_ACCEPTABLE_SCORE && (
+        <ul className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px] text-silver/70">
+          <Req ok={checks.len} text="8+ characters" />
+          <Req ok={checks.upper} text="Uppercase" />
+          <Req ok={checks.lower} text="Lowercase" />
+          <Req ok={checks.digit} text="Number" />
+          <Req ok={checks.symbol} text="Symbol" />
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Req({ ok, text }: { ok: boolean; text: string }) {
+  return (
+    <li className="flex items-center gap-1.5">
+      <span
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ background: ok ? "oklch(0.78 0.17 165)" : "oklch(0.40 0.03 265)" }}
+      />
+      <span className={ok ? "text-[oklch(0.85_0.16_165)]" : ""}>{text}</span>
+    </li>
+  );
+}
+
 function SignUpPage() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
@@ -28,6 +111,9 @@ function SignUpPage() {
     if (!loading && session) navigate({ to: "/" });
   }, [loading, session, navigate]);
 
+  const strength = scorePassword(password);
+  const passwordOk = strength.score >= MIN_ACCEPTABLE_SCORE;
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
@@ -35,7 +121,7 @@ function SignUpPage() {
     setInfo(null);
     try {
       if (!fullName.trim()) throw new Error("Please enter your full name");
-      if (password.length < 8) throw new Error("Password must be at least 8 characters");
+      if (!passwordOk) throw new Error("Password is too weak. Strengthen it to continue.");
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
@@ -121,6 +207,7 @@ function SignUpPage() {
             icon={<Lock className="h-3.5 w-3.5 text-silver" />}
             placeholder="At least 8 characters"
           />
+          {password.length > 0 && <StrengthMeter strength={strength} />}
 
           {err && (
             <p className="text-[12px] text-[oklch(0.85_0.18_25)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_25_/_0.18)]">
@@ -135,7 +222,7 @@ function SignUpPage() {
 
           <button
             type="submit"
-            disabled={busy}
+            disabled={busy || !passwordOk}
             className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase transition-all disabled:opacity-60"
             style={{
               background:
