@@ -18,9 +18,9 @@ const STREAM_DURATION_MS = 5 * 60 * 1000;
 const TICK_MS = 2000;
 
 const SITES = [
-  { facility_name: "Ikeja Corporate HQ", location_state: "Lagos", status: "online" },
-  { facility_name: "Lekki Premium Terminal", location_state: "Lagos", status: "online" },
-  { facility_name: "Abuja Operations Annex", location_state: "FCT", status: "online" },
+  { name: "Ikeja Corporate HQ", location_state: "Lagos", status: "online" },
+  { name: "Lekki Premium Terminal", location_state: "Lagos", status: "online" },
+  { name: "Abuja Operations Annex", location_state: "FCT", status: "online" },
 ];
 
 const ALERT_TYPES = [
@@ -29,35 +29,61 @@ const ALERT_TYPES = [
   { type: "PERIMETER_HANDSHAKE", severity: "info", msg: () => "Perimeter sensor handshake verified." },
 ];
 
-async function ensureFacilities(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("facilities")
+async function ensureCompanyAndBranches(): Promise<string[]> {
+  const { data: userRes } = await supabase.auth.getUser();
+  const uid = userRes?.user?.id;
+  if (!uid) throw new Error("Sign in required to seed data.");
+
+  // Ensure profile + company
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("company_id")
+    .eq("id", uid)
+    .maybeSingle();
+
+  let companyId = profile?.company_id ?? null;
+  if (!companyId) {
+    const { data: company, error: cErr } = await supabase
+      .from("companies")
+      .insert({ name: "Demo Enterprise" })
+      .select("id")
+      .single();
+    if (cErr) throw cErr;
+    companyId = company.id;
+    const { error: pErr } = await supabase
+      .from("profiles")
+      .update({ company_id: companyId })
+      .eq("id", uid);
+    if (pErr) throw pErr;
+  }
+
+  const { data: existing, error: bErr } = await supabase
+    .from("branches")
     .select("id")
-    .eq("client_id", ENTERPRISE_CLIENT_ID);
-  if (error) throw error;
-  if (data && data.length > 0) return data.map((d: { id: string }) => d.id);
+    .eq("company_id", companyId);
+  if (bErr) throw bErr;
+  if (existing && existing.length > 0) return existing.map((d) => d.id as string);
 
   const { data: inserted, error: insErr } = await supabase
-    .from("facilities")
-    .insert(SITES.map((s) => ({ ...s, client_id: ENTERPRISE_CLIENT_ID })))
+    .from("branches")
+    .insert(SITES.map((s) => ({ ...s, company_id: companyId! })))
     .select("id");
   if (insErr) throw insErr;
-  return (inserted ?? []).map((d: { id: string }) => d.id);
+  return (inserted ?? []).map((d) => d.id as string);
 }
 
-function powerSample(facilityId: string, when: Date) {
-  const phase = (when.getHours() + when.getMinutes() / 60 - 6) / 12; // 0 at 6am, peak midday
+function powerSample(branchId: string, when: Date) {
+  const phase = (when.getHours() + when.getMinutes() / 60 - 6) / 12;
   const dayBoost = Math.max(0, Math.sin(phase * Math.PI));
   const solar = +(380 * dayBoost + Math.random() * 40).toFixed(2);
   const load = +(290 + Math.random() * 80).toFixed(2);
   const battery = Math.round(70 + Math.random() * 25);
   const battTemp = +(28 + Math.random() * 6).toFixed(1);
   const grid = solar > load ? "online" : Math.random() < 0.15 ? "diesel" : "online";
-  // Naira saved = liters not burned * ₦1180 (rough heuristic from solar contribution).
   const litersAvoided = Math.max(0, Math.min(solar, load)) * 0.25;
   const naira = Math.round(litersAvoided * 1180);
   return {
-    facility_id: facilityId,
+    branch_id: branchId,
     solar_generation_kw: solar,
     load_consumption_kw: load,
     battery_percentage: battery,
