@@ -87,6 +87,9 @@ function Index() {
           <div className="lg:col-span-12">
             <DieselBurden />
           </div>
+          <div className="lg:col-span-12">
+            <ContractorAuditTool />
+          </div>
         </div>
 
         {/* Footer */}
