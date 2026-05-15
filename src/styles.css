@@ -662,7 +662,7 @@
     0 8px 22px oklch(0.32 0.13 280 / 0.45),
     0 0 24px oklch(0.62 0.20 282 / 0.30);
 }
-.lux-tab[data-active="false"] { border-color: rgba(255,255,255,0.12); }
+.lux-tab[data-active="false"] { background: transparent; border: 1px solid rgba(255,255,255,0.20); box-shadow: none; }
 
 /* Gold CTA — hover deepen + lift, click pulse */
 .btn-gold-cta {
