@@ -275,7 +275,7 @@ function ShimmerButton({ busy, label }: { busy: boolean; label: string }) {
     <button
       type="submit"
       disabled={busy}
-      className="btn-gold-cta relative w-full overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase disabled:opacity-60 cursor-pointer"
+      className="btn-gold-cta relative w-full overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.18em] uppercase whitespace-nowrap disabled:opacity-60 cursor-pointer"
       style={{
         color: "oklch(0.10 0.02 265)",
         background:
