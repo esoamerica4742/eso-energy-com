@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Lock, Mail, User } from "lucide-react";
+import { Loader2, Lock, Mail, ShieldCheck, User } from "lucide-react";
 import { EsoLogo } from "@/components/aura/EsoLogo";
 import {
   SignupSuccessCard,
