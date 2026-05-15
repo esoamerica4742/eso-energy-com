@@ -272,13 +272,10 @@ function StaggerList({ children }: { children: React.ReactNode }) {
 
 function ShimmerButton({ busy, label }: { busy: boolean; label: string }) {
   return (
-    <motion.button
+    <button
       type="submit"
       disabled={busy}
-      whileHover={{ letterSpacing: "0.30em", boxShadow: "0 0 0 1px oklch(0.78 0.13 86 / 0.6), 0 0 36px oklch(0.78 0.13 86 / 0.45), 0 18px 40px -12px oklch(0.78 0.13 86 / 0.55)" }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 380, damping: 22 }}
-      className="relative w-full overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase disabled:opacity-60 cursor-pointer"
+      className="btn-gold-cta relative w-full overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase disabled:opacity-60 cursor-pointer"
       style={{
         color: "oklch(0.10 0.02 265)",
         background:
@@ -302,7 +299,7 @@ function ShimmerButton({ busy, label }: { busy: boolean; label: string }) {
         {label}
       </span>
       <style>{`@keyframes lux-shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }`}</style>
-    </motion.button>
+    </button>
   );
 }
 
