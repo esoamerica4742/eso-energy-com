@@ -160,11 +160,11 @@ function LoginPage() {
                 <h1 className="text-2xl font-semibold tracking-tight">
                   {mode === "signin" ? "Sign in to your command deck" : "Provision a new operator"}
                 </h1>
-                <p className="mt-1.5 text-[12px] tracking-wide text-silver/80">
-                  {mode === "signin"
-                    ? "AES-256 session · Verified bearer token · Africa premium tier."
-                    : "Sovereign access in under 30 seconds. Encrypted by default."}
-                </p>
+                {mode === "signup" && (
+                  <p className="mt-1.5 text-[12px] tracking-wide text-silver/80">
+                    Sovereign access in under 30 seconds. Encrypted by default.
+                  </p>
+                )}
 
                 <form onSubmit={submit} className="mt-7 space-y-4">
                   <StaggerList key={mode}>
@@ -275,7 +275,7 @@ function ShimmerButton({ busy, label }: { busy: boolean; label: string }) {
     <button
       type="submit"
       disabled={busy}
-      className="btn-gold-cta relative w-full overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase disabled:opacity-60 cursor-pointer"
+      className="btn-gold-cta relative w-full overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.18em] uppercase whitespace-nowrap disabled:opacity-60 cursor-pointer"
       style={{
         color: "oklch(0.10 0.02 265)",
         background:
