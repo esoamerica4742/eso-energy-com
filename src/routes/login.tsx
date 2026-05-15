@@ -188,7 +188,7 @@ function LoginPage() {
                       onChange={setEmail}
                       autoComplete="email"
                       icon={<Mail className="h-3.5 w-3.5 text-silver" />}
-                      placeholder="operator@bank.ng"
+                      placeholder="operator@yourcompany.ng"
                     />
                     <Field
                       id="password"
