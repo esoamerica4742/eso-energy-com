@@ -160,11 +160,11 @@ function LoginPage() {
                 <h1 className="text-2xl font-semibold tracking-tight">
                   {mode === "signin" ? "Sign in to your command deck" : "Provision a new operator"}
                 </h1>
-                <p className="mt-1.5 text-[12px] tracking-wide text-silver/80">
-                  {mode === "signin"
-                    ? "AES-256 session · Verified bearer token · Africa premium tier."
-                    : "Sovereign access in under 30 seconds. Encrypted by default."}
-                </p>
+                {mode === "signup" && (
+                  <p className="mt-1.5 text-[12px] tracking-wide text-silver/80">
+                    Sovereign access in under 30 seconds. Encrypted by default.
+                  </p>
+                )}
 
                 <form onSubmit={submit} className="mt-7 space-y-4">
                   <StaggerList key={mode}>
