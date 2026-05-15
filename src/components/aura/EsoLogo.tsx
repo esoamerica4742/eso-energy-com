@@ -40,7 +40,7 @@ export function EsoLogo({
         <span className="eso-logo-text relative inline-flex items-baseline eso-display leading-none">
           <span className="text-white">ESO</span>
           <span aria-hidden className="inline-block w-[0.32em]" />
-          <span className="text-neutral-300/85">ENERGY</span>
+          <span className="text-white">ENERGY</span>
         </span>
       ) : (
         <span className="eso-logo-text relative inline-flex items-center tracking-[0.3em]">
