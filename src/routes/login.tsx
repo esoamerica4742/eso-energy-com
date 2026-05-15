@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Lock, Mail, User } from "lucide-react";
+import { Loader2, Lock, Mail, ShieldCheck, User } from "lucide-react";
 import { EsoLogo } from "@/components/aura/EsoLogo";
 import {
   SignupSuccessCard,
@@ -90,50 +90,50 @@ function LoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-5 py-10 overflow-hidden"
+      className="login-bg min-h-screen flex items-center justify-center px-5 py-10 overflow-hidden"
       style={{
         background:
           "radial-gradient(1100px 600px at 20% 0%, oklch(0.62 0.20 282 / 0.18), transparent 60%), radial-gradient(900px 500px at 100% 100%, oklch(0.78 0.13 86 / 0.10), transparent 60%), oklch(0.13 0.003 265)",
       }}
     >
       <div
-        className="w-full max-w-md glass-card p-8 md:p-10 relative"
+        className="w-full max-w-md glass-card py-8 md:py-10 px-[44px] md:px-[52px] relative"
         style={{ boxShadow: "0 30px 80px -20px oklch(0 0 0 / 0.7), inset 0 1px 0 oklch(1 0 0 / 0.08)" }}
       >
-        <Link to="/login" className="block mb-7 text-center">
-          <EsoLogo size="lg" className="mx-auto" />
+        <Link to="/login" className="block mb-6 text-center">
+          <EsoLogo size="lg" variant="display" className="mx-auto" />
           <p className="mt-3 text-[10px] tracking-[0.32em] text-silver/70 uppercase font-mono">
             Secure Multi-Tenant Telemetry Gateway // NGA-Region-2026
           </p>
+          <p className="mt-2 inline-flex items-center justify-center gap-1.5 text-[11px] font-medium text-silver/90">
+            <ShieldCheck className="h-3.5 w-3.5 text-[oklch(0.78_0.14_175)]" aria-hidden />
+            <span>AES-256 session · Verified bearer token · Africa premium tier</span>
+          </p>
         </Link>
 
-        {/* Mode toggle */}
+        {/* Mode toggle — proper tabs */}
         <div
-          className="relative grid grid-cols-2 gap-1 p-1 rounded-full hairline mb-7"
-          style={{ background: "oklch(0.13 0.003 265 / 0.6)" }}
+          className="grid grid-cols-2 gap-2 p-1.5 rounded-full mb-7"
+          style={{ background: "oklch(0.13 0.003 265 / 0.6)", border: "1px solid rgba(255,255,255,0.06)" }}
+          role="tablist"
         >
-          <motion.div
-            layout
-            transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="absolute top-1 bottom-1 w-[calc(50%-0.25rem)] rounded-full"
-            style={{
-              left: mode === "signin" ? "0.25rem" : "calc(50% + 0rem)",
-              background:
-                "linear-gradient(135deg, oklch(0.62 0.20 282 / 0.35), oklch(0.62 0.20 282 / 0.18))",
-              boxShadow: "inset 0 0 0 1px oklch(0.62 0.20 282 / 0.5), 0 0 18px oklch(0.62 0.20 282 / 0.25)",
-            }}
-          />
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === "signin"}
+            data-active={mode === "signin"}
             onClick={() => switchMode("signin")}
-            className="relative z-10 py-2 text-[10px] tracking-[0.28em] uppercase text-silver/90 hover:text-white transition-colors"
+            className="lux-tab"
           >
             Enter Command Deck
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={mode === "signup"}
+            data-active={mode === "signup"}
             onClick={() => switchMode("signup")}
-            className="relative z-10 py-2 text-[10px] tracking-[0.28em] uppercase text-silver/90 hover:text-white transition-colors"
+            className="lux-tab"
           >
             Request Access
           </button>
@@ -188,7 +188,7 @@ function LoginPage() {
                       onChange={setEmail}
                       autoComplete="email"
                       icon={<Mail className="h-3.5 w-3.5 text-silver" />}
-                      placeholder="operator@bank.ng"
+                      placeholder="operator@yourcompany.ng"
                     />
                     <Field
                       id="password"
@@ -272,13 +272,10 @@ function StaggerList({ children }: { children: React.ReactNode }) {
 
 function ShimmerButton({ busy, label }: { busy: boolean; label: string }) {
   return (
-    <motion.button
+    <button
       type="submit"
       disabled={busy}
-      whileHover={{ letterSpacing: "0.30em", boxShadow: "0 0 0 1px oklch(0.78 0.13 86 / 0.6), 0 0 36px oklch(0.78 0.13 86 / 0.45), 0 18px 40px -12px oklch(0.78 0.13 86 / 0.55)" }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 380, damping: 22 }}
-      className="relative w-full overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase disabled:opacity-60 cursor-pointer"
+      className="btn-gold-cta relative w-full overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase disabled:opacity-60 cursor-pointer"
       style={{
         color: "oklch(0.10 0.02 265)",
         background:
@@ -302,7 +299,7 @@ function ShimmerButton({ busy, label }: { busy: boolean; label: string }) {
         {label}
       </span>
       <style>{`@keyframes lux-shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }`}</style>
-    </motion.button>
+    </button>
   );
 }
 
@@ -339,7 +336,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg hairline bg-[oklch(0.13_0.003_265_/_0.6)] px-3.5 py-2.5 text-[13px] text-foreground placeholder:text-silver/40 focus:outline-none focus:ring-2 focus:ring-[oklch(0.62_0.20_282_/_0.5)] transition-shadow"
+        className="lux-input w-full rounded-lg px-3.5 py-2.5 text-[13px] text-foreground"
       />
     </label>
   );

@@ -578,3 +578,113 @@
   background-position: 250% 0;
 }
 
+/* Bebas Neue display lockup for the EsoEnergy wordmark */
+.eso-display {
+  font-family: "Bebas Neue", "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  font-feature-settings: "ss01", "kern";
+}
+
+/* Login canvas — noise grain + faint scanlines on top of base gradient */
+.login-bg { position: relative; isolation: isolate; }
+.login-bg::before,
+.login-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.login-bg::before {
+  z-index: 0;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.login-bg::after {
+  z-index: 0;
+  opacity: 0.35;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 3px,
+      rgba(255,255,255,0.025) 3px,
+      rgba(255,255,255,0.025) 4px
+    );
+}
+.login-bg > * { position: relative; z-index: 1; }
+
+/* Login form fields */
+.lux-input {
+  background: oklch(0.215 0.028 265 / 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  transition:
+    border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.35s ease,
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.lux-input::placeholder { color: rgba(255, 255, 255, 0.42); }
+.lux-input:hover { border-color: rgba(255, 255, 255, 0.42); }
+.lux-input:focus {
+  outline: none;
+  background: oklch(0.230 0.028 265 / 0.75);
+  border-color: oklch(0.78 0.14 175 / 0.85);
+  box-shadow:
+    0 0 0 3px oklch(0.78 0.14 175 / 0.18),
+    0 0 18px oklch(0.78 0.14 175 / 0.40),
+    inset 0 1px 0 oklch(1 0 0 / 0.05);
+  transform: translateY(-1px);
+}
+
+/* Auth tabs */
+.lux-tab {
+  position: relative;
+  border-radius: 9999px;
+  padding: 0.55rem 0.75rem;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+  background: transparent;
+  color: oklch(0.74 0.020 270 / 0.78);
+  cursor: pointer;
+}
+.lux-tab:hover { color: #fff; }
+.lux-tab[data-active="true"] {
+  color: #fff;
+  background: linear-gradient(135deg, oklch(0.32 0.13 280), oklch(0.26 0.14 285));
+  border-color: oklch(0.62 0.20 282 / 0.55);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.10),
+    0 8px 22px oklch(0.32 0.13 280 / 0.45),
+    0 0 24px oklch(0.62 0.20 282 / 0.30);
+}
+.lux-tab[data-active="false"] { border-color: rgba(255,255,255,0.12); }
+
+/* Gold CTA — hover deepen + lift, click pulse */
+.btn-gold-cta {
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.3s ease,
+    letter-spacing 0.3s ease;
+}
+.btn-gold-cta:hover {
+  transform: translateY(-2px);
+  filter: saturate(1.15) brightness(0.96);
+  letter-spacing: 0.26em;
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.45),
+    0 0 0 1px oklch(0.78 0.13 86 / 0.7),
+    0 14px 36px -6px oklch(0.70 0.15 80 / 0.55),
+    0 0 38px oklch(0.78 0.13 86 / 0.50);
+}
+.btn-gold-cta:active { transform: translateY(0) scale(0.985); animation: gold-cta-pulse 0.45s ease-out; }
+@keyframes gold-cta-pulse {
+  0% { box-shadow: 0 0 0 0 oklch(0.78 0.13 86 / 0.65); }
+  100% { box-shadow: 0 0 0 14px oklch(0.78 0.13 86 / 0); }
+}
+
