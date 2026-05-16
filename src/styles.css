@@ -688,3 +688,214 @@
   100% { box-shadow: 0 0 0 14px oklch(0.78 0.13 86 / 0); }
 }
 
+/* ============================================================
+   Command Deck — cyber-industrial auth surface
+   ============================================================ */
+.deck-canvas {
+  position: relative;
+  background-color: #030508;
+  isolation: isolate;
+}
+.deck-canvas::before,
+.deck-canvas::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.deck-canvas::before {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 110%, rgba(13, 45, 36, 0.55) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 55% at 0% 0%, rgba(29, 24, 68, 0.55) 0%, transparent 60%);
+}
+.deck-canvas::after {
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.deck-canvas > * { position: relative; z-index: 1; }
+
+.deck-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 24px;
+  background: rgba(10, 14, 22, 0.75);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 40px 80px -20px rgba(0, 0, 0, 0.8),
+    0 0 60px rgba(139, 92, 246, 0.06);
+  overflow: hidden;
+}
+
+/* Top progress rail */
+.deck-progress {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #8b5cf6, #14b8a6, transparent);
+  background-size: 200% 100%;
+  animation: deck-progress-slide 1.4s linear infinite;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+  z-index: 5;
+}
+@keyframes deck-progress-slide {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Capsule tabs */
+.deck-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.deck-tab {
+  position: relative;
+  border-radius: 9999px;
+  padding: 0.7rem 0.75rem;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #4b5563;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, background 0.3s ease;
+}
+.deck-tab:hover { color: #fff; }
+.deck-tab:active { transform: scale(0.97); }
+.deck-tab[data-active="true"] {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.10), rgba(139, 92, 246, 0.04));
+  box-shadow:
+    inset 0 0 0 1px rgba(139, 92, 246, 0.35),
+    inset 0 0 24px rgba(139, 92, 246, 0.15),
+    0 0 18px rgba(139, 92, 246, 0.20);
+}
+
+/* Recessed inputs */
+.deck-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.deck-input-wrap:hover { border-color: rgba(255, 255, 255, 0.12); }
+.deck-input-wrap:focus-within {
+  border-color: #8b5cf6;
+  box-shadow:
+    0 0 0 3px rgba(139, 92, 246, 0.15),
+    0 0 22px rgba(139, 92, 246, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.55);
+}
+.deck-input {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  outline: none;
+  padding: 0.85rem 0.95rem 0.85rem 0.5rem;
+  color: #fff;
+  font-size: 13.5px;
+  letter-spacing: -0.005em;
+}
+.deck-input::placeholder { color: rgba(156, 163, 175, 0.5); font-weight: 400; }
+.deck-icon-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 0.85rem;
+  color: rgba(156, 163, 175, 0.7);
+}
+.deck-input-wrap:focus-within .deck-icon-slot { color: #a78bfa; }
+
+/* Champagne machined gold button */
+.deck-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #080c10;
+  background: linear-gradient(135deg, #e5b974 0%, #f7e4c5 50%, #d4a762 100%);
+  border: 0;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 14px 38px -10px rgba(229, 185, 116, 0.55),
+    0 0 0 1px rgba(229, 185, 116, 0.35);
+  animation: deck-cta-breathe 3.6s ease-in-out infinite;
+  transition: filter 0.25s ease, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  overflow: hidden;
+  isolation: isolate;
+}
+.deck-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  background-size: 220% 100%;
+  background-position: -150% 0;
+  transition: background-position 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+.deck-cta:hover { filter: brightness(1.06) saturate(1.08); }
+.deck-cta:hover::after { background-position: 250% 0; }
+.deck-cta:active { transform: scale(0.995); }
+.deck-cta:disabled { opacity: 0.85; cursor: progress; animation: none; }
+@keyframes deck-cta-breathe {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -1px 0 rgba(0,0,0,0.15), 0 14px 38px -10px rgba(229,185,116,0.55), 0 0 0 1px rgba(229,185,116,0.35); }
+  50%      { box-shadow: inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -1px 0 rgba(0,0,0,0.15), 0 18px 48px -8px rgba(229,185,116,0.75), 0 0 0 1px rgba(229,185,116,0.55); }
+}
+
+/* Matrix metadata footer */
+.deck-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem 1rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+}
+.deck-meta-row { display: contents; }
+.deck-meta .ml { text-align: left; }
+.deck-meta .mc { text-align: center; }
+.deck-meta .mr { text-align: right; }
+
+/* Field label */
+.deck-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 500;
+}
+
