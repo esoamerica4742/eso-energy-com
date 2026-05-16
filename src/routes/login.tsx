@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, Lock, Mail, ShieldCheck, User } from "lucide-react";
+import { Loader2, Lock, Mail, ShieldCheck, User, Building2 } from "lucide-react";
 import { EsoLogo } from "@/components/aura/EsoLogo";
 import {
   SignupSuccessCard,
@@ -30,14 +31,13 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [company, setCompany] = useState("");
   const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
   const [phase, setPhase] = useState<"idle" | "authenticating" | "signup-success">("idle");
+  const [ctaLabel, setCtaLabel] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && session && phase !== "signup-success") {
-      // small delay so the authenticating overlay can breathe
       const t = setTimeout(() => navigate({ to: "/" }), 900);
       return () => clearTimeout(t);
     }
@@ -46,39 +46,45 @@ function LoginPage() {
   const switchMode = (next: Mode) => {
     if (next === mode) return;
     setDirection(next === "signup" ? 1 : -1);
-    setErr(null);
-    setInfo(null);
     setMode(next);
   };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (busy) return;
     setBusy(true);
-    setErr(null);
-    setInfo(null);
+    setCtaLabel("ESTABLISHING SECURE PROTOCOLS…");
+    // Brief cinematic delay so the progress rail registers
+    await new Promise((r) => setTimeout(r, 650));
     try {
       if (mode === "signin") {
+        if (!email || !password) throw new Error("Email and password are required.");
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         setPhase("authenticating");
       } else {
-        if (!fullName.trim()) throw new Error("Please enter your full name");
+        if (!fullName.trim()) throw new Error("Please enter your full name.");
+        if (password.length < 8) throw new Error("Password must be at least 8 characters.");
         const { error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
-            data: { full_name: fullName.trim() },
+            data: { full_name: fullName.trim(), company: company.trim() },
           },
         });
         if (error) throw error;
         setPhase("signup-success");
       }
-    } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Authentication failed");
-    } finally {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Authentication failed.";
+      toast.error("EsoEnergy Systems", { description: msg });
       setBusy(false);
+      setCtaLabel(null);
+      return;
     }
+    setBusy(false);
+    setCtaLabel(null);
   };
 
   const returnToDeck = () => {
@@ -88,52 +94,43 @@ function LoginPage() {
     switchMode("signin");
   };
 
+  const isSignin = mode === "signin";
+
   return (
-    <div
-      className="login-bg min-h-screen flex items-center justify-center px-5 py-10 overflow-hidden"
-      style={{
-        background:
-          "radial-gradient(1100px 600px at 20% 0%, oklch(0.62 0.20 282 / 0.18), transparent 60%), radial-gradient(900px 500px at 100% 100%, oklch(0.78 0.13 86 / 0.10), transparent 60%), oklch(0.13 0.003 265)",
-      }}
-    >
-      <div
-        className="w-full max-w-md glass-card py-8 md:py-10 px-[44px] md:px-[52px] relative"
-        style={{ boxShadow: "0 30px 80px -20px oklch(0 0 0 / 0.7), inset 0 1px 0 oklch(1 0 0 / 0.08)" }}
-      >
-        <Link to="/login" className="block mb-6 text-center">
+    <div className="deck-canvas min-h-screen flex items-center justify-center px-5 py-10 overflow-hidden">
+      <div className="deck-card py-9 md:py-11 px-7 md:px-10 relative">
+        {busy && <div className="deck-progress" aria-hidden />}
+
+        <Link to="/login" className="block mb-7 text-center">
           <EsoLogo size="lg" variant="display" className="mx-auto" />
-          <p className="mt-3 text-[10px] tracking-[0.32em] text-silver/70 uppercase font-mono">
-            Secure Multi-Tenant Telemetry Gateway // NGA-Region-2026
+          <p className="mt-3 text-[10px] tracking-[0.32em] text-white/40 uppercase font-mono">
+            Secure Multi-Tenant Telemetry Gateway
           </p>
-          <p className="mt-2 inline-flex items-center justify-center gap-1.5 text-[11px] font-medium text-silver/90">
-            <ShieldCheck className="h-3.5 w-3.5 text-[oklch(0.78_0.14_175)]" aria-hidden />
-            <span>AES-256 session · Verified bearer token · Africa premium tier</span>
+          <p className="mt-2 inline-flex items-center justify-center gap-1.5 text-[11px] font-medium text-white/70">
+            <ShieldCheck className="h-3.5 w-3.5 text-[#14b8a6]" aria-hidden />
+            <span>AES-256 session · Verified bearer · Africa premium tier</span>
           </p>
         </Link>
 
-        {/* Mode toggle — proper tabs */}
-        <div
-          className="grid grid-cols-2 gap-2 p-1.5 rounded-full mb-7"
-          style={{ background: "oklch(0.13 0.003 265 / 0.6)", border: "1px solid rgba(255,255,255,0.06)" }}
-          role="tablist"
-        >
+        {/* Capsule tabs */}
+        <div className="deck-tabs mb-8" role="tablist">
           <button
             type="button"
             role="tab"
-            aria-selected={mode === "signin"}
-            data-active={mode === "signin"}
+            aria-selected={isSignin}
+            data-active={isSignin}
             onClick={() => switchMode("signin")}
-            className="lux-tab"
+            className="deck-tab"
           >
             Enter Command Deck
           </button>
           <button
             type="button"
             role="tab"
-            aria-selected={mode === "signup"}
-            data-active={mode === "signup"}
+            aria-selected={!isSignin}
+            data-active={!isSignin}
             onClick={() => switchMode("signup")}
-            className="lux-tab"
+            className="deck-tab"
           >
             Request Access
           </button>
@@ -152,23 +149,26 @@ function LoginPage() {
             <AnimatePresence mode="wait" initial={false} custom={direction}>
               <motion.div
                 key={mode}
-                initial={{ x: 60 * direction, opacity: 0, scale: 0.97 }}
-                animate={{ x: 0, opacity: 1, scale: 1 }}
-                exit={{ x: -60 * direction, opacity: 0, scale: 0.97 }}
-                transition={{ type: "spring", stiffness: 120, damping: 14 }}
+                initial={{ x: 50 * direction, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -50 * direction, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 130, damping: 16 }}
               >
-                <h1 className="text-2xl font-semibold tracking-tight">
-                  {mode === "signin" ? "Sign in to your command deck" : "Provision a new operator"}
+                <h1
+                  className="text-[28px] md:text-[30px] leading-[1.1] tracking-tight text-white"
+                  style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 500 }}
+                >
+                  {isSignin ? "Sign in to your command deck" : "Request operator access"}
                 </h1>
-                {mode === "signup" && (
-                  <p className="mt-1.5 text-[12px] tracking-wide text-silver/80">
-                    Sovereign access in under 30 seconds. Encrypted by default.
-                  </p>
-                )}
+                <p className="mt-2 text-[12.5px] text-white/55 leading-relaxed">
+                  {isSignin
+                    ? "Sovereign telemetry · encrypted by default."
+                    : "Provision a new operator in under 30 seconds."}
+                </p>
 
-                <form onSubmit={submit} className="mt-7 space-y-4">
-                  <StaggerList key={mode}>
-                    {mode === "signup" && (
+                <form onSubmit={submit} className="mt-7 space-y-4" noValidate>
+                  <Stagger>
+                    {!isSignin && (
                       <Field
                         id="fullName"
                         type="text"
@@ -176,8 +176,20 @@ function LoginPage() {
                         value={fullName}
                         onChange={setFullName}
                         autoComplete="name"
-                        icon={<User className="h-3.5 w-3.5 text-silver" />}
+                        icon={<User className="h-4 w-4" />}
                         placeholder="Ada Lovelace"
+                      />
+                    )}
+                    {!isSignin && (
+                      <Field
+                        id="company"
+                        type="text"
+                        label="Company"
+                        value={company}
+                        onChange={setCompany}
+                        autoComplete="organization"
+                        icon={<Building2 className="h-4 w-4" />}
+                        placeholder="EsoEnergy Holdings"
                       />
                     )}
                     <Field
@@ -187,7 +199,7 @@ function LoginPage() {
                       value={email}
                       onChange={setEmail}
                       autoComplete="email"
-                      icon={<Mail className="h-3.5 w-3.5 text-silver" />}
+                      icon={<Mail className="h-4 w-4" />}
                       placeholder="operator@yourcompany.ng"
                     />
                     <Field
@@ -196,52 +208,48 @@ function LoginPage() {
                       label="Password"
                       value={password}
                       onChange={setPassword}
-                      autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                      icon={<Lock className="h-3.5 w-3.5 text-silver" />}
-                      placeholder={mode === "signin" ? "••••••••••" : "At least 8 characters"}
+                      autoComplete={isSignin ? "current-password" : "new-password"}
+                      icon={<Lock className="h-4 w-4" />}
+                      placeholder={isSignin ? "••••••••••" : "At least 8 characters"}
                     />
 
-                    {err && (
-                      <p className="text-[12px] text-[oklch(0.85_0.18_25)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_25_/_0.18)]">
-                        {err}
-                      </p>
-                    )}
-                    {info && (
-                      <p className="text-[12px] text-[var(--gold)] hairline rounded-md px-3 py-2 bg-[oklch(0.30_0.10_165_/_0.18)]">
-                        {info}
-                      </p>
-                    )}
+                    <button type="submit" disabled={busy} className="deck-cta mt-2">
+                      {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                      <span>
+                        {ctaLabel
+                          ? ctaLabel
+                          : isSignin
+                            ? "Initialize Command Flow"
+                            : "Submit Access Request"}
+                      </span>
+                    </button>
 
-                    <ShimmerButton busy={busy} label={
-                      busy
-                        ? mode === "signin" ? "Initializing…" : "Provisioning…"
-                        : mode === "signin" ? "Initialize Command Flow" : "Submit Access Setup"
-                    } />
-
-                    {mode === "signin" && (
+                    {isSignin && (
                       <Link
                         to="/forgot-password"
-                        className="block w-full text-center text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-[var(--gold)] transition-colors"
+                        className="block w-full text-center text-[10.5px] tracking-[0.28em] uppercase text-white/45 hover:text-[#e5b974] transition-colors"
                       >
                         Forgot password?
                       </Link>
                     )}
-                  </StaggerList>
+                  </Stagger>
                 </form>
               </motion.div>
             </AnimatePresence>
           </motion.div>
 
           <AnimatePresence>
-            {phase === "signup-success" && (
-              <SignupSuccessCard onReturn={returnToDeck} />
-            )}
+            {phase === "signup-success" && <SignupSuccessCard onReturn={returnToDeck} />}
           </AnimatePresence>
         </div>
 
-        <div className="mt-8 pt-5 border-t border-border flex items-center justify-between text-[10px] tracking-[0.22em] uppercase text-silver/60">
-          <span>v4.2 · Encrypted Mesh</span>
-          <span>PoP · Lagos · Frankfurt</span>
+        <div className="mt-9 pt-5 border-t border-white/5 deck-meta">
+          <span className="ml">V4.2</span>
+          <span className="mc">ENCRYPTED POP</span>
+          <span className="mr">LAGOS</span>
+          <span className="ml">MESH</span>
+          <span className="mc" />
+          <span className="mr">FRANKFURT</span>
         </div>
       </div>
 
@@ -252,7 +260,7 @@ function LoginPage() {
   );
 }
 
-function StaggerList({ children }: { children: React.ReactNode }) {
+function Stagger({ children }: { children: React.ReactNode }) {
   const arr = Array.isArray(children) ? children.flat().filter(Boolean) : [children];
   return (
     <>
@@ -261,45 +269,12 @@ function StaggerList({ children }: { children: React.ReactNode }) {
           key={i}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08 + i * 0.05, type: "spring", stiffness: 220, damping: 22 }}
+          transition={{ delay: 0.06 + i * 0.05, type: "spring", stiffness: 220, damping: 22 }}
         >
           {child}
         </motion.div>
       ))}
     </>
-  );
-}
-
-function ShimmerButton({ busy, label }: { busy: boolean; label: string }) {
-  return (
-    <button
-      type="submit"
-      disabled={busy}
-      className="btn-gold-cta relative w-full overflow-hidden inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.18em] uppercase whitespace-nowrap disabled:opacity-60 cursor-pointer"
-      style={{
-        color: "oklch(0.10 0.02 265)",
-        background:
-          "linear-gradient(135deg, oklch(0.78 0.13 86), oklch(0.89 0.07 88))",
-        boxShadow: "inset 0 1px 0 oklch(1 0 0 / 0.4), 0 18px 40px -12px oklch(0.78 0.13 86 / 0.45)",
-      }}
-    >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(110deg, transparent 30%, oklch(1 0 0 / 0.45) 50%, transparent 70%)",
-          backgroundSize: "220% 100%",
-          animation: "lux-shimmer 2.6s linear infinite",
-          mixBlendMode: "overlay",
-        }}
-      />
-      <span className="relative z-10 inline-flex items-center gap-2">
-        {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-        {label}
-      </span>
-      <style>{`@keyframes lux-shimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }`}</style>
-    </button>
   );
 }
 
@@ -323,21 +298,25 @@ function Field({
   autoComplete?: string;
 }) {
   return (
-    <label htmlFor={id} className="block">
-      <span className="flex items-center gap-1.5 text-[10px] tracking-[0.22em] uppercase text-silver/80 mb-1.5">
-        {icon}
+    <div>
+      <label htmlFor={id} className="deck-label mb-2">
         {label}
-      </span>
-      <input
-        id={id}
-        type={type}
-        required
-        autoComplete={autoComplete ?? (type === "password" ? "current-password" : "email")}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="lux-input w-full rounded-lg px-3.5 py-2.5 text-[13px] text-foreground"
-      />
-    </label>
+      </label>
+      <div className="deck-input-wrap">
+        <span className="deck-icon-slot" aria-hidden>
+          {icon}
+        </span>
+        <input
+          id={id}
+          type={type}
+          required
+          autoComplete={autoComplete}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="deck-input"
+        />
+      </div>
+    </div>
   );
 }
