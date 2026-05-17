@@ -1,4 +1,5 @@
-import { ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogIn, LogOut, UserPlus } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { triggerLogout, useLogoutActive } from "@/lib/logout-bus";
 import { EsoLogo } from "@/components/aura/EsoLogo";
 
