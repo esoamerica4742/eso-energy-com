@@ -1,744 +1,1159 @@
-import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "framer-motion";
-import { toast } from "sonner";
-import { EsoLogo } from "@/components/aura/EsoLogo";
-import {
-  Building2,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  MapPin,
-  Plus,
-  Radio,
-  Trash2,
-  UserRound,
-  Wifi,
-} from "lucide-react";
-import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
-import { ConnectingModal } from "@/components/aura/ConnectingModal";
+import { useState, useEffect } from "react";
 
-export const Route = createFileRoute("/onboarding")({
-  component: OnboardingWizard,
-  head: () => ({
-    meta: [
-      { title: "Onboarding · EsoEnergy Systems" },
-      { name: "description", content: "Provision your sovereign energy fleet in three premium steps." },
-    ],
-  }),
-});
+const EsoEnergyCreateAccount = () => {
+  const [step, setStep] = useState(1);
+  const [focused, setFocused] = useState(null);
+  const [formData, setFormData] = useState({
+    companyName: "",
+    fullName: "",
+    email: "",
+    password: "",
+    companySize: "",
+    role: "",
+    country: "",
+  });
+  const [showPass, setShowPass] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [particles, setParticles] = useState([]);
 
-const STATES = [
-  "Lagos",
-  "Abuja FCT",
-  "Rivers",
-  "Kano",
-  "Oyo",
-  "Ogun",
-  "Kaduna",
-  "Enugu",
-  "Delta",
-  "Anambra",
-];
+  useEffect(() => {
+    setMounted(true);
+    const pts = Array.from({ length: 28 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 2 + 0.5,
+      opacity: Math.random() * 0.5 + 0.1,
+      speed: Math.random() * 20 + 15,
+      delay: Math.random() * 10,
+    }));
+    setParticles(pts);
+  }, []);
 
-const INVERTERS = ["Sunsynk", "Growatt", "Victron", "Deye", "SMA"];
+  const handleChange = (e) => {
+    setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
+  };
 
-type Branch = { id: string; name: string; state: string };
+  const strength = (() => {
+    const p = formData.password;
+    let s = 0;
+    if (p.length >= 8) s++;
+    if (/[A-Z]/.test(p)) s++;
+    if (/[0-9]/.test(p)) s++;
+    if (/[^A-Za-z0-9]/.test(p)) s++;
+    return s;
+  })();
 
-const profileSchema = z.object({
-  fullName: z.string().trim().min(2, "Full name is required").max(80),
-  email: z.string().trim().email("Invalid work email").max(255),
-  company: z.string().trim().min(2, "Company name is required").max(120),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^\+234\s?\d{3}\s?\d{3}\s?\d{4}$/, "Use +234 XXX XXX XXXX format"),
-});
-
-// ---------- Step indicator ----------
-
-const STEPS = [
-  { key: "profile", label: "Profile", icon: UserRound },
-  { key: "facilities", label: "Facilities", icon: Building2 },
-  { key: "sync", label: "Sync", icon: Radio },
-] as const;
-
-function Stepper({ current }: { current: number }) {
-  return (
-    <ol className="relative flex items-center justify-between gap-2">
-      {STEPS.map((s, i) => {
-        const done = i < current;
-        const active = i === current;
-        const Icon = done ? Check : s.icon;
-        const color = done
-          ? "oklch(0.78 0.17 165)"
-          : active
-            ? "oklch(0.86 0.02 255)"
-            : "oklch(0.74 0.025 255 / 0.5)";
-        return (
-          <li key={s.key} className="flex-1 flex flex-col items-center relative">
-            {i < STEPS.length - 1 && (
-              <span
-                className="absolute top-5 left-1/2 h-px w-full"
-                style={{
-                  background:
-                    i < current
-                      ? "linear-gradient(90deg, oklch(0.78 0.17 165), oklch(0.78 0.17 165 / 0.3))"
-                      : "oklch(1 0 0 / 0.08)",
-                }}
-                aria-hidden
-              />
-            )}
-            <motion.span
-              layout
-              className="relative z-10 grid h-10 w-10 place-items-center rounded-full hairline"
-              style={{
-                color,
-                background: done
-                  ? "oklch(0.30 0.10 165 / 0.35)"
-                  : active
-                    ? "oklch(0.22 0.02 265)"
-                    : "oklch(0.18 0.012 265)",
-                boxShadow: done
-                  ? "inset 0 0 0 1px oklch(0.78 0.17 165 / 0.55), 0 0 24px oklch(0.78 0.17 165 / 0.4)"
-                  : active
-                    ? "inset 0 0 0 1px oklch(0.86 0.02 255 / 0.35), 0 0 18px oklch(0.86 0.02 255 / 0.25)"
-                    : "inset 0 0 0 1px oklch(1 0 0 / 0.08)",
-              }}
-            >
-              <Icon className="h-4 w-4" />
-            </motion.span>
-            <p
-              className="mt-2 text-[10px] tracking-[0.22em] uppercase"
-              style={{ color: done || active ? "oklch(0.86 0.02 255)" : "oklch(0.74 0.025 255 / 0.6)" }}
-            >
-              {s.label}
-            </p>
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
-
-// ---------- Reusable form bits ----------
-
-function Field({
-  label,
-  htmlFor,
-  hint,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label htmlFor={htmlFor} className="block">
-      <span className="text-[10px] tracking-[0.22em] uppercase text-silver/80">{label}</span>
-      <div className="mt-1.5">{children}</div>
-      {hint && <span className="mt-1 block text-[10px] text-silver/60">{hint}</span>}
-    </label>
-  );
-}
-
-const inputClass =
-  "w-full rounded-lg hairline bg-[oklch(0.16_0.015_265_/_0.6)] px-3.5 py-2.5 text-sm text-foreground placeholder:text-silver/50 outline-none transition focus:bg-[oklch(0.18_0.018_265_/_0.7)]";
-const inputFocusStyle: React.CSSProperties = {};
-
-// ---------- Step components ----------
-
-function StepProfile({
-  values,
-  setValues,
-  onNext,
-}: {
-  values: { fullName: string; email: string; company: string; phone: string; password: string };
-  setValues: (v: typeof values) => void;
-  onNext: () => void;
-}) {
-  const [submitting, setSubmitting] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const parsed = profileSchema.safeParse(values);
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
-      return;
-    }
-    if (values.password.length < 8) {
-      toast.error("Password must be at least 8 characters");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const { error } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            full_name: values.fullName,
-            company: values.company,
-            phone: values.phone,
-          },
-        },
-      });
-      if (error) throw error;
-      toast.success("Corporate profile secured", {
-        description: `${values.company} · welcome aboard, ${values.fullName.split(" ")[0]}.`,
-      });
-      onNext();
-    } catch (err: any) {
-      toast.error("Account creation failed", { description: err?.message ?? "Please try again." });
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
-        <p className="eyebrow">Step 01 · Identity</p>
-        <h2 className="mt-1 text-2xl md:text-3xl font-semibold tracking-tight">Corporate Profile</h2>
-        <p className="mt-2 text-sm text-silver/80 max-w-md leading-relaxed">
-          Establish your sovereign account. All fields encrypted in transit and at rest.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Field label="Full Name" htmlFor="fullName">
-          <input
-            id="fullName"
-            className={inputClass}
-            placeholder="Adaeze Balogun"
-            value={values.fullName}
-            onChange={(e) => setValues({ ...values, fullName: e.target.value })}
-            autoComplete="name"
-          />
-        </Field>
-        <Field label="Work Email" htmlFor="email">
-          <input
-            id="email"
-            type="email"
-            className={inputClass}
-            placeholder="adaeze@enterprise.com"
-            value={values.email}
-            onChange={(e) => setValues({ ...values, email: e.target.value })}
-            autoComplete="email"
-          />
-        </Field>
-        <Field label="Company Name" htmlFor="company">
-          <input
-            id="company"
-            className={inputClass}
-            placeholder="Access Bank Plc"
-            value={values.company}
-            onChange={(e) => setValues({ ...values, company: e.target.value })}
-            autoComplete="organization"
-          />
-        </Field>
-        <Field label="Phone Number" htmlFor="phone" hint="Format: +234 XXX XXX XXXX">
-          <input
-            id="phone"
-            className={inputClass}
-            placeholder="+234 802 555 1010"
-            value={values.phone}
-            onChange={(e) => setValues({ ...values, phone: e.target.value })}
-            autoComplete="tel"
-          />
-        </Field>
-        <div className="md:col-span-2">
-          <Field label="Password" htmlFor="password" hint="Minimum 8 characters">
-            <input
-              id="password"
-              type="password"
-              className={inputClass}
-              placeholder="••••••••"
-              value={values.password}
-              onChange={(e) => setValues({ ...values, password: e.target.value })}
-              autoComplete="new-password"
-            />
-          </Field>
-        </div>
-      </div>
-
-      <div className="flex justify-end pt-2">
-        <PrimaryButton submit loading={submitting}>
-          {submitting ? "Securing account…" : "Create Account & Continue"}
-          {!submitting && <ChevronRight className="h-4 w-4" />}
-        </PrimaryButton>
-      </div>
-    </form>
-  );
-}
-
-function StepFacilities({
-  branches,
-  setBranches,
-  onBack,
-  onNext,
-}: {
-  branches: Branch[];
-  setBranches: (b: Branch[]) => void;
-  onBack: () => void;
-  onNext: () => void;
-}) {
-  function addBranch() {
-    setBranches([...branches, { id: crypto.randomUUID(), name: "", state: "" }]);
-  }
-  function removeBranch(id: string) {
-    if (branches.length === 1) {
-      toast.error("At least one facility is required");
-      return;
-    }
-    setBranches(branches.filter((b) => b.id !== id));
-  }
-  function updateBranch(id: string, patch: Partial<Branch>) {
-    setBranches(branches.map((b) => (b.id === id ? { ...b, ...patch } : b)));
-  }
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    for (const b of branches) {
-      if (!b.name.trim() || !b.state) {
-        toast.error("Complete every branch", { description: "Site name and state are required." });
-        return;
-      }
-    }
-    toast.success(`${branches.length} ${branches.length === 1 ? "facility" : "facilities"} mapped`, {
-      description: "Footprint locked into your fleet roster.",
-    });
-    onNext();
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
-        <p className="eyebrow">Step 02 · Footprint</p>
-        <h2 className="mt-1 text-2xl md:text-3xl font-semibold tracking-tight">Facility Footprint</h2>
-        <p className="mt-2 text-sm text-silver/80 max-w-md leading-relaxed">
-          Map every branch we will orchestrate. You can edit, retire, or add nodes anytime.
-        </p>
-      </div>
-
-      <ul className="space-y-3">
-        <AnimatePresence initial={false}>
-          {branches.map((b, idx) => (
-            <motion.li
-              key={b.id}
-              layout
-              initial={{ opacity: 0, y: 12, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.98 }}
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="rounded-xl hairline p-4"
-              style={{ background: "linear-gradient(160deg, oklch(0.18 0.018 265 / 0.6), oklch(0.14 0.015 265 / 0.6))" }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="inline-flex items-center gap-2 text-[10px] tracking-[0.22em] uppercase text-silver/80">
-                  <MapPin className="h-3 w-3" /> Branch {String(idx + 1).padStart(2, "0")}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeBranch(b.id)}
-                  className="text-silver/60 hover:text-[oklch(0.85_0.18_25)] transition-colors p-1"
-                  aria-label="Remove branch"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Field label="Branch / Site Name" htmlFor={`name-${b.id}`}>
-                  <input
-                    id={`name-${b.id}`}
-                    className={inputClass}
-                    placeholder="Victoria Island Hub"
-                    value={b.name}
-                    onChange={(e) => updateBranch(b.id, { name: e.target.value })}
-                  />
-                </Field>
-                <Field label="State" htmlFor={`state-${b.id}`}>
-                  <select
-                    id={`state-${b.id}`}
-                    className={inputClass + " appearance-none cursor-pointer"}
-                    value={b.state}
-                    onChange={(e) => updateBranch(b.id, { state: e.target.value })}
-                  >
-                    <option value="" disabled>Select state…</option>
-                    {STATES.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </Field>
-              </div>
-            </motion.li>
-          ))}
-        </AnimatePresence>
-      </ul>
-
-      <button
-        type="button"
-        onClick={addBranch}
-        className="group flex w-full items-center justify-center gap-2 rounded-xl border border-dashed py-3 text-[12px] tracking-[0.16em] uppercase text-silver/80 transition-all hover:text-foreground hover:bg-[oklch(0.18_0.018_265_/_0.5)]"
-        style={{ borderColor: "oklch(0.78 0.17 165 / 0.35)" }}
-      >
-        <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" style={{ color: "oklch(0.88 0.16 165)" }} />
-        Add Another Branch
-      </button>
-
-      <div className="flex justify-between pt-2">
-        <SecondaryButton onClick={onBack}>
-          <ChevronLeft className="h-4 w-4" /> Back
-        </SecondaryButton>
-        <PrimaryButton submit>
-          Continue <ChevronRight className="h-4 w-4" />
-        </PrimaryButton>
-      </div>
-    </form>
-  );
-}
-
-function StepSync({
-  values,
-  setValues,
-  onBack,
-  onComplete,
-}: {
-  values: { brand: string; serial: string; accountEmail: string; accountPassword: string };
-  setValues: (v: typeof values) => void;
-  onBack: () => void;
-  onComplete: (generatedSerial: string) => void;
-}) {
-  const [syncing, setSyncing] = useState(false);
-  const [generatedSerial, setGeneratedSerial] = useState<string>("");
-
-  function generateDongleSerial(brand: string) {
-    const prefix = (brand || "DGL").slice(0, 3).toUpperCase();
-    const year = new Date().getFullYear();
-    const rand = Array.from({ length: 6 }, () =>
-      "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]
-    ).join("");
-    return `${prefix}-${year}-${rand}`;
-  }
-
-  function handleSync(e: React.FormEvent) {
-    e.preventDefault();
-    if (!values.brand) return toast.error("Select your inverter brand");
-    if (!values.accountEmail.trim()) return toast.error("Enter your manufacturer account email");
-    if (values.accountPassword.length < 4) return toast.error("Enter your account password");
-    const serial = generateDongleSerial(values.brand);
-    setGeneratedSerial(serial);
-    setValues({ ...values, serial });
-    setSyncing(true);
-  }
-
-  function handleConnectionComplete() {
-    setSyncing(false);
-    toast.success("Remote sync established", {
-      description: `Dongle ${generatedSerial} bonded to your fleet mesh.`,
-    });
-    onComplete(generatedSerial);
-  }
+  const strengthLabel = ["", "Weak", "Fair", "Strong", "Excellent"][strength];
+  const strengthColor = ["", "#EF4444", "#F59E0B", "#22C55E", "#10B981"][strength];
 
   return (
     <>
-    <ConnectingModal open={syncing} onComplete={handleConnectionComplete} />
-    <form onSubmit={handleSync} className="space-y-5">
-      <div>
-        <p className="eyebrow">Step 03 · Telemetry</p>
-        <h2 className="mt-1 text-2xl md:text-3xl font-semibold tracking-tight">Instant Remote Sync</h2>
-        <p className="mt-2 text-sm text-silver/80 max-w-lg leading-relaxed font-light">
-          No hardware installation or wiring changes required. Connect via your current inverter
-          Wi-Fi gateway module.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Field label="Inverter Brand" htmlFor="brand">
-          <select
-            id="brand"
-            className={inputClass + " appearance-none cursor-pointer"}
-            value={values.brand}
-            onChange={(e) => setValues({ ...values, brand: e.target.value })}
-          >
-            <option value="" disabled>Select inverter brand…</option>
-            {INVERTERS.map((b) => (
-              <option key={b} value={b}>{b}</option>
-            ))}
-          </select>
-        </Field>
-      </div>
-
-      <AnimatePresence initial={false}>
-        {values.brand && (
-          <motion.div
-            key="creds"
-            initial={{ opacity: 0, y: 12, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: "auto" }}
-            exit={{ opacity: 0, y: -8, height: 0 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-              <Field label={`${values.brand} Account Email / Username`} htmlFor="accountEmail">
-                <input
-                  id="accountEmail"
-                  className={inputClass}
-                  placeholder="operator@enterprise.com"
-                  value={values.accountEmail}
-                  onChange={(e) => setValues({ ...values, accountEmail: e.target.value })}
-                  autoComplete="off"
-                />
-              </Field>
-              <Field label="Account Password" htmlFor="accountPassword">
-                <input
-                  id="accountPassword"
-                  type="password"
-                  className={inputClass}
-                  placeholder="••••••••"
-                  value={values.accountPassword}
-                  onChange={(e) => setValues({ ...values, accountPassword: e.target.value })}
-                  autoComplete="new-password"
-                />
-              </Field>
-            </div>
-            <div
-              className="mt-4 flex items-start gap-2.5 rounded-lg hairline px-3.5 py-3"
-              style={{
-                background:
-                  "linear-gradient(135deg, oklch(0.30 0.10 165 / 0.18), oklch(0.18 0.018 265 / 0.4))",
-              }}
-            >
-              <span className="text-sm leading-none mt-0.5">🔒</span>
-              <p className="text-[10.5px] leading-relaxed tracking-[0.04em] text-silver/85 font-light">
-                <span className="text-foreground font-medium">Secured with 256-bit Enterprise Encryption.</span>{" "}
-                Your credentials are used solely to establish the initial API token handshake and are
-                <span className="text-foreground"> never stored on our servers</span>.
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Sync visual */}
-      <div className="flex justify-center pt-4">
-        <button
-          type="submit"
-          disabled={syncing}
-          className="group relative inline-flex items-center gap-3 rounded-full px-7 py-4 text-[12px] font-semibold tracking-[0.18em] uppercase transition-all hover:-translate-y-0.5 disabled:cursor-wait"
-          style={{
-            color: "oklch(0.13 0.003 265)",
-            background: "linear-gradient(135deg, oklch(0.88 0.16 165), oklch(0.78 0.17 165))",
-            boxShadow:
-              "inset 0 1px 0 oklch(1 0 0 / 0.45), 0 12px 36px oklch(0.78 0.17 165 / 0.45), 0 0 0 0 oklch(0.78 0.17 165 / 0.55)",
-            animation: syncing ? "none" : "sync-pulse 2.4s ease-out infinite",
-          }}
-        >
-          <span className="relative grid h-6 w-6 place-items-center">
-            {syncing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <Wifi className="h-4 w-4" />
-                <span
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    boxShadow: "0 0 0 0 oklch(0.13 0.003 265 / 0.35)",
-                    animation: "sync-ring 2.4s ease-out infinite",
-                  }}
-                  aria-hidden
-                />
-              </>
-            )}
-          </span>
-          {syncing ? "Establishing handshake…" : "Initialize Remote Connection"}
-        </button>
-      </div>
-
       <style>{`
-        @keyframes sync-pulse {
-          0%, 100% { box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.45), 0 12px 36px oklch(0.78 0.17 165 / 0.45), 0 0 0 0 oklch(0.78 0.17 165 / 0.55); }
-          50%      { box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.45), 0 12px 36px oklch(0.78 0.17 165 / 0.55), 0 0 0 14px oklch(0.78 0.17 165 / 0); }
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --void: #07080C;
+          --surface: #0C0E15;
+          --panel: #0F1119;
+          --border: rgba(255,255,255,0.07);
+          --border-active: rgba(200,168,82,0.45);
+          --gold: #C8A852;
+          --gold-bright: #E0C06A;
+          --gold-dim: rgba(200,168,82,0.15);
+          --text-primary: #EDE8DC;
+          --text-secondary: #6B6860;
+          --text-muted: #3A3830;
+          --green: #2DD4BF;
+          --green-dim: rgba(45,212,191,0.1);
+          --input-bg: rgba(255,255,255,0.03);
+          --input-hover: rgba(255,255,255,0.055);
         }
-        @keyframes sync-ring {
-          0%   { box-shadow: 0 0 0 0 oklch(0.13 0.003 265 / 0.5); }
-          100% { box-shadow: 0 0 0 14px oklch(0.13 0.003 265 / 0); }
+
+        .eso-root {
+          min-height: 100vh;
+          background: var(--void);
+          display: flex;
+          font-family: 'Outfit', sans-serif;
+          color: var(--text-primary);
+          overflow: hidden;
+          position: relative;
+        }
+
+        /* LEFT PANEL */
+        .eso-left {
+          width: 52%;
+          min-height: 100vh;
+          background: var(--surface);
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 48px 56px;
+          overflow: hidden;
+          border-right: 1px solid var(--border);
+        }
+
+        .eso-left::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(ellipse 80% 60% at 20% 80%, rgba(200,168,82,0.06) 0%, transparent 70%),
+                      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(45,212,191,0.04) 0%, transparent 60%);
+          pointer-events: none;
+        }
+
+        /* Solar grid pattern */
+        .solar-grid {
+          position: absolute;
+          inset: 0;
+          opacity: 0.035;
+          background-image:
+            linear-gradient(rgba(200,168,82,0.8) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(200,168,82,0.8) 1px, transparent 1px);
+          background-size: 44px 44px;
+          mask-image: radial-gradient(ellipse 90% 90% at 30% 60%, black 20%, transparent 80%);
+        }
+
+        /* Particles */
+        .particle {
+          position: absolute;
+          border-radius: 50%;
+          background: var(--gold);
+          animation: floatUp linear infinite;
+          pointer-events: none;
+        }
+
+        @keyframes floatUp {
+          0% { transform: translateY(0px) translateX(0px); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 0.6; }
+          100% { transform: translateY(-120px) translateX(20px); opacity: 0; }
+        }
+
+        /* Inverter visualization */
+        .inverter-visual {
+          position: absolute;
+          bottom: 80px;
+          right: -30px;
+          width: 340px;
+          height: 340px;
+          opacity: 0.9;
+        }
+
+        .energy-ring {
+          position: absolute;
+          border-radius: 50%;
+          border: 1px solid;
+          animation: pulseRing 3s ease-in-out infinite;
+        }
+
+        @keyframes pulseRing {
+          0%, 100% { transform: scale(1); opacity: 0.6; }
+          50% { transform: scale(1.04); opacity: 1; }
+        }
+
+        .energy-bar-wrap {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-top: 24px;
+        }
+
+        .energy-bar {
+          height: 3px;
+          border-radius: 2px;
+          background: var(--border);
+          overflow: hidden;
+          position: relative;
+        }
+
+        .energy-bar-fill {
+          height: 100%;
+          border-radius: 2px;
+          animation: fillBar 2.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes fillBar {
+          from { width: 30%; }
+          to { width: 100%; }
+        }
+
+        .stat-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: rgba(45,212,191,0.08);
+          border: 1px solid rgba(45,212,191,0.2);
+          border-radius: 100px;
+          padding: 6px 14px;
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--green);
+          letter-spacing: 0.04em;
+        }
+
+        .stat-dot {
+          width: 6px; height: 6px;
+          border-radius: 50%;
+          background: var(--green);
+          animation: blink 1.4s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+          0%,100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+
+        /* Brand mark */
+        .brand-mark {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          position: relative;
+          z-index: 2;
+        }
+
+        .brand-icon {
+          width: 38px;
+          height: 38px;
+          border: 1px solid rgba(200,168,82,0.35);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(200,168,82,0.06);
+          position: relative;
+        }
+
+        .brand-icon svg { width: 20px; height: 20px; }
+
+        .brand-name {
+          font-family: 'Outfit', sans-serif;
+          font-size: 15px;
+          font-weight: 600;
+          letter-spacing: 0.25em;
+          color: var(--text-primary);
+          text-transform: uppercase;
+        }
+
+        .brand-sub {
+          font-size: 10px;
+          letter-spacing: 0.15em;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          font-weight: 400;
+        }
+
+        /* Hero copy */
+        .hero-copy {
+          position: relative;
+          z-index: 2;
+          max-width: 420px;
+        }
+
+        .hero-label {
+          font-size: 11px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: var(--gold);
+          font-weight: 500;
+          margin-bottom: 20px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .hero-label::before {
+          content: '';
+          width: 24px;
+          height: 1px;
+          background: var(--gold);
+        }
+
+        .hero-title {
+          font-family: 'Cormorant', serif;
+          font-size: 52px;
+          line-height: 1.08;
+          font-weight: 400;
+          color: var(--text-primary);
+          margin-bottom: 20px;
+          letter-spacing: -0.01em;
+        }
+
+        .hero-title em {
+          font-style: italic;
+          color: var(--gold-bright);
+        }
+
+        .hero-desc {
+          font-size: 14.5px;
+          color: var(--text-secondary);
+          line-height: 1.7;
+          font-weight: 300;
+          margin-bottom: 32px;
+        }
+
+        /* Metrics row */
+        .metrics {
+          display: flex;
+          gap: 28px;
+          position: relative;
+          z-index: 2;
+        }
+
+        .metric {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .metric-value {
+          font-family: 'Cormorant', serif;
+          font-size: 30px;
+          font-weight: 500;
+          color: var(--text-primary);
+          line-height: 1;
+        }
+
+        .metric-value span {
+          font-size: 16px;
+          color: var(--gold);
+        }
+
+        .metric-label {
+          font-size: 11px;
+          color: var(--text-secondary);
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          font-weight: 400;
+        }
+
+        .metric-divider {
+          width: 1px;
+          background: var(--border);
+          align-self: stretch;
+        }
+
+        /* RIGHT PANEL */
+        .eso-right {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 56px;
+          background: var(--void);
+          position: relative;
+          overflow-y: auto;
+        }
+
+        .eso-right::before {
+          content: '';
+          position: absolute;
+          top: -200px;
+          right: -200px;
+          width: 500px;
+          height: 500px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(200,168,82,0.04) 0%, transparent 70%);
+          pointer-events: none;
+        }
+
+        .form-container {
+          width: 100%;
+          max-width: 420px;
+          position: relative;
+          z-index: 2;
+        }
+
+        .form-header {
+          margin-bottom: 36px;
+          opacity: 0;
+          transform: translateY(16px);
+          animation: slideIn 0.6s ease forwards;
+        }
+
+        @keyframes slideIn {
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-eyebrow {
+          font-size: 11px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--gold);
+          font-weight: 500;
+          margin-bottom: 10px;
+        }
+
+        .form-title {
+          font-family: 'Cormorant', serif;
+          font-size: 34px;
+          font-weight: 400;
+          color: var(--text-primary);
+          line-height: 1.15;
+          margin-bottom: 8px;
+        }
+
+        .form-subtitle {
+          font-size: 13.5px;
+          color: var(--text-secondary);
+          font-weight: 300;
+          line-height: 1.6;
+        }
+
+        /* Steps */
+        .step-indicator {
+          display: flex;
+          align-items: center;
+          gap: 0;
+          margin-bottom: 32px;
+          opacity: 0;
+          animation: slideIn 0.6s 0.1s ease forwards;
+        }
+
+        .step-node {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.02em;
+          border: 1px solid;
+          transition: all 0.4s ease;
+          cursor: pointer;
+          position: relative;
+          z-index: 1;
+        }
+
+        .step-node.done {
+          background: var(--gold);
+          border-color: var(--gold);
+          color: var(--void);
+        }
+
+        .step-node.active {
+          background: var(--gold-dim);
+          border-color: var(--gold);
+          color: var(--gold);
+          box-shadow: 0 0 0 4px rgba(200,168,82,0.1);
+        }
+
+        .step-node.idle {
+          background: transparent;
+          border-color: var(--text-muted);
+          color: var(--text-muted);
+        }
+
+        .step-line {
+          flex: 1;
+          height: 1px;
+          background: var(--border);
+          margin: 0 4px;
+          transition: background 0.4s ease;
+          max-width: 60px;
+        }
+
+        .step-line.done { background: var(--gold); opacity: 0.4; }
+
+        .step-label-row {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 6px;
+          margin-bottom: 28px;
+        }
+
+        .step-label {
+          font-size: 10px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-muted);
+          font-weight: 400;
+          transition: color 0.3s;
+        }
+
+        .step-label.active { color: var(--gold); }
+
+        /* Form fields */
+        .field-group {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          margin-bottom: 20px;
+          opacity: 0;
+          animation: slideIn 0.5s 0.2s ease forwards;
+        }
+
+        .field-row {
+          display: flex;
+          gap: 12px;
+        }
+
+        .field {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          flex: 1;
+        }
+
+        .field-label {
+          font-size: 11px;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+
+        .field-input-wrap {
+          position: relative;
+        }
+
+        .field-input {
+          width: 100%;
+          background: var(--input-bg);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 13px 16px;
+          font-size: 14px;
+          font-family: 'Outfit', sans-serif;
+          font-weight: 300;
+          color: var(--text-primary);
+          outline: none;
+          transition: all 0.25s ease;
+          -webkit-appearance: none;
+        }
+
+        .field-input::placeholder { color: var(--text-muted); }
+
+        .field-input:hover {
+          background: var(--input-hover);
+          border-color: rgba(255,255,255,0.12);
+        }
+
+        .field-input:focus {
+          background: rgba(200,168,82,0.04);
+          border-color: var(--gold);
+          box-shadow: 0 0 0 3px rgba(200,168,82,0.08);
+        }
+
+        .field-input-wrap .icon {
+          position: absolute;
+          right: 14px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--text-muted);
+          cursor: pointer;
+          transition: color 0.2s;
+          display: flex;
+          align-items: center;
+        }
+
+        .field-input-wrap .icon:hover { color: var(--text-secondary); }
+        .field-input-wrap.has-icon .field-input { padding-right: 44px; }
+
+        select.field-input {
+          cursor: pointer;
+          background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%236B6860' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 14px center;
+          padding-right: 40px;
+        }
+
+        /* Password strength */
+        .strength-row {
+          display: flex;
+          gap: 4px;
+          margin-top: 8px;
+          align-items: center;
+        }
+
+        .strength-seg {
+          height: 2px;
+          flex: 1;
+          border-radius: 2px;
+          background: var(--text-muted);
+          transition: background 0.3s ease;
+        }
+
+        .strength-text {
+          font-size: 11px;
+          letter-spacing: 0.06em;
+          font-weight: 500;
+          margin-left: 8px;
+          min-width: 60px;
+          transition: color 0.3s;
+        }
+
+        /* Divider */
+        .or-divider {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin: 20px 0;
+          opacity: 0;
+          animation: slideIn 0.5s 0.25s ease forwards;
+        }
+
+        .or-divider::before,
+        .or-divider::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: var(--border);
+        }
+
+        .or-text {
+          font-size: 11px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--text-muted);
+          font-weight: 400;
+        }
+
+        /* SSO Buttons */
+        .sso-row {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 24px;
+          opacity: 0;
+          animation: slideIn 0.5s 0.3s ease forwards;
+        }
+
+        .sso-btn {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 11px 12px;
+          background: var(--input-bg);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          font-size: 12.5px;
+          font-family: 'Outfit', sans-serif;
+          font-weight: 400;
+          color: var(--text-secondary);
+          cursor: pointer;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+        }
+
+        .sso-btn:hover {
+          background: var(--input-hover);
+          border-color: rgba(255,255,255,0.14);
+          color: var(--text-primary);
+        }
+
+        .sso-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+        /* CTA */
+        .cta-btn {
+          width: 100%;
+          padding: 15px 24px;
+          background: linear-gradient(135deg, var(--gold) 0%, #A8882A 100%);
+          border: none;
+          border-radius: 8px;
+          font-size: 13.5px;
+          font-family: 'Outfit', sans-serif;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: var(--void);
+          cursor: pointer;
+          transition: all 0.25s ease;
+          position: relative;
+          overflow: hidden;
+          opacity: 0;
+          animation: slideIn 0.5s 0.35s ease forwards;
+        }
+
+        .cta-btn::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+          opacity: 0;
+          transition: opacity 0.2s;
+        }
+
+        .cta-btn:hover::before { opacity: 1; }
+        .cta-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(200,168,82,0.25); }
+        .cta-btn:active { transform: translateY(0); }
+
+        .cta-secondary {
+          width: 100%;
+          padding: 14px 24px;
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          font-size: 13.5px;
+          font-family: 'Outfit', sans-serif;
+          font-weight: 400;
+          letter-spacing: 0.04em;
+          color: var(--text-secondary);
+          cursor: pointer;
+          transition: all 0.2s ease;
+          margin-top: 10px;
+        }
+
+        .cta-secondary:hover {
+          border-color: rgba(255,255,255,0.14);
+          color: var(--text-primary);
+          background: var(--input-hover);
+        }
+
+        /* Terms */
+        .terms-text {
+          font-size: 11.5px;
+          color: var(--text-muted);
+          text-align: center;
+          margin-top: 18px;
+          line-height: 1.65;
+          opacity: 0;
+          animation: slideIn 0.5s 0.4s ease forwards;
+        }
+
+        .terms-text a {
+          color: var(--gold);
+          text-decoration: none;
+          opacity: 0.8;
+        }
+
+        .terms-text a:hover { opacity: 1; text-decoration: underline; }
+
+        /* Sign in link */
+        .signin-row {
+          text-align: center;
+          margin-top: 20px;
+          font-size: 12.5px;
+          color: var(--text-muted);
+          opacity: 0;
+          animation: slideIn 0.5s 0.45s ease forwards;
+        }
+
+        .signin-row a {
+          color: var(--gold);
+          text-decoration: none;
+          font-weight: 500;
+        }
+
+        /* Feature badges on left */
+        .feature-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          position: relative;
+          z-index: 2;
+        }
+
+        .feature-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 13px;
+          color: var(--text-secondary);
+          font-weight: 300;
+        }
+
+        .feature-icon {
+          width: 28px;
+          height: 28px;
+          border-radius: 6px;
+          background: var(--gold-dim);
+          border: 1px solid rgba(200,168,82,0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .feature-icon svg { width: 13px; height: 13px; color: var(--gold); }
+
+        /* Animated orb */
+        .orb {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(60px);
+          pointer-events: none;
+        }
+
+        /* Input with prefix */
+        .input-prefix {
+          position: absolute;
+          left: 1px;
+          top: 1px;
+          bottom: 1px;
+          display: flex;
+          align-items: center;
+          padding: 0 12px;
+          font-size: 12px;
+          color: var(--text-muted);
+          border-right: 1px solid var(--border);
+          border-radius: 7px 0 0 7px;
+          background: rgba(255,255,255,0.02);
+          letter-spacing: 0.02em;
+          white-space: nowrap;
+        }
+
+        .field-input.with-prefix { padding-left: 74px; }
+
+        /* Step content fade */
+        .step-content {
+          animation: slideIn 0.4s ease forwards;
+        }
+
+        @media (max-width: 900px) {
+          .eso-left { display: none; }
+          .eso-right { padding: 32px 24px; }
+          .form-container { max-width: 100%; }
         }
       `}</style>
 
-      <div className="flex justify-between pt-2">
-        <SecondaryButton onClick={onBack} disabled={syncing}>
-          <ChevronLeft className="h-4 w-4" /> Back
-        </SecondaryButton>
-        <button
-          type="button"
-          onClick={() => onComplete("")}
-          disabled={syncing}
-          className="text-[11px] tracking-[0.22em] uppercase text-silver/70 hover:text-foreground transition-colors"
-        >
-          Skip for now
-        </button>
-      </div>
-    </form>
-    </>
-  );
-}
+      <div className="eso-root">
+        {/* LEFT PANEL */}
+        <div className="eso-left">
+          <div className="solar-grid" />
 
-// ---------- Buttons ----------
+          {/* Floating particles */}
+          {mounted && particles.map((p) => (
+            <div
+              key={p.id}
+              className="particle"
+              style={{
+                left: `${p.x}%`,
+                bottom: `${p.y % 40}%`,
+                width: `${p.size}px`,
+                height: `${p.size}px`,
+                opacity: p.opacity,
+                animationDuration: `${p.speed}s`,
+                animationDelay: `${p.delay}s`,
+              }}
+            />
+          ))}
 
-function PrimaryButton({
-  children,
-  submit,
-  loading,
-  onClick,
-}: {
-  children: React.ReactNode;
-  submit?: boolean;
-  loading?: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      type={submit ? "submit" : "button"}
-      onClick={onClick}
-      disabled={loading}
-      className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[12px] font-semibold tracking-[0.16em] uppercase transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-wait disabled:hover:translate-y-0"
-      style={{
-        color: "oklch(0.13 0.003 265)",
-        background: "linear-gradient(135deg, oklch(0.78 0.13 86), oklch(0.89 0.07 88))",
-        boxShadow: "inset 0 1px 0 oklch(1 0 0 / 0.4), 0 8px 24px oklch(0.78 0.13 86 / 0.4)",
-      }}
-    >
-      {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-      {children}
-    </button>
-  );
-}
+          {/* Ambient orb */}
+          <div className="orb" style={{
+            width: 320, height: 320,
+            background: "radial-gradient(circle, rgba(200,168,82,0.09) 0%, transparent 70%)",
+            bottom: -60, right: -80,
+          }} />
+          <div className="orb" style={{
+            width: 200, height: 200,
+            background: "radial-gradient(circle, rgba(45,212,191,0.06) 0%, transparent 70%)",
+            top: 80, right: 40,
+          }} />
 
-function SecondaryButton({
-  children,
-  onClick,
-  disabled,
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="inline-flex items-center gap-2 rounded-full hairline px-4 py-2.5 text-[11px] font-semibold tracking-[0.16em] uppercase text-silver hover:text-foreground transition-colors disabled:opacity-50"
-      style={{ background: "oklch(0.18 0.018 265 / 0.5)" }}
-    >
-      {children}
-    </button>
-  );
-}
+          {/* Brand */}
+          <div className="brand-mark">
+            <div className="brand-icon">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                  stroke="#C8A852" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div className="brand-name">ESO Energy</div>
+              <div className="brand-sub">Inverter Intelligence</div>
+            </div>
+          </div>
 
-// ---------- Wizard shell ----------
+          {/* Hero */}
+          <div className="hero-copy">
+            <div className="hero-label">Enterprise Platform</div>
+            <h1 className="hero-title">
+              Monitor every<br/>watt with<br/><em>precision.</em>
+            </h1>
+            <p className="hero-desc">
+              Real-time solar inverter intelligence for energy operators who demand complete visibility across every asset, site, and megawatt in their portfolio.
+            </p>
+            <div className="stat-pill">
+              <span className="stat-dot" />
+              Live across 2,400+ sites globally
+            </div>
+          </div>
 
-function OnboardingWizard() {
-  const navigate = useNavigate();
-  const [step, setStep] = useState(0);
+          {/* Energy bars */}
+          <div style={{ position: "relative", zIndex: 2 }}>
+            <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-secondary)", marginBottom: 10, fontWeight: 400 }}>
+              Active Output — Fleet Average
+            </div>
+            <div className="energy-bar-wrap">
+              {[
+                { label: "Site A — Berlin", pct: 92, color: "#C8A852", delay: "0s" },
+                { label: "Site B — Madrid", pct: 78, color: "#2DD4BF", delay: "0.3s" },
+                { label: "Site C — Dubai", pct: 85, color: "#C8A852", delay: "0.6s" },
+              ].map((b) => (
+                <div key={b.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-secondary)", width: 130, flexShrink: 0, fontWeight: 300 }}>{b.label}</div>
+                  <div className="energy-bar" style={{ flex: 1 }}>
+                    <div className="energy-bar-fill" style={{
+                      background: `linear-gradient(90deg, ${b.color}88, ${b.color})`,
+                      width: `${b.pct}%`,
+                      animationDelay: b.delay,
+                    }} />
+                  </div>
+                  <div style={{ fontSize: 11, color: b.color, width: 36, textAlign: "right", fontWeight: 500 }}>{b.pct}%</div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-  const [profile, setProfile] = useState({
-    fullName: "",
-    email: "",
-    company: "",
-    phone: "+234 ",
-    password: "",
-  });
-  const [branches, setBranches] = useState<Branch[]>([
-    { id: crypto.randomUUID(), name: "", state: "" },
-  ]);
-  const [sync, setSync] = useState({ brand: "", serial: "", accountEmail: "", accountPassword: "" });
-
-  function complete(generatedSerial?: string) {
-    toast.success("EsoEnergy Systems · Onboarding complete", {
-      description: generatedSerial
-        ? `Dongle ${generatedSerial} bonded · routing to EsoEnergy Fleet Command…`
-        : "Routing you to EsoEnergy Fleet Command…",
-    });
-    setTimeout(() => navigate({ to: "/" }), 900);
-  }
-
-  return (
-    <div
-      className="relative min-h-screen flex items-center justify-center px-4 py-10 overflow-hidden"
-      style={{
-        background:
-          "radial-gradient(80% 60% at 20% 10%, oklch(0.62 0.20 282 / 0.18), transparent 60%), radial-gradient(60% 50% at 90% 90%, oklch(0.78 0.13 86 / 0.10), transparent 60%), oklch(0.13 0.003 265)",
-      }}
-    >
-      {/* Ambient grid */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.05]"
-        style={{
-          backgroundImage:
-            "linear-gradient(oklch(0.86 0.02 255) 1px, transparent 1px), linear-gradient(90deg, oklch(0.86 0.02 255) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-      />
-
-      <div className="relative w-full max-w-3xl">
-        <div className="mb-6 text-center">
-          <EsoLogo size="lg" className="mx-auto" />
-          <p className="eyebrow mt-3">EsoEnergy Systems · Provisioning</p>
-          <h1 className="mt-2 text-3xl md:text-[34px] font-semibold tracking-tight">
-            <span className="shimmer-text">Welcome to EsoEnergy Fleet Command</span>
-          </h1>
-        </div>
-
-        <div className="glass-card p-6 md:p-10">
-          <Stepper current={step} />
-
-          <div className="mt-8">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, x: 32 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -32 }}
-                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              >
-                {step === 0 && (
-                  <StepProfile
-                    values={profile}
-                    setValues={setProfile}
-                    onNext={() => setStep(1)}
-                  />
-                )}
-                {step === 1 && (
-                  <StepFacilities
-                    branches={branches}
-                    setBranches={setBranches}
-                    onBack={() => setStep(0)}
-                    onNext={() => setStep(2)}
-                  />
-                )}
-                {step === 2 && (
-                  <StepSync
-                    values={sync}
-                    setValues={setSync}
-                    onBack={() => setStep(1)}
-                    onComplete={complete}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
+          {/* Metrics */}
+          <div className="metrics">
+            <div className="metric">
+              <div className="metric-value">14.2<span>GW</span></div>
+              <div className="metric-label">Monitored capacity</div>
+            </div>
+            <div className="metric-divider" />
+            <div className="metric">
+              <div className="metric-value">99.8<span>%</span></div>
+              <div className="metric-label">Platform uptime</div>
+            </div>
+            <div className="metric-divider" />
+            <div className="metric">
+              <div className="metric-value">340<span>ms</span></div>
+              <div className="metric-label">Avg. alert latency</div>
+            </div>
           </div>
         </div>
 
-        <p className="mt-6 text-center text-[10px] tracking-[0.32em] uppercase text-silver/60">
-          AES-256 · End-to-end encrypted handshake
-        </p>
+        {/* RIGHT PANEL */}
+        <div className="eso-right">
+          <div className="form-container">
+            <div className="form-header">
+              <div className="form-eyebrow">New Account</div>
+              <h2 className="form-title">
+                {step === 1 ? "Create your workspace" : "Configure your fleet"}
+              </h2>
+              <p className="form-subtitle">
+                {step === 1
+                  ? "Start monitoring your inverter portfolio in minutes."
+                  : "Tell us about your energy infrastructure."}
+              </p>
+            </div>
+
+            {/* Step indicator */}
+            <div className="step-indicator">
+              {[1, 2].map((s, i) => (
+                <>
+                  <div
+                    key={s}
+                    className={`step-node ${s < step ? "done" : s === step ? "active" : "idle"}`}
+                    onClick={() => s < step && setStep(s)}
+                  >
+                    {s < step ? (
+                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    ) : s}
+                  </div>
+                  {i < 1 && (
+                    <div key={`line-${s}`} className={`step-line ${s < step ? "done" : ""}`} />
+                  )}
+                </>
+              ))}
+            </div>
+            <div className="step-label-row">
+              {["Account Details", "Fleet Setup"].map((l, i) => (
+                <div key={l} className={`step-label ${step === i + 1 ? "active" : ""}`}>{l}</div>
+              ))}
+            </div>
+
+            {step === 1 ? (
+              <div className="step-content" key="step1">
+                {/* SSO */}
+                <div className="sso-row">
+                  <button className="sso-btn">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Google SSO
+                  </button>
+                  <button className="sso-btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style={{color:"#60A5FA"}}>
+                      <path d="M21.007 0H2.993A2.993 2.993 0 000 2.993v18.014A2.993 2.993 0 002.993 24h9.18v-9.297H9.25V11.07h2.923V8.418c0-2.9 1.772-4.479 4.365-4.479 1.24 0 2.306.092 2.616.133v3.035h-1.795c-1.407 0-1.68.67-1.68 1.65v2.313h3.356l-.437 3.633h-2.919V24h5.328A2.993 2.993 0 0024 21.007V2.993A2.993 2.993 0 0021.007 0z"/>
+                    </svg>
+                    Microsoft SSO
+                  </button>
+                </div>
+
+                <div className="or-divider"><span className="or-text">or continue with email</span></div>
+
+                <div className="field-group">
+                  <div className="field-row">
+                    <div className="field">
+                      <label className="field-label">First Name</label>
+                      <div className="field-input-wrap">
+                        <input className="field-input" name="fullName" placeholder="Alex" value={formData.fullName} onChange={handleChange} onFocus={() => setFocused("fullName")} onBlur={() => setFocused(null)} />
+                      </div>
+                    </div>
+                    <div className="field">
+                      <label className="field-label">Last Name</label>
+                      <div className="field-input-wrap">
+                        <input className="field-input" name="lastName" placeholder="Morgan" onChange={handleChange} onFocus={() => setFocused("lastName")} onBlur={() => setFocused(null)} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="field">
+                    <label className="field-label">Work Email</label>
+                    <div className="field-input-wrap">
+                      <input className="field-input" type="email" name="email" placeholder="alex@company.com" value={formData.email} onChange={handleChange} onFocus={() => setFocused("email")} onBlur={() => setFocused(null)} />
+                      <span className="icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                          <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="field">
+                    <label className="field-label">Password</label>
+                    <div className="field-input-wrap has-icon">
+                      <input className="field-input" type={showPass ? "text" : "password"} name="password" placeholder="Min. 8 characters" value={formData.password} onChange={handleChange} onFocus={() => setFocused("password")} onBlur={() => setFocused(null)} />
+                      <span className="icon" onClick={() => setShowPass(!showPass)}>
+                        {showPass ? (
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
+                            <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                          </svg>
+                        ) : (
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                          </svg>
+                        )}
+                      </span>
+                    </div>
+                    {formData.password && (
+                      <div className="strength-row">
+                        {[1,2,3,4].map((i) => (
+                          <div key={i} className="strength-seg" style={{
+                            background: i <= strength ? strengthColor : undefined,
+                            opacity: i <= strength ? 1 : undefined,
+                          }} />
+                        ))}
+                        <span className="strength-text" style={{ color: strengthColor }}>{strengthLabel}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <button className="cta-btn" onClick={() => setStep(2)}>
+                  Continue — Fleet Setup →
+                </button>
+              </div>
+            ) : (
+              <div className="step-content" key="step2">
+                <div className="field-group">
+                  <div className="field">
+                    <label className="field-label">Company Name</label>
+                    <div className="field-input-wrap">
+                      <div className="input-prefix">ESO /</div>
+                      <input className="field-input with-prefix" name="companyName" placeholder="Your Company" value={formData.companyName} onChange={handleChange} />
+                    </div>
+                  </div>
+
+                  <div className="field-row">
+                    <div className="field">
+                      <label className="field-label">Fleet Size</label>
+                      <div className="field-input-wrap">
+                        <select className="field-input" name="companySize" value={formData.companySize} onChange={handleChange}>
+                          <option value="" disabled>Select range</option>
+                          <option>1 – 10 Inverters</option>
+                          <option>11 – 50 Inverters</option>
+                          <option>51 – 200 Inverters</option>
+                          <option>200+ Inverters</option>
+                          <option>1 GW+ Portfolio</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="field">
+                      <label className="field-label">Your Role</label>
+                      <div className="field-input-wrap">
+                        <select className="field-input" name="role" value={formData.role} onChange={handleChange}>
+                          <option value="" disabled>Select role</option>
+                          <option>Asset Manager</option>
+                          <option>O&M Engineer</option>
+                          <option>Energy Analyst</option>
+                          <option>CTO / VP Engineering</option>
+                          <option>Developer / Integrator</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="field">
+                    <label className="field-label">Primary Market</label>
+                    <div className="field-input-wrap">
+                      <select className="field-input" name="country" value={formData.country} onChange={handleChange}>
+                        <option value="" disabled>Select region</option>
+                        <option>Europe</option>
+                        <option>Middle East & Africa</option>
+                        <option>Asia Pacific</option>
+                        <option>North America</option>
+                        <option>Latin America</option>
+                        <option>Multi-region</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Feature list */}
+                  <div style={{ marginTop: 4, padding: "16px", background: "rgba(200,168,82,0.04)", border: "1px solid rgba(200,168,82,0.12)", borderRadius: 10 }}>
+                    <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--gold)", fontWeight: 500, marginBottom: 12 }}>Your plan includes</div>
+                    <div className="feature-list">
+                      {[
+                        { icon: "⚡", text: "Real-time inverter telemetry & fault alerts" },
+                        { icon: "📊", text: "Yield analysis & performance benchmarking" },
+                        { icon: "🔌", text: "Multi-brand inverter protocol support" },
+                      ].map((f) => (
+                        <div className="feature-item" key={f.text}>
+                          <div className="feature-icon">
+                            <span style={{ fontSize: 11 }}>{f.icon}</span>
+                          </div>
+                          {f.text}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <button className="cta-btn">
+                  Activate ESO Workspace →
+                </button>
+                <button className="cta-secondary" onClick={() => setStep(1)}>
+                  ← Back to account details
+                </button>
+              </div>
+            )}
+
+            <p className="terms-text">
+              By creating an account you agree to ESO Energy's{" "}
+              <a href="#">Terms of Service</a> and{" "}
+              <a href="#">Privacy Policy</a>. Enterprise agreements available on request.
+            </p>
+
+            <div className="signin-row">
+              Already have a workspace?{" "}
+              <a href="#">Sign in →</a>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
-}
+};
+
+export default EsoEnergyCreateAccount;
