@@ -106,7 +106,7 @@ function HomePage() {
               Deploy Your Infrastructure
             </Link>
             <Link
-              to="/dashboard"
+              to="/"
               className="px-8 py-4 bg-neutral-900 border border-neutral-800 text-neutral-300 font-medium text-sm rounded-lg hover:border-neutral-700 hover:text-white transition-all duration-200"
             >
               Enter Command Deck
