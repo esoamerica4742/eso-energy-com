@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import React, { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
@@ -58,8 +58,32 @@ function HomePage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 font-sans antialiased selection:bg-amber-500/30 selection:text-amber-200">
+      {/* LUXURIOUS NAVIGATION HEADER LINKED NATIVELY TO YOUR APP PAGES */}
+      <nav className="w-full border-b border-neutral-900/60 bg-neutral-950/80 backdrop-blur-md fixed top-0 left-0 z-50 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-white font-mono font-semibold tracking-wider text-sm">ESO ENERGY</span>
+          </div>
+          <div className="flex items-center gap-6">
+            {/* TanStack Router direct links to your existing file routes */}
+            <Link
+              to="/login"
+              className="text-neutral-400 hover:text-white text-xs font-mono uppercase tracking-wider transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/signup"
+              className="px-5 py-2.5 bg-white text-black font-medium text-xs rounded-lg shadow-md transition-all duration-200 hover:bg-neutral-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Request Portal Access
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* HERO SECTION */}
-      <section className="relative pt-32 pb-20 px-6 max-w-7xl mx-auto border-b border-neutral-900">
+      <section className="relative pt-44 pb-20 px-6 max-w-7xl mx-auto border-b border-neutral-900">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.05),transparent_50%)]" />
         <div className="relative max-w-4xl">
           <span className="text-amber-500 font-mono tracking-widest text-xs uppercase block mb-4">
@@ -68,14 +92,30 @@ function HomePage() {
           <h1 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.1] text-white mb-8">
             ESO ENERGY
           </h1>
-          <p className="text-xl md:text-2xl text-neutral-400 font-light leading-relaxed mb-6">
+          <p className="text-xl md:text-2xl text-neutral-400 font-light leading-relaxed mb-10">
             Africa's Premier B2B Architecture for Hybrid Solar-Grid Orchestration, Fuel Security, and Real-Time Asset
             Intelligence.
           </p>
+
+          {/* DYNAMIC HUB ACTIONS FOR CLIENT ONBOARDING */}
+          <div className="flex flex-wrap gap-4 relative z-10">
+            <Link
+              to="/signup"
+              className="px-8 py-4 bg-white text-black font-medium text-sm rounded-lg shadow-xl hover:bg-neutral-200 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Deploy Your Infrastructure
+            </Link>
+            <Link
+              to="/login"
+              className="px-8 py-4 bg-neutral-900 border border-neutral-800 text-neutral-300 font-medium text-sm rounded-lg hover:border-neutral-700 hover:text-white transition-all duration-200"
+            >
+              Enter Command Deck
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* IDENTITY STATEMENT */}
+      {/* CORPORATE MANDATE */}
       <section className="py-20 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 border-b border-neutral-900">
         <div className="lg:col-span-4">
           <h2 className="text-xs uppercase font-mono tracking-wider text-neutral-500 sticky top-32">
