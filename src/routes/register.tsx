@@ -39,8 +39,8 @@ function RegisterComponent() {
         .brand-logo-text { font-family: 'Cinzel', serif; }
       `}</style>
 
-      <div class="w-full max-w-lg p-10 rounded-3xl bg-gradient-to-b from-zinc-950 to-zinc-950/90 border border-zinc-800/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] relative overflow-hidden">
-        <div class="absolute -top-[100px] left-1/2 -translate-x-1/2 w-[300px] h-[150px] bg-gradient-to-b from-amber-500/10 to-transparent blur-3xl pointer-events-none" />
+      <div className="w-full max-w-lg p-10 rounded-3xl bg-gradient-to-b from-zinc-950 to-zinc-950/90 border border-zinc-800/60 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] relative overflow-hidden">
+        <div className="absolute -top-[100px] left-1/2 -translate-x-1/2 w-[300px] h-[150px] bg-gradient-to-b from-amber-500/10 to-transparent blur-3xl pointer-events-none" />
 
         {!isSubmitted ? (
           <>
@@ -95,13 +95,13 @@ function RegisterComponent() {
               <button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full mt-4 py-4 px-6 font-semibold text-xs text-zinc-950 tracking-[0.15em] uppercase bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-400 rounded-xl transition-all duration-300 shadow-[0_4px_30px_rgba(245,158,11,0.15)] flex items-center justify-center"
+                className="w-full mt-4 py-4 px-6 font-semibold text-xs text-zinc-950 tracking-[0.15em] uppercase bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 rounded-xl transition-all duration-300 shadow-[0_4px_30px_rgba(245,158,11,0.15)] flex items-center justify-center"
               >
                 {isLoading ? "LOADING..." : "REQUEST WORKSPACE ACCESS"}
               </button>
             </form>
 
-            <div class="mt-8 text-center text-xs text-zinc-600 relative z-10 tracking-wide">
+            <div className="mt-8 text-center text-xs text-zinc-600 relative z-10 tracking-wide">
               Already managing fleets? <Link to="/login" className="text-amber-500/80 hover:text-amber-400 font-medium transition-colors ml-1">Access Terminal</Link>
             </div>
           </>
