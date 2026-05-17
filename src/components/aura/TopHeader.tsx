@@ -1,4 +1,5 @@
-import { ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogIn, LogOut, UserPlus } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { triggerLogout, useLogoutActive } from "@/lib/logout-bus";
 import { EsoLogo } from "@/components/aura/EsoLogo";
 
@@ -27,6 +28,26 @@ export function TopHeader() {
           <div className="hidden md:flex items-center gap-2 text-[11px] text-silver">
             <span className="font-mono">SESSION · AES-256</span>
           </div>
+          <Link
+            to="/login"
+            className="hairline rounded-full px-3 py-2 inline-flex items-center gap-2 text-[11px] font-mono tracking-[0.18em] uppercase text-silver hover:text-foreground transition-colors"
+            style={{ background: "oklch(0.19 0.006 265)" }}
+          >
+            <LogIn className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Sign In</span>
+          </Link>
+          <Link
+            to="/register"
+            className="rounded-full px-3.5 py-2 inline-flex items-center gap-2 text-[11px] font-mono tracking-[0.18em] uppercase font-semibold transition-all hover:brightness-110"
+            style={{
+              background: "linear-gradient(135deg, oklch(0.78 0.13 86), oklch(0.89 0.07 88))",
+              color: "oklch(0.13 0.003 265)",
+              boxShadow: "0 6px 20px oklch(0.78 0.13 86 / 0.25)",
+            }}
+          >
+            <UserPlus className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Create Account</span>
+          </Link>
           <button className="group flex items-center gap-3 rounded-full hairline pl-1.5 pr-3 py-1.5 transition-all hover:bg-[oklch(0.22_0.008_265)]"
             style={{ background: "oklch(0.19 0.006 265)" }}>
             <span className="relative h-8 w-8 rounded-full grid place-items-center text-[11px] font-semibold"
