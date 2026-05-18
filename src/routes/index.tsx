@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
 
 function DashboardPage() {
   return (
-    <div className="min-h-screen bg-[oklch(0.13_0.003_265)] text-foreground">
+    <div className="min-h-screen bg-[#030712] text-foreground">
       <TopHeader />
       <main className="mx-auto max-w-[1440px] px-5 md:px-8 py-6 md:py-8 space-y-6 md:space-y-8">
         <section>

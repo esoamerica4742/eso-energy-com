@@ -22,7 +22,7 @@ function RootDocument() {
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-screen bg-[#07080a] text-white antialiased">
+      <body className="min-h-screen bg-[#030712] text-white antialiased font-sans tracking-tight">
         <QueryClientProvider client={queryClient}>
           <Outlet />
         </QueryClientProvider>
