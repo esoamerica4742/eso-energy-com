@@ -1,7 +1,8 @@
-import { createRootRoute, Outlet, HeadContent, Scripts } from '@tanstack/react-router';
+import { createRootRouteWithContext, Outlet, HeadContent, Scripts } from '@tanstack/react-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import appCss from '@/styles.css?url';
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -14,13 +15,16 @@ export const Route = createRootRoute({
 });
 
 function RootDocument() {
+  const { queryClient } = Route.useRouteContext();
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body className="min-h-screen bg-[#07080a] text-white antialiased">
-        <Outlet />
+        <QueryClientProvider client={queryClient}>
+          <Outlet />
+        </QueryClientProvider>
         <Scripts />
       </body>
     </html>
