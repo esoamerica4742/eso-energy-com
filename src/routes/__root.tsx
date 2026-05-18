@@ -16,7 +16,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootDocument() {
-  const { queryClient } = Route.useRouteContext();
+  const [queryClient] = useState(() => new QueryClient());
   return (
     <html lang="en">
       <head>
