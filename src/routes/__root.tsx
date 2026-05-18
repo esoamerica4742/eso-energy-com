@@ -1,15 +1,33 @@
-import { createRootRoute, Outlet } from '@tanstack/react-router';
-import React from 'react';
+import { createRootRouteWithContext, Outlet, HeadContent, Scripts } from '@tanstack/react-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useState } from 'react';
+import appCss from '@/styles.css?url';
 
-export const Route = createRootRoute({
-  component: RootLayout,
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  head: () => ({
+    meta: [
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'ESO ENERGY · Command Deck' },
+    ],
+    links: [{ rel: 'stylesheet', href: appCss }],
+  }),
+  shellComponent: RootDocument,
 });
 
-function RootLayout() {
+function RootDocument() {
+  const [queryClient] = useState(() => new QueryClient());
   return (
-    <main className="min-h-screen bg-[#07080a]">
-      {/* This Outlet is mandatory. It tells the router where to load your login and register pages */}
-      <Outlet />
-    </main>
+    <html lang="en">
+      <head>
+        <HeadContent />
+      </head>
+      <body className="min-h-screen bg-[#07080a] text-white antialiased">
+        <QueryClientProvider client={queryClient}>
+          <Outlet />
+        </QueryClientProvider>
+        <Scripts />
+      </body>
+    </html>
   );
 }
