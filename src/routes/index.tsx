@@ -11,7 +11,6 @@ import { LogoutOverlay } from "@/components/aura/LogoutOverlay";
 
 export const Route = createFileRoute("/")({
   component: DashboardPage,
-  ssr: false,
   head: () => ({
     meta: [
       { title: "Command Deck · ESO ENERGY" },
