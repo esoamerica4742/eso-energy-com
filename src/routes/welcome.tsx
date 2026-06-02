@@ -15,6 +15,7 @@ import {
   Lock,
   Mail,
   MapPin,
+  Phone,
   CheckCircle2,
   X,
   Eye,
