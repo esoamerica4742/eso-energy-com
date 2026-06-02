@@ -523,6 +523,12 @@ function ComplianceFooter() {
                 Onitsha, Anambra, Nigeria.
               </p>
               <p className="flex items-center gap-2 text-white/70">
+                <Phone className="h-4 w-4 shrink-0" style={{ color: GOLD }} />
+                <a href="tel:+2348068670809" className="hover:text-white">
+                  +234 806 867 0809
+                </a>
+              </p>
+              <p className="flex items-center gap-2 text-white/70">
                 <Mail className="h-4 w-4 shrink-0" style={{ color: GOLD }} />
                 <a href="mailto:info@eso-energy.com" className="hover:text-white">
                   info@eso-energy.com
@@ -548,10 +554,10 @@ function ComplianceFooter() {
               Legal
             </p>
             <ul className="space-y-2.5 text-sm text-white/70">
-              <li><a className="hover:text-white" href="/terms">Terms of Service</a></li>
-              <li><a className="hover:text-white" href="/privacy">Privacy Policy</a></li>
-              <li><a className="hover:text-white" href="/refunds">Refund / Cancellation</a></li>
-              <li><a className="hover:text-white" href="/compliance">Compliance</a></li>
+              <li><Link to="/terms" className="hover:text-white">Terms of Service</Link></li>
+              <li><Link to="/privacy" className="hover:text-white">Privacy Policy</Link></li>
+              <li><Link to="/refunds" className="hover:text-white">Refund / Cancellation</Link></li>
+              <li><Link to="/compliance" className="hover:text-white">Compliance</Link></li>
             </ul>
           </div>
         </div>
