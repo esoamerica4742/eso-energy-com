@@ -38,9 +38,9 @@
   --color-champagne: var(--champagne);
   --color-indigo-iris: var(--indigo-iris);
   --color-violet-iris: var(--violet-iris);
-  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-mono: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ============================================================
@@ -58,8 +58,8 @@
   /* 2026 Elite accent system */
   --jade: oklch(0.74 0.17 165);                  /* Deep Jade Emerald #10B981 */
   --jade-glow: oklch(0.86 0.16 165);
-  --metal-gold: oklch(0.78 0.16 75);             /* Muted Metallic Gold #F59E0B */
-  --metal-gold-glow: oklch(0.88 0.16 78);
+  --metal-gold: #D4AF37;                         /* Metallic Gold */
+  --metal-gold-glow: #E8D5A3;
 
   /* Surface layers — slate steps */
   --surface-1: oklch(0.180 0.025 265);            /* #121827 */
@@ -72,8 +72,8 @@
   --popover-foreground: oklch(1 0 0);
 
   /* Liquid gold (legacy ribbon accent — used sparingly) */
-  --gold: oklch(0.78 0.13 86);
-  --champagne: oklch(0.89 0.07 88);
+  --gold: #D4AF37;
+  --champagne: #E8D5A3;
 
   /* PRIMARY — Electric Indigo #6366F1 */
   --indigo-iris: oklch(0.62 0.20 277);
@@ -96,7 +96,7 @@
   --ring: oklch(0.62 0.20 277 / 0.55);
 
   /* Legacy aliases */
-  --solar: oklch(0.78 0.13 86);
+  --solar: #D4AF37;
   --emerald-mint: oklch(0.74 0.17 165);            /* Emerald Glow #10B981-ish */
   --storage: oklch(0.62 0.20 277);
   --alert: oklch(0.62 0.22 25);
@@ -104,9 +104,9 @@
 
   /* Premium gradients */
   --gradient-obsidian: linear-gradient(160deg, oklch(0.215 0.028 265) 0%, oklch(0.135 0.020 270) 100%);
-  --gradient-gold: linear-gradient(135deg, oklch(0.78 0.13 86), oklch(0.89 0.07 88));
+  --gradient-gold: linear-gradient(135deg, #D4AF37, #E8D5A3);
   --gradient-iris: linear-gradient(135deg, oklch(0.62 0.20 277), oklch(0.55 0.17 320));
-  --gradient-solar: linear-gradient(135deg, oklch(0.78 0.13 86), oklch(0.89 0.07 88));
+  --gradient-solar: linear-gradient(135deg, #D4AF37, #E8D5A3);
   --gradient-emerald: linear-gradient(135deg, oklch(0.74 0.17 165), oklch(0.60 0.14 175));
   --gradient-storage: linear-gradient(135deg, oklch(0.62 0.20 277), oklch(0.55 0.17 320));
 
@@ -116,9 +116,9 @@
   --shadow-floating:
     inset 0 1px 0 0 oklch(1 0 0 / 0.08),
     0 28px 80px -20px oklch(0 0 0 / 0.8);
-  --glow-gold: 0 0 40px oklch(0.78 0.13 86 / 0.30);
+  --glow-gold: 0 0 40px rgba(212, 175, 55, 0.30);
   --glow-iris: 0 0 36px oklch(0.62 0.20 277 / 0.45);
-  --glow-solar: 0 0 40px oklch(0.78 0.13 86 / 0.30);
+  --glow-solar: 0 0 40px rgba(212, 175, 55, 0.30);
   --glow-emerald: 0 0 28px oklch(0.74 0.17 165 / 0.35);
   --glow-storage: 0 0 28px oklch(0.62 0.20 277 / 0.45);
   --glow-alert: 0 0 24px oklch(0.62 0.22 25 / 0.45);
@@ -168,15 +168,15 @@
   }
 
   h1, h2, h3, h4 {
-    font-family: "Playfair Display", ui-serif, Georgia, serif;
-    font-weight: 300;
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
     letter-spacing: -0.025em;
     color: oklch(1 0 0);
   }
   h1 { letter-spacing: -0.03em; }
 
   /* Selection */
-  ::selection { background: oklch(0.78 0.13 86 / 0.35); color: oklch(1 0 0); }
+  ::selection { background: rgba(212, 175, 55, 0.35); color: oklch(1 0 0); }
 }
 
 @layer components {
@@ -253,7 +253,7 @@
 
   /* Editorial display headings */
   .display-xl {
-    font-family: "Playfair Display", serif;
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
     font-weight: 300;
     font-size: clamp(2.5rem, 5vw, 5rem);
     letter-spacing: -0.03em;
@@ -261,7 +261,7 @@
     color: oklch(1 0 0);
   }
   .display-lg {
-    font-family: "Playfair Display", serif;
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
     font-weight: 300;
     font-size: clamp(2rem, 3.5vw, 3.25rem);
     letter-spacing: -0.025em;
@@ -276,7 +276,7 @@
   .btn-gold {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, oklch(0.78 0.13 86), oklch(0.89 0.07 88));
+    background: linear-gradient(135deg, #D4AF37, #E8D5A3);
     color: oklch(0.13 0.003 265);
     border-radius: 8px;
     padding: 0.625rem 1.25rem;
@@ -284,7 +284,7 @@
     box-shadow:
       inset 0 1px 0 oklch(1 0 0 / 0.4),
       inset 0 -1px 0 oklch(0 0 0 / 0.15),
-      0 6px 20px oklch(0.78 0.13 86 / 0.25);
+      0 6px 20px rgba(212, 175, 55, 0.25);
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
                 box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -296,14 +296,14 @@
     transform: translateX(-100%);
     transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .btn-gold:hover { transform: scale(1.02); box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.5), 0 10px 30px oklch(0.78 0.13 86 / 0.4); }
+  .btn-gold:hover { transform: scale(1.02); box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.5), 0 10px 30px rgba(212, 175, 55, 0.4); }
   .btn-gold:hover::after { transform: translateX(100%); }
 
   /* Secondary — glass with gold border */
   .btn-glass-gold {
     background: oklch(1 0 0 / 0.03);
     backdrop-filter: blur(16px);
-    border: 1px solid oklch(0.78 0.13 86 / 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.4);
     color: var(--gold);
     border-radius: 8px;
     padding: 0.625rem 1.25rem;
@@ -311,9 +311,9 @@
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .btn-glass-gold:hover {
-    background: oklch(0.78 0.13 86 / 0.10);
-    border-color: oklch(0.78 0.13 86 / 0.7);
-    box-shadow: 0 0 24px oklch(0.78 0.13 86 / 0.25);
+    background: rgba(212, 175, 55, 0.10);
+    border-color: rgba(212, 175, 55, 0.7);
+    box-shadow: 0 0 24px rgba(212, 175, 55, 0.25);
   }
 
   /* Gold pill badge */
@@ -323,9 +323,9 @@
     gap: 0.35rem;
     padding: 0.25rem 0.65rem;
     border-radius: 9999px;
-    background: oklch(0.78 0.13 86 / 0.15);
+    background: rgba(212, 175, 55, 0.15);
     color: var(--gold);
-    border: 1px solid oklch(0.78 0.13 86 / 0.25);
+    border: 1px solid rgba(212, 175, 55, 0.25);
     font-size: 0.7rem;
     letter-spacing: 0.06em;
     font-weight: 500;
@@ -334,8 +334,8 @@
   /* Avatar gold ring */
   .avatar-gold {
     box-shadow:
-      0 0 0 1.5px oklch(0.78 0.13 86 / 0.7),
-      0 0 18px oklch(0.78 0.13 86 / 0.25);
+      0 0 0 1.5px rgba(212, 175, 55, 0.7),
+      0 0 18px rgba(212, 175, 55, 0.25);
   }
 
   /* Sidebar active gold rail */
@@ -347,9 +347,9 @@
     position: absolute;
     left: 0; top: 8px; bottom: 8px;
     width: 2px;
-    background: linear-gradient(180deg, oklch(0.89 0.07 88), oklch(0.78 0.13 86));
+    background: linear-gradient(180deg, #E8D5A3, #D4AF37);
     border-radius: 2px;
-    box-shadow: 0 0 12px oklch(0.78 0.13 86 / 0.6);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
   }
 }
 
@@ -367,8 +367,8 @@
   50%      { transform: scale(1.06); opacity: 1; }
 }
 @keyframes pulse-gold {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.78 0.13 86 / 0.55); }
-  50%      { box-shadow: 0 0 0 10px oklch(0.78 0.13 86 / 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.55); }
+  50%      { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
 }
 @keyframes pulse-alert {
   0%, 100% { box-shadow: 0 0 0 0 oklch(0.66 0.24 25 / 0.6); }
@@ -396,14 +396,14 @@
 
 .shimmer-text {
   background: linear-gradient(90deg,
-    oklch(0.78 0.13 86) 0%,
+    #D4AF37 0%,
     oklch(0.95 0.06 90) 50%,
-    oklch(0.78 0.13 86) 100%);
+    #D4AF37 100%);
   background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  font-family: "Playfair Display", serif;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   font-weight: 400;
   animation: shimmer 6s linear infinite;
 }
@@ -441,6 +441,78 @@
 
 /* Ensure app content sits above the noise overlay */
 #root, main, header, nav, footer { position: relative; z-index: 2; }
+
+/* Landing command deck — Stripe-style verify ring + unlock spring */
+@keyframes landing-orbit-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes landing-deck-unlock {
+  0% {
+    opacity: 0.35;
+    transform: perspective(900px) rotateX(10deg) rotateY(-8deg) scale(0.96);
+    filter: blur(6px);
+  }
+  60% {
+    opacity: 1;
+    transform: perspective(900px) rotateX(2deg) rotateY(2deg) scale(1.01);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(900px) rotateX(0deg) rotateY(0deg) scale(1);
+    filter: blur(0);
+  }
+}
+@keyframes landing-vault-exit {
+  to {
+    opacity: 0;
+    transform: scale(1.04);
+    filter: blur(8px);
+  }
+}
+.landing-deck-shell {
+  position: relative;
+  isolation: isolate;
+}
+.landing-deck-shell--verifying .landing-deck-orbit {
+  opacity: 1;
+}
+.landing-deck-orbit {
+  pointer-events: none;
+  position: absolute;
+  inset: -3px;
+  border-radius: 1.15rem;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  overflow: hidden;
+  z-index: 0;
+}
+.landing-deck-orbit::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(212, 175, 55, 0.15) 40deg,
+    rgba(212, 175, 55, 0.95) 120deg,
+    rgba(0, 240, 255, 0.85) 200deg,
+    rgba(212, 175, 55, 0.35) 280deg,
+    transparent 360deg
+  );
+  animation: landing-orbit-spin 1.1s linear infinite;
+}
+.landing-deck-inner {
+  position: relative;
+  z-index: 1;
+  border-radius: 1rem;
+}
+.landing-deck-inner--unlocked {
+  animation: landing-deck-unlock 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.landing-vault-layer {
+  animation: landing-vault-exit 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
 
 /* Pitch-sim soft-red flashing alert */
 @keyframes sim-flash-pulse {
@@ -580,7 +652,7 @@
 
 /* Bebas Neue display lockup for the EsoEnergy wordmark */
 .eso-display {
-  font-family: "Bebas Neue", "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   font-weight: 400;
   letter-spacing: 0.04em;
   font-feature-settings: "ss01", "kern";
@@ -678,19 +750,32 @@
   letter-spacing: 0.26em;
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 0.45),
-    0 0 0 1px oklch(0.78 0.13 86 / 0.7),
+    0 0 0 1px rgba(212, 175, 55, 0.7),
     0 14px 36px -6px oklch(0.70 0.15 80 / 0.55),
-    0 0 38px oklch(0.78 0.13 86 / 0.50);
+    0 0 38px rgba(212, 175, 55, 0.50);
 }
 .btn-gold-cta:active { transform: translateY(0) scale(0.985); animation: gold-cta-pulse 0.45s ease-out; }
 @keyframes gold-cta-pulse {
-  0% { box-shadow: 0 0 0 0 oklch(0.78 0.13 86 / 0.65); }
-  100% { box-shadow: 0 0 0 14px oklch(0.78 0.13 86 / 0); }
+  0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.65); }
+  100% { box-shadow: 0 0 0 14px rgba(212, 175, 55, 0); }
 }
 
 /* ============================================================
    Command Deck — cyber-industrial auth surface
    ============================================================ */
+/* Dashboard scrollbar — minimal Apple-style */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: oklch(1 0 0 / 0.12);
+  border-radius: 999px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .deck-canvas {
   position: relative;
   background-color: #030508;
@@ -876,7 +961,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 0.5rem 1rem;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   font-size: 9.5px;
   letter-spacing: 0.25em;
   text-transform: uppercase;

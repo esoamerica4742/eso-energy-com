@@ -16,12 +16,46 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { EsoLogo } from "@/components/aura/EsoLogo";
+import { AuthenticatingOverlay } from "@/components/aura/AuthOverlays";
 import {
-  SignupSuccessCard,
-  AuthenticatingOverlay,
-} from "@/components/aura/AuthOverlays";
+  buildAuthCallbackUrl,
+  productDestination,
+  validateSignupPassword,
+  type AuthProduct,
+} from "@/lib/auth/productRedirect";
+
+type LoginProduct = AuthProduct;
+
+type LoginSearch = {
+  mode?: "signin" | "signup";
+  product?: LoginProduct;
+};
+
+const PRODUCT_COPY: Record<
+  LoginProduct,
+  { name: string; signInTitle: string; signUpTitle: string; signInHint: string; signUpHint: string }
+> = {
+  monitoring: {
+    name: "Eso Inverter Monitoring",
+    signInTitle: "Sign in to monitoring",
+    signUpTitle: "Create your monitoring account",
+    signInHint: "Fleet telemetry · Enode devices · command deck.",
+    signUpHint: "Choose a password · we email you a confirmation link before first sign-in.",
+  },
+  esopay: {
+    name: "Eso Pay Bills",
+    signInTitle: "Sign in to Eso Pay",
+    signUpTitle: "Create your Eso Pay account",
+    signInHint: "Wallet & utility billing · continue in the mobile app after sign-in.",
+    signUpHint: "Choose a password · confirm your email, then open Eso Pay on your phone.",
+  },
+};
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>): LoginSearch => ({
+    mode: search.mode === "signup" ? "signup" : "signin",
+    product: search.product === "esopay" ? "esopay" : "monitoring",
+  }),
   component: LoginPage,
   head: () => ({
     meta: [
@@ -41,32 +75,37 @@ const ACCESS_TIERS = [
   "Tier 5 - Sovereign Admin",
 ];
 
-function generateTicket() {
-  const n = Math.floor(1000 + Math.random() * 9000);
-  return `ESO-REQ-${n}X`;
-}
+type AuthPhase = "idle" | "authenticating" | "confirm-email";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { mode: searchMode, product = "monitoring" } = Route.useSearch();
+  const productCopy = PRODUCT_COPY[product];
   const { session, loading } = useAuth();
-  const [mode, setMode] = useState<Mode>("signin");
+  const [mode, setMode] = useState<Mode>(searchMode === "signup" ? "signup" : "signin");
   const [direction, setDirection] = useState<1 | -1>(1);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [company, setCompany] = useState("");
   const [tier, setTier] = useState(ACCESS_TIERS[1]);
   const [busy, setBusy] = useState(false);
-  const [phase, setPhase] = useState<"idle" | "authenticating" | "signup-success">("idle");
+  const [phase, setPhase] = useState<AuthPhase>("idle");
   const [ctaLabel, setCtaLabel] = useState<string | null>(null);
-  const [ticketId, setTicketId] = useState<string>("");
+  const [pendingEmail, setPendingEmail] = useState("");
 
   useEffect(() => {
-    if (!loading && session && phase !== "signup-success") {
-      const t = setTimeout(() => navigate({ to: "/" }), 900);
+    setMode(searchMode === "signup" ? "signup" : "signin");
+  }, [searchMode]);
+
+  useEffect(() => {
+    if (!loading && session && phase !== "confirm-email") {
+      const delay = phase === "authenticating" ? 900 : 0;
+      const t = setTimeout(() => navigate({ to: productDestination(product) }), delay);
       return () => clearTimeout(t);
     }
-  }, [loading, session, navigate, phase]);
+  }, [loading, session, navigate, phase, product]);
 
   const switchMode = (next: Mode) => {
     if (next === mode) return;
@@ -91,23 +130,31 @@ function LoginPage() {
         if (!fullName.trim()) throw new Error("Please enter your full name.");
         if (!email.trim()) throw new Error("Corporate email is required.");
         if (!company.trim()) throw new Error("Organization is required.");
-        // Synthesize a placeholder password for the access request log
-        const tempPw = `Req-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`;
-        const { error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password: tempPw,
+        const passwordError = validateSignupPassword(password, confirmPassword);
+        if (passwordError) throw new Error(passwordError);
+
+        const trimmedEmail = email.trim();
+        const { data, error } = await supabase.auth.signUp({
+          email: trimmedEmail,
+          password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: buildAuthCallbackUrl(product),
             data: {
               full_name: fullName.trim(),
               company: company.trim(),
               access_tier: tier,
+              preferred_product: product,
             },
           },
         });
         if (error) throw error;
-        setTicketId(generateTicket());
-        setPhase("signup-success");
+
+        if (data.session) {
+          setPhase("authenticating");
+        } else {
+          setPendingEmail(trimmedEmail);
+          setPhase("confirm-email");
+        }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication failed.";
@@ -120,25 +167,52 @@ function LoginPage() {
     setCtaLabel(null);
   };
 
-  const returnToDeck = () => {
+  const returnToSignIn = () => {
     setPhase("idle");
     setFullName("");
     setPassword("");
+    setConfirmPassword("");
+    setPendingEmail("");
     switchMode("signin");
   };
 
+  const resendConfirmation = async () => {
+    if (!pendingEmail) return;
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: pendingEmail,
+        options: { emailRedirectTo: buildAuthCallbackUrl(product) },
+      });
+      if (error) throw error;
+      toast.success("Confirmation email sent", {
+        description: `Check ${pendingEmail} for the verification link.`,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Could not resend email.";
+      toast.error("Resend failed", { description: msg });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const isSignin = mode === "signin";
-  const showSuccess = phase === "signup-success";
+  const showConfirmEmail = phase === "confirm-email";
 
   return (
     <div className="deck-canvas min-h-screen flex items-center justify-center px-5 py-10 overflow-hidden">
       <div className="deck-card py-9 md:py-11 px-7 md:px-10 relative">
         {busy && <div className="deck-progress" aria-hidden />}
 
-        <Link to="/login" className="block mb-7 text-center">
+        <Link to="/access" className="mb-4 inline-flex text-[11px] font-mono text-white/40 hover:text-white/70">
+          ← Command center
+        </Link>
+
+        <Link to="/login" search={{ product, mode }} className="block mb-7 text-center">
           <EsoLogo size="lg" variant="display" className="mx-auto" />
           <p className="mt-3 text-[10px] tracking-[0.32em] text-white/40 uppercase font-mono">
-            Secure Multi-Tenant Telemetry Gateway
+            {productCopy.name}
           </p>
           <p className="mt-2 inline-flex items-center justify-center gap-1.5 text-[11px] font-medium text-white/70">
             <ShieldCheck className="h-3.5 w-3.5 text-[#14b8a6]" aria-hidden />
@@ -166,21 +240,27 @@ function LoginPage() {
             onClick={() => switchMode("signup")}
             className="deck-tab"
           >
-            Request Access
+            Create account
           </button>
         </div>
 
         <div className="relative min-h-[460px]">
           <AnimatePresence mode="wait" initial={false}>
-            {showSuccess ? (
+            {showConfirmEmail ? (
               <motion.div
-                key="success"
+                key="confirm-email"
                 initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 exit={{ opacity: 0, y: -8, filter: "blur(8px)" }}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               >
-                <SuccessPanel ticketId={ticketId} onReturn={returnToDeck} />
+                <ConfirmEmailPanel
+                  email={pendingEmail}
+                  product={product}
+                  busy={busy}
+                  onResend={() => void resendConfirmation()}
+                  onReturn={returnToSignIn}
+                />
               </motion.div>
             ) : (
               <motion.div
@@ -192,17 +272,15 @@ function LoginPage() {
               >
                 <h1
                   className="text-[26px] md:text-[28px] leading-[1.15] tracking-tight text-white"
-                  style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 500 }}
+                  style={{ fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif', fontWeight: 500 }}
                 >
-                  {isSignin ? "Sign in to your command deck" : "Request secure terminal credentials"}
+                  {isSignin ? productCopy.signInTitle : productCopy.signUpTitle}
                 </h1>
                 <p
                   className="mt-2 text-[11px] text-white/50 leading-relaxed"
-                  style={{ fontFamily: '"JetBrains Mono", "Fira Code", ui-monospace, monospace' }}
+                  style={{ fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif' }}
                 >
-                  {isSignin
-                    ? "Sovereign telemetry · encrypted by default."
-                    : "System vetting required · Authorization takes 2-4 business hours."}
+                  {isSignin ? productCopy.signInHint : productCopy.signUpHint}
                 </p>
 
                 <form onSubmit={submit} className={`mt-7 ${isSignin ? "space-y-4" : "space-y-6"}`} noValidate>
@@ -262,6 +340,26 @@ function LoginPage() {
                           icon={<Building2 className="h-4 w-4" />}
                           placeholder="Lagos Hub Alpha"
                         />
+                        <Field
+                          id="signupPassword"
+                          type="password"
+                          label="Password"
+                          value={password}
+                          onChange={setPassword}
+                          autoComplete="new-password"
+                          icon={<Lock className="h-4 w-4" />}
+                          placeholder="At least 8 characters"
+                        />
+                        <Field
+                          id="confirmPassword"
+                          type="password"
+                          label="Confirm password"
+                          value={confirmPassword}
+                          onChange={setConfirmPassword}
+                          autoComplete="new-password"
+                          icon={<Lock className="h-4 w-4" />}
+                          placeholder="Repeat password"
+                        />
                         <TierSelect value={tier} onChange={setTier} />
                       </>
                     )}
@@ -272,18 +370,18 @@ function LoginPage() {
                         {ctaLabel
                           ? ctaLabel
                           : isSignin
-                            ? "Initialize Command Flow"
-                            : "Submit Credential Request"}
+                            ? "Sign in"
+                            : "Create account"}
                       </span>
                     </button>
 
                     {isSignin && (
-                      <Link
-                        to="/forgot-password"
+                      <a
+                        href="/forgot-password"
                         className="block w-full text-center text-[10.5px] tracking-[0.28em] uppercase text-white/45 hover:text-[#e5b974] transition-colors"
                       >
                         Forgot password?
-                      </Link>
+                      </a>
                     )}
                   </Stagger>
                 </form>
@@ -309,7 +407,24 @@ function LoginPage() {
   );
 }
 
-function SuccessPanel({ ticketId, onReturn }: { ticketId: string; onReturn: () => void }) {
+function ConfirmEmailPanel({
+  email,
+  product,
+  busy,
+  onResend,
+  onReturn,
+}: {
+  email: string;
+  product: LoginProduct;
+  busy: boolean;
+  onResend: () => void;
+  onReturn: () => void;
+}) {
+  const nextStep =
+    product === "esopay"
+      ? "After confirming, sign in and open Eso Pay on your phone."
+      : "After confirming, sign in to open your monitoring dashboard.";
+
   return (
     <div className="flex flex-col items-center text-center pt-2">
       <motion.div
@@ -324,55 +439,38 @@ function SuccessPanel({ ticketId, onReturn }: { ticketId: string; onReturn: () =
           background: "radial-gradient(circle at 50% 50%, rgba(16,185,129,0.18), rgba(16,185,129,0.02))",
         }}
       >
-        <motion.div
-          initial={{ scale: 0, rotate: -20 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 260, damping: 16, delay: 0.25 }}
-        >
-          <Check className="h-9 w-9" style={{ color: "#34d399" }} strokeWidth={2.4} />
-        </motion.div>
+        <Mail className="h-9 w-9" style={{ color: "#34d399" }} strokeWidth={2.2} />
       </motion.div>
 
       <h2
         className="mt-6 text-[22px] md:text-[24px] leading-tight text-white"
-        style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 500 }}
+        style={{ fontFamily: '"Inter", ui-sans-serif, system-ui, sans-serif', fontWeight: 500 }}
       >
-        Request Logged in Gateway Ledger
+        Confirm your email
       </h2>
-      <p
-        className="mt-2 text-[10.5px] text-white/55 tracking-[0.18em]"
-        style={{ fontFamily: '"JetBrains Mono", "Fira Code", ui-monospace, monospace' }}
-      >
-        SECURE HANDSHAKE COMPLETE
+      <p className="mt-3 text-sm leading-relaxed text-white/60">
+        We sent a verification link to{" "}
+        <span className="font-medium text-white/90">{email}</span>. Open it to activate your
+        account.
       </p>
+      <p className="mt-2 text-[12px] text-white/45">{nextStep}</p>
 
-      <div
-        className="mt-6 w-full rounded-xl px-4 py-3.5 text-left"
-        style={{
-          background: "rgba(0,0,0,0.45)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
-          fontFamily: '"JetBrains Mono", "Fira Code", ui-monospace, monospace',
-        }}
+      <button
+        type="button"
+        onClick={onResend}
+        disabled={busy}
+        className="mt-6 deck-cta w-full max-w-xs"
       >
-        <div className="flex items-center justify-between text-[10px] tracking-[0.22em] text-white/40 uppercase mb-1.5">
-          <span>Ticket</span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-            Pending
-          </span>
-        </div>
-        <div className="text-[11.5px] text-white/85 break-all">
-          TICKET ID: <span className="text-[#e5b974]">{ticketId}</span> · STATUS: PENDING SECURITY CLEARANCE
-        </div>
-      </div>
+        {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+        <span>Resend confirmation email</span>
+      </button>
 
       <button
         type="button"
         onClick={onReturn}
-        className="mt-7 text-[10.5px] tracking-[0.28em] uppercase text-white/55 hover:text-[#e5b974] transition-colors"
+        className="mt-5 text-[10.5px] tracking-[0.28em] uppercase text-white/55 hover:text-[#e5b974] transition-colors"
       >
-        ← Return to Sign In
+        ← Back to sign in
       </button>
     </div>
   );
@@ -526,5 +624,3 @@ function Field({
   );
 }
 
-// SignupSuccessCard import retained for tree compatibility but unused now.
-void SignupSuccessCard;

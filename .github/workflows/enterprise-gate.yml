@@ -1,0 +1,65 @@
+name: Enterprise Gate
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      staging_url:
+        description: "Staging base URL (e.g. https://staging.example.com)"
+        required: false
+        type: string
+
+jobs:
+  enterprise-gate:
+    name: Enterprise Gate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eso-energy-com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: eso-energy-com/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Backend readiness
+        run: npm run verify:backend
+
+      - name: Enterprise local checks
+        run: npm run verify:enterprise -- --local-only
+
+      - name: Resolve staging URL
+        id: staging
+        shell: bash
+        run: |
+          URL_INPUT="${{ github.event.inputs.staging_url }}"
+          URL_SECRET="${{ secrets.ENTERPRISE_STAGING_URL }}"
+          if [ -n "$URL_INPUT" ]; then
+            echo "url=$URL_INPUT" >> "$GITHUB_OUTPUT"
+          elif [ -n "$URL_SECRET" ]; then
+            echo "url=$URL_SECRET" >> "$GITHUB_OUTPUT"
+          else
+            echo "ENTERPRISE_STAGING_URL secret is missing and no workflow_dispatch input was provided."
+            exit 1
+          fi
+
+      - name: Enterprise staging health gate
+        run: npm run verify:enterprise -- --url "${{ steps.staging.outputs.url }}"

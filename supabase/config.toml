@@ -1,1 +1,8 @@
-project_id = "ywlmbswlisqzqtszcbmz"
+# Set after: npx supabase link --project-ref YOUR_PROJECT_REF
+project_id = "pndsuzscjedumjhadtio"
+
+# Magic Link template = 6-digit OTP for mobile (no {{ .ConfirmationURL }}).
+# Hosted: run `node scripts/apply-email-otp-template.mjs` or paste template in Dashboard.
+[auth.email.template.magic_link]
+subject = "Your ESO Energy sign-in code"
+content_path = "./supabase/templates/magic-link-otp.html"

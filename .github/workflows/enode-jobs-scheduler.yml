@@ -1,0 +1,72 @@
+name: Enode Jobs Scheduler
+
+on:
+  schedule:
+    # Every 5 minutes (GitHub Actions minimum granularity).
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run-enode-jobs:
+    name: Run Enode Background Jobs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate required secrets
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.ENODE_JOBS_BASE_URL }}" ]; then
+            echo "Missing secret: ENODE_JOBS_BASE_URL"
+            exit 1
+          fi
+          if [ -z "${{ secrets.ENODE_JOB_TOKEN }}" ]; then
+            echo "Missing secret: ENODE_JOB_TOKEN"
+            exit 1
+          fi
+
+      - name: Process webhook queue
+        shell: bash
+        run: |
+          curl --fail --show-error --silent \
+            -X POST \
+            -H "x-job-token: ${{ secrets.ENODE_JOB_TOKEN }}" \
+            "${{ secrets.ENODE_JOBS_BASE_URL }}/jobs/process-webhook-queue?limit=800&parallel=16"
+
+      - name: Offline detection
+        shell: bash
+        run: |
+          curl --fail --show-error --silent \
+            -X POST \
+            -H "x-job-token: ${{ secrets.ENODE_JOB_TOKEN }}" \
+            "${{ secrets.ENODE_JOBS_BASE_URL }}/jobs/offline-check?staleMinutes=10&criticalMinutes=15&cooldownMinutes=30"
+
+      - name: Rollups and retention (every 15 minutes)
+        shell: bash
+        run: |
+          MINUTE=$(date -u +%M)
+          MOD=$((10#$MINUTE % 15))
+          if [ "$MOD" -ne 0 ]; then
+            echo "Skipping rollups this run (UTC minute=$MINUTE)."
+            exit 0
+          fi
+          curl --fail --show-error --silent \
+            -X POST \
+            -H "x-job-token: ${{ secrets.ENODE_JOB_TOKEN }}" \
+            "${{ secrets.ENODE_JOBS_BASE_URL }}/jobs/rollups?hourlyHours=72&dailyDays=30&rawDays=14&fiveMinDays=120&hourlyRetainDays=730"
+
+      - name: Low grid balance alert scan
+        shell: bash
+        run: |
+          curl --fail --show-error --silent \
+            -X POST \
+            -H "x-job-token: ${{ secrets.ENODE_JOB_TOKEN }}" \
+            "${{ secrets.ENODE_JOBS_BASE_URL }}/jobs/low-grid-balance-alerts?thresholdNaira=25000"
+
+      - name: Solarman fleet sync (5 minute backend cadence)
+        shell: bash
+        run: |
+          BASE="${{ secrets.ENODE_JOBS_BASE_URL }}"
+          SOLARMAN_BASE="${BASE/enode-api/solarman-api}"
+          curl --fail --show-error --silent \
+            -X POST \
+            -H "x-job-token: ${{ secrets.ENODE_JOB_TOKEN }}" \
+            "${SOLARMAN_BASE}/jobs/sync-all"

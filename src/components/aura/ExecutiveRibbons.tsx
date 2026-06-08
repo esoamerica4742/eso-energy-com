@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Banknote, HeartPulse, TrendingUp, Activity, Sun, Fuel } from "lucide-react";
+import { SavingsSparkline } from "@/components/aura/SavingsSparkline";
+import { Link } from "@tanstack/react-router";
 
 type Props = {
   siteLabel?: string;
@@ -102,6 +104,9 @@ export function ExecutiveRibbons({ siteLabel }: Props) {
           </span>
         </div>
 
+        <SavingsSparkline />
+        <p className="text-[11px] text-silver/50 mt-2">7-day trend · diesel offset vs prior week</p>
+
         <div className="mt-5 grid grid-cols-3 gap-3">
           <Mini label="Month-to-date" value={formatNaira(monthSavings)} />
           <Mini label="Diesel avoided" value={`${dieselAvoided.toLocaleString()} L`} icon={<Fuel className="h-3 w-3" />} tone="amber" />
@@ -151,7 +156,10 @@ export function ExecutiveRibbons({ siteLabel }: Props) {
 
         <div className="mt-4 grid grid-cols-2 gap-3">
           <Mini label="Stability" value={`${stability}%`} icon={<Activity className="h-3 w-3" />} />
-          <Mini label="Critical alerts" value={isSite ? "1" : "2"} tone="amber" />
+          <Link to="/alerts" className="block rounded-xl hairline px-3 py-2.5 hover:bg-white/[0.03] transition-colors" style={{ background: "oklch(0.16 0.015 265 / 0.5)" }}>
+            <p className="text-[9px] tracking-[0.22em] uppercase text-silver/70">Active alerts</p>
+            <p className="num text-[15px] font-semibold mt-1" style={{ color: "oklch(0.92 0.12 75)" }}>{isSite ? "1" : "3"}</p>
+          </Link>
         </div>
       </article>
     </section>

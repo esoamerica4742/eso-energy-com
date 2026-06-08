@@ -1,23 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { TopHeader } from "@/components/aura/TopHeader";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { DashboardQuickStats } from "@/components/dashboard/DashboardQuickStats";
 import { ExecutiveRibbons } from "@/components/aura/ExecutiveRibbons";
-import { EnergyFlow } from "@/components/aura/EnergyFlow";
+import { PowerNetworkRow } from "@/components/aura/PowerNetworkRow";
 import { FleetCommandView } from "@/components/aura/FleetCommandView";
 import { DieselBurden } from "@/components/aura/DieselBurden";
 import { ThermalLoadTracker } from "@/components/aura/ThermalLoadTracker";
 import { BatteryLifespanGuard } from "@/components/aura/BatteryLifespanGuard";
 import { ExecutiveReporting } from "@/components/aura/ExecutiveReporting";
 import { LogoutOverlay } from "@/components/aura/LogoutOverlay";
+import { EnodeDashboardPanel } from "@/components/enode/EnodeDashboardPanel";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
   head: () => ({
     meta: [
-      { title: "Command Deck · ESO ENERGY" },
+      { title: "Dashboard · ESO ENERGY" },
       {
         name: "description",
         content:
-          "Live operational command deck for ESO ENERGY — fleet telemetry, energy orchestration, diesel security, and battery intelligence.",
+          "B2B solar monitoring — fleet telemetry, diesel savings, and battery health across Africa.",
       },
     ],
   }),
@@ -25,42 +27,56 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardPage() {
   return (
-    <div className="min-h-screen bg-[#030712] text-foreground">
-      <TopHeader />
-      <main className="mx-auto max-w-[1440px] px-5 md:px-8 py-6 md:py-8 space-y-6 md:space-y-8">
-        <section>
-          <div className="mb-5">
-            <p className="text-[11px] tracking-[0.22em] text-silver uppercase">Command Deck</p>
-            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight shimmer-text mt-1">
-              Sovereign Operations Overview
-            </h1>
-          </div>
-          <ExecutiveRibbons siteLabel="Pan-African Mesh" />
+    <DashboardShell
+      subtitle="Fleet operations · B2B solar monitoring"
+      title="Dashboard"
+    >
+      <div className="space-y-8">
+        <DashboardQuickStats />
+
+        <section id="energy" className="scroll-mt-24 space-y-5">
+          <SectionLabel>Executive Performance</SectionLabel>
+          <ExecutiveRibbons />
         </section>
 
-        <section>
-          <EnergyFlow />
+        <section className="scroll-mt-24">
+          <SectionLabel>Power network</SectionLabel>
+          <PowerNetworkRow siteCount={6} />
         </section>
 
-        <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2">
+        <section id="enode" className="scroll-mt-24">
+          <EnodeDashboardPanel />
+        </section>
+
+        <section id="fleet" className="scroll-mt-24 grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2 space-y-5">
+            <SectionLabel>Fleet Command</SectionLabel>
             <FleetCommandView />
           </div>
-          <div>
+          <div id="diesel" className="scroll-mt-24 space-y-5">
+            <SectionLabel>Diesel Security</SectionLabel>
             <DieselBurden />
           </div>
         </section>
 
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ThermalLoadTracker siteLabel="Pan-African Mesh" />
+        <section className="scroll-mt-24 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ThermalLoadTracker />
           <BatteryLifespanGuard />
         </section>
 
-        <section>
+        <section id="reports" className="scroll-mt-24 space-y-5">
+          <SectionLabel>Executive Reporting</SectionLabel>
           <ExecutiveReporting />
         </section>
-      </main>
+      </div>
+
       <LogoutOverlay />
-    </div>
+    </DashboardShell>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-[11px] font-mono tracking-[0.28em] uppercase text-zinc-500">{children}</h2>
   );
 }

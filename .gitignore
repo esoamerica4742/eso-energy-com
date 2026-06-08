@@ -16,9 +16,20 @@ dist-ssr
 .nitro
 *.local
 
+# Environment (secrets)
+.env
+.env.*
+!.env.example
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+
+# Supabase CLI cache
+supabase/.temp/
+
+# Expo (if opened from monorepo tooling)
+.expo/
 
 # Editor directories and files
 .vscode/*

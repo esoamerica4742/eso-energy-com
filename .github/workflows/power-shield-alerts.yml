@@ -1,0 +1,27 @@
+name: Eso Pay Power Shield alerts
+
+on:
+  schedule:
+    # Every 15 minutes — aligns with scheduled alert grace windows.
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  evaluate-alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Power Shield cron
+        env:
+          ESO_PAY_CRON_SECRET: ${{ secrets.ESO_PAY_CRON_SECRET }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        run: |
+          if [ -z "$ESO_PAY_CRON_SECRET" ] || [ -z "$SUPABASE_URL" ]; then
+            echo "Skip: set ESO_PAY_CRON_SECRET and SUPABASE_URL repo secrets"
+            exit 0
+          fi
+          curl -fsS -X POST \
+            -H "X-Cron-Secret: ${ESO_PAY_CRON_SECRET}" \
+            "${SUPABASE_URL%/}/functions/v1/eso-pay-api/power-shield/cron"
+          curl -fsS -X POST \
+            -H "X-Cron-Secret: ${ESO_PAY_CRON_SECRET}" \
+            "${SUPABASE_URL%/}/functions/v1/eso-pay-api/utilities/fulfillment/cron"

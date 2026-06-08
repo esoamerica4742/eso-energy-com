@@ -1,4 +1,11 @@
+import { useState } from "react";
 import { Sun, Zap, Fuel, MapPin, Activity } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 type PowerSource = "solar" | "grid" | "diesel";
 
@@ -76,7 +83,11 @@ function StatusTag({ source }: { source: PowerSource }) {
   );
 }
 
-function NigeriaMap() {
+function NigeriaMap({
+  onSelectPin,
+}: {
+  onSelectPin: (b: Branch) => void;
+}) {
   return (
     <div
       className="relative overflow-hidden rounded-2xl hairline h-full min-h-[420px]"
@@ -121,22 +132,25 @@ function NigeriaMap() {
       {BRANCHES.map((b) => {
         const m = SOURCE_META[b.source];
         return (
-          <div
+          <button
             key={b.id}
-            className="absolute -translate-x-1/2 -translate-y-1/2 group"
+            type="button"
+            onClick={() => onSelectPin(b)}
+            className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1 transition-transform active:scale-95 focus:outline-none"
             style={{ left: `${b.x}%`, top: `${b.y}%` }}
+            aria-label={`${b.city} branch`}
           >
             <span
               className="block h-2.5 w-2.5 rounded-full ticker-dot"
               style={{ background: m.pin, boxShadow: `0 0 0 4px ${m.bg}, 0 0 16px ${m.glow}` }}
             />
             <span
-              className="absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md hairline px-2 py-1 text-[10px] tracking-[0.12em] uppercase opacity-0 transition-opacity group-hover:opacity-100"
-              style={{ background: "oklch(0.13 0.003 265 / 0.9)", color: m.fg }}
+              className="text-[9px] tracking-[0.08em] uppercase font-medium"
+              style={{ color: m.fg }}
             >
               {b.city}
             </span>
-          </div>
+          </button>
         );
       })}
 
@@ -144,7 +158,7 @@ function NigeriaMap() {
       <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 rounded-xl hairline px-3 py-2 backdrop-blur-md"
         style={{ background: "oklch(0.13 0.003 265 / 0.6)" }}>
         <p className="text-[10px] tracking-[0.22em] uppercase text-silver/80">
-          <MapPin className="inline h-3 w-3 mr-1" /> Federal Republic of Nigeria · {BRANCHES.length} nodes
+          <MapPin className="inline h-3 w-3 mr-1" /> Nigeria · {BRANCHES.length} sites
         </p>
         <div className="flex items-center gap-3 text-[10px] text-silver">
           {(["solar", "grid", "diesel"] as PowerSource[]).map((s) => (
@@ -239,6 +253,7 @@ type FleetProps = {
 };
 
 export function FleetCommandView({ selectedId, onSelect }: FleetProps = {}) {
+  const [mapPin, setMapPin] = useState<Branch | null>(null);
   const counts = BRANCHES.reduce(
     (acc, b) => {
       acc[b.source] += 1;
@@ -251,9 +266,9 @@ export function FleetCommandView({ selectedId, onSelect }: FleetProps = {}) {
     <section className="glass-card p-6 md:p-8">
       <header className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <p className="text-[11px] tracking-[0.32em] uppercase text-silver">Multi-Site Fleet Command View</p>
+          <p className="text-[11px] tracking-[0.32em] uppercase text-silver">Fleet sites</p>
           <h2 className="mt-1 text-2xl md:text-[28px] font-semibold tracking-tight">
-            <span className="shimmer-text">{BRANCHES.length} sovereign branches</span> · live power posture
+            <span className="shimmer-text">{BRANCHES.length} branches</span> · live status
           </h2>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -268,7 +283,7 @@ export function FleetCommandView({ selectedId, onSelect }: FleetProps = {}) {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-5">
-          <NigeriaMap />
+          <NigeriaMap onSelectPin={(b) => setMapPin(b)} />
         </div>
         <div className="lg:col-span-7">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -286,6 +301,32 @@ export function FleetCommandView({ selectedId, onSelect }: FleetProps = {}) {
           </div>
         </div>
       </div>
+
+      <Sheet open={!!mapPin} onOpenChange={(o) => !o && setMapPin(null)}>
+        <SheetContent side="bottom" className="bg-[#121211] border-white/10">
+          {mapPin && (
+            <>
+              <SheetHeader>
+                <SheetTitle className="text-white">{mapPin.name}</SheetTitle>
+              </SheetHeader>
+              <p className="text-sm text-zinc-400 mt-1">{mapPin.city} · {mapPin.region}</p>
+              <div className="mt-3">
+                <StatusTag source={mapPin.source} />
+              </div>
+              <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <dt className="text-zinc-500 text-[10px] uppercase">Load</dt>
+                  <dd className="num font-semibold text-white">{mapPin.loadKw.toFixed(1)} kW</dd>
+                </div>
+                <div>
+                  <dt className="text-zinc-500 text-[10px] uppercase">Battery</dt>
+                  <dd className="num font-semibold text-white">{mapPin.batterySoc}%</dd>
+                </div>
+              </dl>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </section>
   );
 }

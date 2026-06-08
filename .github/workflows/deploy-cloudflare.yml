@@ -1,0 +1,75 @@
+name: Deploy Cloudflare Workers
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_gates:
+        description: "Skip lint/test before deploy (emergency only)"
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "public/**"
+      - "wrangler.jsonc"
+      - "vite.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/deploy-cloudflare.yml"
+
+concurrency:
+  group: deploy-cloudflare-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy app.eso-energy.com
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Quality gates
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_gates != true }}
+        run: |
+          npm run lint
+          npm run test
+
+      - name: Build (production client + worker)
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+          VITE_ENODE_LINK_REDIRECT_URI: https://app.eso-energy.com/link-device/callback
+          VITE_ENODE_API_URL: https://app.eso-energy.com/api/enode
+        run: npm run build
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --config dist/server/wrangler.json
+
+      - name: Post-deploy health probe
+        run: |
+          sleep 8
+          curl -fsS "https://app.eso-energy.com/api/health/enterprise" | head -c 2000
+          echo ""

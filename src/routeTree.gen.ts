@@ -14,10 +14,17 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RefundsRouteImport } from './routes/refunds'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as MonitorRouteImport } from './routes/monitor'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LinkDeviceRouteImport } from './routes/link-device'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ComplianceRouteImport } from './routes/compliance'
+import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as AccessRouteImport } from './routes/access'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LinkDeviceCallbackRouteImport } from './routes/link-device/callback'
+import { Route as EsopayOpenRouteImport } from './routes/esopay/open'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -44,9 +51,19 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MonitorRoute = MonitorRouteImport.update({
+  id: '/monitor',
+  path: '/monitor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LinkDeviceRoute = LinkDeviceRouteImport.update({
+  id: '/link-device',
+  path: '/link-device',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -59,92 +76,165 @@ const ComplianceRoute = ComplianceRouteImport.update({
   path: '/compliance',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlertsRoute = AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccessRoute = AccessRouteImport.update({
+  id: '/access',
+  path: '/access',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LinkDeviceCallbackRoute = LinkDeviceCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => LinkDeviceRoute,
+} as any)
+const EsopayOpenRoute = EsopayOpenRouteImport.update({
+  id: '/esopay/open',
+  path: '/esopay/open',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/access': typeof AccessRoute
+  '/alerts': typeof AlertsRoute
   '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
+  '/link-device': typeof LinkDeviceRouteWithChildren
   '/login': typeof LoginRoute
+  '/monitor': typeof MonitorRoute
   '/privacy': typeof PrivacyRoute
   '/refunds': typeof RefundsRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/esopay/open': typeof EsopayOpenRoute
+  '/link-device/callback': typeof LinkDeviceCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/access': typeof AccessRoute
+  '/alerts': typeof AlertsRoute
   '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
+  '/link-device': typeof LinkDeviceRouteWithChildren
   '/login': typeof LoginRoute
+  '/monitor': typeof MonitorRoute
   '/privacy': typeof PrivacyRoute
   '/refunds': typeof RefundsRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/esopay/open': typeof EsopayOpenRoute
+  '/link-device/callback': typeof LinkDeviceCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/access': typeof AccessRoute
+  '/alerts': typeof AlertsRoute
   '/compliance': typeof ComplianceRoute
   '/dashboard': typeof DashboardRoute
+  '/link-device': typeof LinkDeviceRouteWithChildren
   '/login': typeof LoginRoute
+  '/monitor': typeof MonitorRoute
   '/privacy': typeof PrivacyRoute
   '/refunds': typeof RefundsRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/esopay/open': typeof EsopayOpenRoute
+  '/link-device/callback': typeof LinkDeviceCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/access'
+    | '/alerts'
     | '/compliance'
     | '/dashboard'
+    | '/link-device'
     | '/login'
+    | '/monitor'
     | '/privacy'
     | '/refunds'
     | '/register'
     | '/terms'
     | '/welcome'
+    | '/auth/callback'
+    | '/esopay/open'
+    | '/link-device/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/access'
+    | '/alerts'
     | '/compliance'
     | '/dashboard'
+    | '/link-device'
     | '/login'
+    | '/monitor'
     | '/privacy'
     | '/refunds'
     | '/register'
     | '/terms'
     | '/welcome'
+    | '/auth/callback'
+    | '/esopay/open'
+    | '/link-device/callback'
   id:
     | '__root__'
     | '/'
+    | '/access'
+    | '/alerts'
     | '/compliance'
     | '/dashboard'
+    | '/link-device'
     | '/login'
+    | '/monitor'
     | '/privacy'
     | '/refunds'
     | '/register'
     | '/terms'
     | '/welcome'
+    | '/auth/callback'
+    | '/esopay/open'
+    | '/link-device/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccessRoute: typeof AccessRoute
+  AlertsRoute: typeof AlertsRoute
   ComplianceRoute: typeof ComplianceRoute
   DashboardRoute: typeof DashboardRoute
+  LinkDeviceRoute: typeof LinkDeviceRouteWithChildren
   LoginRoute: typeof LoginRoute
+  MonitorRoute: typeof MonitorRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundsRoute: typeof RefundsRoute
   RegisterRoute: typeof RegisterRoute
   TermsRoute: typeof TermsRoute
   WelcomeRoute: typeof WelcomeRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
+  EsopayOpenRoute: typeof EsopayOpenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -184,11 +274,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/monitor': {
+      id: '/monitor'
+      path: '/monitor'
+      fullPath: '/monitor'
+      preLoaderRoute: typeof MonitorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/link-device': {
+      id: '/link-device'
+      path: '/link-device'
+      fullPath: '/link-device'
+      preLoaderRoute: typeof LinkDeviceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -205,6 +309,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComplianceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/access': {
+      id: '/access'
+      path: '/access'
+      fullPath: '/access'
+      preLoaderRoute: typeof AccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -212,20 +330,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/link-device/callback': {
+      id: '/link-device/callback'
+      path: '/callback'
+      fullPath: '/link-device/callback'
+      preLoaderRoute: typeof LinkDeviceCallbackRouteImport
+      parentRoute: typeof LinkDeviceRoute
+    }
+    '/esopay/open': {
+      id: '/esopay/open'
+      path: '/esopay/open'
+      fullPath: '/esopay/open'
+      preLoaderRoute: typeof EsopayOpenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface LinkDeviceRouteChildren {
+  LinkDeviceCallbackRoute: typeof LinkDeviceCallbackRoute
+}
+
+const LinkDeviceRouteChildren: LinkDeviceRouteChildren = {
+  LinkDeviceCallbackRoute: LinkDeviceCallbackRoute,
+}
+
+const LinkDeviceRouteWithChildren = LinkDeviceRoute._addFileChildren(
+  LinkDeviceRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccessRoute: AccessRoute,
+  AlertsRoute: AlertsRoute,
   ComplianceRoute: ComplianceRoute,
   DashboardRoute: DashboardRoute,
+  LinkDeviceRoute: LinkDeviceRouteWithChildren,
   LoginRoute: LoginRoute,
+  MonitorRoute: MonitorRoute,
   PrivacyRoute: PrivacyRoute,
   RefundsRoute: RefundsRoute,
   RegisterRoute: RegisterRoute,
   TermsRoute: TermsRoute,
   WelcomeRoute: WelcomeRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
+  EsopayOpenRoute: EsopayOpenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
