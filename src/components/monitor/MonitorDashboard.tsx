@@ -34,7 +34,7 @@ export function MonitorDashboard() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#060809] text-white">
+    <div className="flex min-h-screen flex-col bg-[#080A0F] text-white">
       <MonitorFleetHeader
         siteLabel="Fleet site"
         inverterCount={devices.length}

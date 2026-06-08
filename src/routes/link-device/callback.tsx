@@ -37,7 +37,7 @@ function LinkDeviceCallbackPage() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-[#0A0A09] flex flex-col items-center justify-center gap-4 text-zinc-400">
+    <div className="min-h-screen bg-[#080A0F] flex flex-col items-center justify-center gap-4 text-zinc-400">
       <Loader2 className="h-8 w-8 animate-spin text-[#D4AF37]" />
       <p className="text-sm font-mono tracking-wider">Finishing device connection…</p>
     </div>

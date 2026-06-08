@@ -13,7 +13,7 @@ type TabId = (typeof TABS)[number]["id"];
 
 export function MonitorTabBar({ active }: { active: TabId }) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/[0.06] bg-[#060809]/95 px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/[0.06] bg-[#0D1017]/95 px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md">
       <ul className="mx-auto flex max-w-lg items-stretch justify-between gap-1">
         {TABS.map((tab) => {
           const isActive = tab.id === active;

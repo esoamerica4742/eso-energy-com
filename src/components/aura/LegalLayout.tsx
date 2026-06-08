@@ -20,7 +20,7 @@ export function LegalLayout({
       className="min-h-screen w-full text-white antialiased selection:bg-[#FFD700]/30"
       style={{
         background:
-          "radial-gradient(1200px 600px at 80% -10%, rgba(255,215,0,0.08), transparent 60%), radial-gradient(900px 500px at -10% 30%, rgba(0,255,157,0.06), transparent 55%), #0A0A0A",
+          "radial-gradient(1200px 600px at 80% -10%, rgba(255,215,0,0.08), transparent 60%), radial-gradient(900px 500px at -10% 30%, rgba(0,255,157,0.06), transparent 55%), #080A0F",
         fontFamily:
           '"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
       }}
