@@ -16,7 +16,7 @@ export function DashboardShell({ children, title, subtitle }: DashboardShellProp
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0A0A09] text-[#E8E6E1] flex overflow-hidden">
+    <div className="min-h-screen bg-[#080A0F] text-[#E8E6E1] flex overflow-hidden">
       <div
         className="pointer-events-none fixed inset-0 z-0"
         aria-hidden
