@@ -36,7 +36,7 @@ export function MonitorFleetHeader({
   const conn = connectionStyles(connectionTone);
 
   return (
-    <header className="border-b border-white/[0.06] bg-[#060809] px-5 pt-5 pb-4">
+    <header className="border-b border-white/[0.06] bg-[#0D1017] px-5 pt-5 pb-4">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-[26px] font-bold tracking-tight text-white leading-none">
