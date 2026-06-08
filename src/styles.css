@@ -51,8 +51,8 @@
 :root {
   --radius: 0.625rem;
 
-  /* Canvas — Deep Void Obsidian #030712 */
-  --background: oklch(0.085 0.015 270);          /* #030712 */
+  /* Canvas — Deep Navy #080A0F */
+  --background: #080A0F;
   --foreground: oklch(1 0 0);
 
   /* 2026 Elite accent system */
