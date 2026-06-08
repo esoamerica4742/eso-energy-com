@@ -7,9 +7,12 @@ $ProjectRef = if ($env:SUPABASE_PROJECT_REF) { $env:SUPABASE_PROJECT_REF } else 
 npx supabase@latest link --project-ref $ProjectRef
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-Write-Host "Applying Eso Pay SQL migrations (direct Postgres)..." -ForegroundColor Cyan
-node scripts/apply-eso-pay-migration.mjs
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+Write-Host "Applying pending SQL migrations (Supabase CLI)..." -ForegroundColor Cyan
+npx supabase@latest db push --linked
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "db push failed — try: npx supabase login, then re-run. Fallback: node scripts/apply-eso-pay-migration.mjs (needs SUPABASE_DB_PASSWORD in .env)" -ForegroundColor Yellow
+  exit $LASTEXITCODE
+}
 
 Write-Host "Setting Monnify edge secrets..." -ForegroundColor Cyan
 node scripts/set-monnify-secrets.mjs
