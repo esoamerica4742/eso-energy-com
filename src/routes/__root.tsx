@@ -30,7 +30,7 @@ function RootDocument() {
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-screen bg-[#030712] text-white antialiased font-sans tracking-tight">
+      <body className="min-h-screen bg-[#080A0F] text-white antialiased font-sans tracking-tight">
         <QueryClientProvider client={queryClient}>
           <EnterpriseRealtimeProvider>
             <Outlet />
