@@ -10,7 +10,7 @@ import { LandingAuthActions } from "@/components/landing/LandingAuthActions";
 
 /* ─── Design tokens (CSS custom properties) ─── */
 const TOKENS = {
-  bg: "#080C0C",
+  bg: "#080A0F",
   teal: "#00E5C0",
   amber: "#D4AF37",
   muted: "#A0ADA8",
