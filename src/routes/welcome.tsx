@@ -135,22 +135,13 @@ function Hero({ onAuth }: { onAuth: (m: AuthMode) => void }) {
           </h1>
 
           <p className="text-base sm:text-lg text-white/65 leading-relaxed max-w-xl">
-            ESO ENERGY TECH LIMITED unifies solar inverter intelligence and utility bill payments
-            into one transparent, enterprise-grade command surface — built for households,
-            estates, and businesses across Africa.
+            ESO ENERGY TECH LIMITED unifies solar inverter intelligence and consumer utility bill payments
+            into one transparent mobile application. Seamlessly purchase telecom airtime and data bundles,
+            pay cable TV bills (DSTV, GOTV, StarTimes), and buy prepaid electricity tokens alongside
+            tracking your smart inverter performance.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <button
-              onClick={() => onAuth("signup")}
-              className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-bold tracking-wide text-black transition hover:brightness-110 active:scale-[0.98]"
-              style={{
-                background: `linear-gradient(135deg, ${GOLD}, #FFB800)`,
-                boxShadow: "0 12px 36px rgba(255,215,0,0.3)",
-              }}
-            >
-              Get Started Free <ArrowRight className="h-4 w-4" />
-            </button>
             <a
               href="#how"
               className="inline-flex items-center gap-2 rounded-full border px-6 py-3.5 text-sm font-semibold hover:bg-white/5 transition"
