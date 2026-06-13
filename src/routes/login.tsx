@@ -80,7 +80,7 @@ type AuthPhase = "idle" | "authenticating" | "confirm-email";
 function LoginPage() {
   const navigate = useNavigate();
   const { mode: searchMode, product = "monitoring" } = Route.useSearch();
-  const productCopy = PRODUCT_COPY[product];
+  const productCopy = PRODUCT_COPY[product as LoginProduct];
   const { session, loading } = useAuth();
   const [mode, setMode] = useState<Mode>(searchMode === "signup" ? "signup" : "signin");
   const [direction, setDirection] = useState<1 | -1>(1);
