@@ -134,12 +134,52 @@ function Hero({ onAuth }: { onAuth: (m: AuthMode) => void }) {
             </span>
           </h1>
 
-          <p className="text-base sm:text-lg text-white/65 leading-relaxed max-w-xl">
-            ESO ENERGY TECH LIMITED unifies solar inverter intelligence and consumer utility bill payments
-            into one transparent mobile application. Seamlessly purchase telecom airtime and data bundles,
-            pay cable TV bills (DSTV, GOTV, StarTimes), and buy prepaid electricity tokens alongside
-            tracking your smart inverter performance.
-          </p>
+          <div className="space-y-3 max-w-xl">
+            {[
+              {
+                icon: Phone,
+                title: "Telecom Top-Up",
+                desc: "Airtime and high-speed data bundles across all Nigerian networks.",
+                accent: GOLD,
+              },
+              {
+                icon: Zap,
+                title: "TV & Electricity Bills",
+                desc: "Instant vending for prepaid electricity tokens and DSTV/GOTV subscriptions.",
+                accent: MINT,
+              },
+              {
+                icon: Cpu,
+                title: "Inverter Subscriptions",
+                desc: "Secure recurring billing for live IoT solar monitoring systems.",
+                accent: GOLD,
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
+                className="group flex items-start gap-4 rounded-2xl border p-4 backdrop-blur-sm hover:bg-white/[0.03] transition"
+                style={{ borderColor: "rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}
+              >
+                <div
+                  className="grid place-items-center h-10 w-10 rounded-xl shrink-0"
+                  style={{
+                    background: `${item.accent}12`,
+                    border: `1px solid ${item.accent}30`,
+                    boxShadow: `0 0 20px ${item.accent}10`,
+                  }}
+                >
+                  <item.icon className="h-5 w-5" style={{ color: item.accent }} />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-white mb-0.5 tracking-tight">{item.title}</h3>
+                  <p className="text-sm text-white/60 leading-relaxed">{item.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <a
