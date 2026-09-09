@@ -1,6 +1,7 @@
 # ESO Energy Web
 
 Core web platform for ESO Energy and ESO Pay, handling enterprise utility billing, automated token vending, and real-time metering telemetry.
+🚀 **Live Production Platform:** [Click here to launch ESO Energy Web](https://eso-energy.com)
 
 ## Tech Stack
 
